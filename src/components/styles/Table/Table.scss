@@ -3,14 +3,14 @@ table {
   table-layout: fixed;
 
   thead {
-    background: #4d940e;
     position: sticky;
+    background: #4d940e;
 
     th {
-      font-size: 16px;
       padding: 15px 10px;
+      font-size: 16px;
       text-align: center;
-      color: #ffffff;
+      color: #fff;
       border-top-left-radius: 10px;
       border-top-right-radius: 10px;
 
@@ -30,19 +30,13 @@ table {
     width: 100%;
 
     td {
-      text-align: center;
       width: 25px;
       height: 70px;
-      border-bottom: 2px solid #d6d6d8;
       padding: 0;
       margin: 0;
+      text-align: center;
+      border-bottom: 2px solid #d6d6d8;
       box-sizing: border-box;
-
-      // span {
-      //   font-size: 17px;
-      //   font-weight: 500;
-      //   color: #555;
-      // }
 
       &:first-child {
         width: 100px;

@@ -2,22 +2,27 @@ import React, { useState } from "react";
 import { Popconfirm } from "antd";
 import "../../styles/Button/Delete.scss";
 
+// Props
 interface DeleteButtonProps {
-  onClick?: () => void; // khi xác nhận xoá
-  onCancel?: () => void; // khi bấm huỷ
+  onClick?: () => void;
+  onCancel?: () => void;
   disabled?: boolean;
   children?: React.ReactNode;
 }
 
+// Component: DeleteButton
 export default function DeleteButton({
   onClick,
   disabled,
   children = "Xoá",
 }: DeleteButtonProps) {
+  // Local state
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
 
+  // Handlers
   const showPopconfirm = () => setOpen(true);
+
   const handleOk = () => {
     setConfirmLoading(true);
 
@@ -27,10 +32,12 @@ export default function DeleteButton({
       onClick?.();
     }, 2000);
   };
+
   const handleCancel = () => {
     console.log("Clicked cancel button");
     setOpen(false);
   };
+  // Render
   return (
     <Popconfirm
       title="Bạn có chắc muốn xoá?"

@@ -1,6 +1,7 @@
 import { Form, Upload, Button } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 
+// Props
 interface FormImageUploadProps {
   label?: string;
   name?: string;
@@ -10,6 +11,7 @@ interface FormImageUploadProps {
   multiple?: boolean;
 }
 
+// Component: FormImageUpload
 export function FormImageUpload({
   label = "Tải ảnh lên",
   name = "image",
@@ -32,7 +34,7 @@ export function FormImageUpload({
       <Upload
         name={name}
         listType={listType}
-        beforeUpload={() => false} // chặn upload tự động, chỉ lưu local
+        beforeUpload={() => false}
         multiple={multiple}
         maxCount={multiple ? undefined : 1}
       >

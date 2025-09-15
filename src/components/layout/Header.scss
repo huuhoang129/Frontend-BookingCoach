@@ -2,21 +2,19 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  transition: all 0.3s ease; // hiệu ứng mượt cho thay đổi
+  transition: all 0.3s ease;
 
   .header-container {
-    background: #f7f7fa;
-    font-style: inherit;
-    font-family: "Inter", sans-serif;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 3px 150px;
-
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); // đổ bóng
-    padding: 3px 120px; // thu nhỏ padding một chút cho cảm giác compact
+    padding: 3px 120px;
+    background: #f7f7fa;
+    font-family: "Inter", sans-serif;
+    font-style: inherit;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
+
     .header-logo {
       a {
         img {
@@ -31,10 +29,12 @@
         ul {
           display: flex;
           list-style: none;
-          padding: 0;
           margin: 0;
+          padding: 0;
+
           li {
             margin-right: 40px;
+
             a {
               font-size: 17px;
               font-weight: 505;
@@ -64,6 +64,7 @@
     .header-lang {
       position: relative;
       margin-top: 10px;
+
       .header-lang-vien {
         .icon {
           width: 25px;
@@ -91,33 +92,37 @@
         position: absolute;
         top: 100%;
         background: #fff;
-        z-index: 1000;
         border: 1px solid #d8d7d7;
         border-radius: 4px;
+        z-index: 1000;
         animation: dropdownFadeIn 0.25s ease;
 
         ul {
           list-style: none;
-          border-radius: 4px;
           margin: 0;
           padding: 0;
+          border-radius: 4px;
           cursor: pointer;
+
           li {
             display: flex;
             align-items: center;
             gap: 6px;
-            border-radius: 4px;
             padding: 6px 18px;
+            border-radius: 4px;
+
             a {
               display: flex;
-              color: #000000;
+              color: #000;
+
               .icon {
-                margin-top: 1px;
-                margin-right: 7px;
                 width: 20px;
                 height: 20px;
+                margin-top: 1px;
+                margin-right: 7px;
               }
             }
+
             &:hover {
               background: #dfdfdf;
             }

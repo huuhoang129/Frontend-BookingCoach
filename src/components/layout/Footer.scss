@@ -1,47 +1,54 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap");
 
 .app-footer {
+  margin-top: 15px;
   background: #f7f7fa;
   color: #000;
   line-height: 1.5;
   font-style: inherit;
   font-family: "Inter", sans-serif;
-
   border-top: 1px solid #ddd;
+
   .footer {
     .footer-wp {
       .container {
         padding-top: 20px;
+
         .row {
           display: flex;
           justify-content: space-between;
           margin: 10px 20px;
           padding: 6px;
+
           ul {
             list-style: none;
           }
+
           .icon {
             width: 20px;
             height: 20px;
           }
+
           h2 {
+            margin-bottom: 28px;
             font-size: 21px;
             font-weight: 700;
-            margin-bottom: 28px;
           }
+
           h4 {
+            margin-bottom: 10px;
             font-size: 16px;
             font-weight: 600;
-            margin-bottom: 10px;
             color: #5a5959;
           }
+
           p,
           span,
           li,
           a {
+            margin-bottom: 8px;
             font-size: 16px;
             font-weight: 500;
-            margin-bottom: 8px;
             color: #5a5959;
             text-decoration: none;
             transition: color 0.3s;
@@ -50,9 +57,10 @@
           .row-1 {
             flex: 1;
             max-width: 480px;
+
             .logo {
-              width: 150px; // chỉnh kích thước chiều ngang
-              height: auto; // giữ tỷ lệ ảnh
+              width: 150px;
+              height: auto;
             }
 
             .gap {
@@ -61,8 +69,9 @@
 
             .contact-icon {
               display: flex;
-              align-items: start;
+              align-items: flex-start;
               gap: 6px;
+
               span,
               a {
                 position: relative;
@@ -71,35 +80,36 @@
 
               a {
                 &:hover {
-                  color: #4d940e; // đổi màu link khi hover
+                  color: #4d940e;
                 }
               }
             }
           }
+
           .row-2,
           .row-3,
           .row-4 {
-            flex: 1; // bắt buộc chiếm chỗ đều
+            flex: 1;
             max-width: 250px;
+
             li {
-              margin-bottom: 15px; // mỗi dòng cách nhau
+              margin-bottom: 15px;
             }
 
             a {
               &:hover {
-                color: #4d940e; // đổi màu link khi hover
+                color: #4d940e;
               }
             }
           }
         }
 
         .footer-bottom {
-          background: #000; // nền đen
-          color: #fff; // chữ trắng
-          font-weight: 500; // hơi đậm (medium)
-          font-size: 14px; // vừa phải
-          padding: 12px 0; // khoảng cách trên dưới
-          padding-left: 20px; // cách lề trái 20px
+          padding: 12px 0 12px 20px;
+          background: #000;
+          color: #fff;
+          font-size: 14px;
+          font-weight: 500;
         }
       }
     }

@@ -1,15 +1,17 @@
-.ant-popconfirm .ant-btn-primary {
-  background-color: #4d940e;
+.ant-popconfirm {
+  .ant-btn-primary {
+    background-color: #4d940e;
 
-  &:hover {
-    background-color: #3c730b !important;
+    &:hover {
+      background-color: #3c730b !important;
+    }
   }
-}
 
-.ant-popconfirm .ant-btn-default {
-  &:hover {
-    color: #3c730b !important;
-    border: 1px solid #3c730b !important;
+  .ant-btn-default {
+    &:hover {
+      color: #3c730b !important;
+      border: 1px solid #3c730b !important;
+    }
   }
 }
 
@@ -21,7 +23,7 @@
   border-radius: 0.5rem;
 
   background-color: #dc2626;
-  color: white;
+  color: #fff;
   font-weight: 500;
   cursor: pointer;
 

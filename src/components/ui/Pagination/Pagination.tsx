@@ -1,13 +1,15 @@
 import React from "react";
 import { Pagination } from "antd";
 
+// Props
 interface PaginationComponentProps {
-  totalItems: number;
-  itemsPerPage: number;
-  currentPage: number;
-  onPageChange: (page: number) => void;
+  totalItems: number; // tổng số item
+  itemsPerPage: number; // số item mỗi trang
+  currentPage: number; // trang hiện tại
+  onPageChange: (page: number) => void; // callback khi đổi trang
 }
 
+// Component: PaginationComponent
 const PaginationComponent: React.FC<PaginationComponentProps> = ({
   totalItems,
   itemsPerPage,

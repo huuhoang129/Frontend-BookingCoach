@@ -1,14 +1,16 @@
 import { Form, Image } from "antd";
 
+// Props
 interface FormImagePreviewProps {
   label?: string;
   name?: string;
-  src?: string; // đường dẫn ảnh
+  src?: string;
   rules?: any[];
   width?: number;
   height?: number;
 }
 
+// Component: FormImagePreview
 export function FormImagePreview({
   label = "Xem ảnh",
   name = "image",

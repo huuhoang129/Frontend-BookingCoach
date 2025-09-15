@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Modal, Form } from "antd";
 
+// Props
 interface ModalProps {
   open: boolean;
   title: string;
@@ -13,6 +14,7 @@ interface ModalProps {
   cancelText?: string;
 }
 
+// Component: CustomModal
 export function CustomModal({
   open,
   title,
@@ -24,15 +26,18 @@ export function CustomModal({
   okText = "Lưu",
   cancelText = "Hủy",
 }: ModalProps) {
+  // Local state & form
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
+  // Effect: set initial form values
   useEffect(() => {
     if (initialValues) {
       form.setFieldsValue(initialValues);
     }
   }, [initialValues, form]);
 
+  // Handlers
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
@@ -47,6 +52,9 @@ export function CustomModal({
     }
   };
 
+  // ------------------------
+  // Render
+  // ------------------------
   return (
     <Modal
       title={title}

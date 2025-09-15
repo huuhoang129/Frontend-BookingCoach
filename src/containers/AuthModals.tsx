@@ -1,23 +1,42 @@
-// src/components/auth/AuthModals.tsx
 import { CustomModal } from "../components/ui/Modal/Modal";
 import { FormInput } from "../components/ui/Form/FormInput";
 import CheckBox from "../components/ui/CheckBox/CheckBox";
 
-export default function AuthModals(props: any) {
-  const {
-    openLogin,
-    setOpenLogin,
-    openRegister,
-    setOpenRegister,
-    openForgotPassword,
-    setOpenForgotPassword,
-    openResetPassword,
-    setOpenResetPassword,
-    openVerifyOtp,
-    setOpenVerifyOtp,
-    handlers,
-  } = props;
+// Props
+interface AuthModalsProps {
+  openLogin: boolean;
+  setOpenLogin: (open: boolean) => void;
+  openRegister: boolean;
+  setOpenRegister: (open: boolean) => void;
+  openForgotPassword: boolean;
+  setOpenForgotPassword: (open: boolean) => void;
+  openResetPassword: boolean;
+  setOpenResetPassword: (open: boolean) => void;
+  openVerifyOtp: boolean;
+  setOpenVerifyOtp: (open: boolean) => void;
+  handlers: {
+    handleLogin: (values: any) => void;
+    handleRegister: (values: any) => void;
+    handleForgotPassword: (values: any) => void;
+    handleVerifyOtp: (values: any) => void;
+    handleResetPassword: (values: any) => void;
+  };
+}
 
+// AuthModals
+export default function AuthModals({
+  openLogin,
+  setOpenLogin,
+  openRegister,
+  setOpenRegister,
+  openForgotPassword,
+  setOpenForgotPassword,
+  openResetPassword,
+  setOpenResetPassword,
+  openVerifyOtp,
+  setOpenVerifyOtp,
+  handlers,
+}: AuthModalsProps) {
   return (
     <>
       {/* Modal đăng nhập */}

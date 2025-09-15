@@ -1,12 +1,14 @@
 import React from "react";
 import "../../styles/Button/quickView.scss";
 
+// Props
 interface QuickViewButtonProps {
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   disabled?: boolean;
   children?: React.ReactNode;
 }
 
+// Component: QuickViewButton
 export default function QuickViewButton({
   onClick,
   disabled,

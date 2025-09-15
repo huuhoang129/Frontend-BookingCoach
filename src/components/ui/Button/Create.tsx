@@ -1,12 +1,14 @@
 import React from "react";
 import "../../styles/Button/Create.scss";
 
+// Props
 interface CreateButtonProps {
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   disabled?: boolean;
   children?: React.ReactNode;
 }
 
+// Component: CreateButton
 export default function CreateButton({
   onClick,
   disabled,

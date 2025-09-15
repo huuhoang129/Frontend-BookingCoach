@@ -1,6 +1,6 @@
-// FormSelect.tsx
 import { Form, Select } from "antd";
 
+// Props
 interface FormSelectProps {
   label?: string;
   name?: string;
@@ -10,22 +10,23 @@ interface FormSelectProps {
   disabled?: boolean;
 }
 
+// Component: FormSelect
 export function FormSelect({
-  label = "Tình trạng",
+  label = "Tình Trạng",
   name = "status",
-  placeholder = "Chọn tình trạng",
-  rules = [{ required: true, message: "Vui lòng chọn tình trạng" }],
+  placeholder = "Chọn Tình Trạng",
+  rules = [{ required: true, message: "Vui Lòng Chọn Tình Trạng" }],
   options = [
-    { label: "Hoạt động", value: "active" },
-    { label: "Không hoạt động", value: "inactive" },
+    { label: "Hoạt Động", value: "active" },
+    { label: "Không Hoạt Động", value: "inactive" },
   ],
   disabled = false,
 }: FormSelectProps) {
   return (
     <Form.Item label={label} name={name} rules={rules}>
-      <Select placeholder={placeholder}>
+      <Select placeholder={placeholder} disabled={disabled}>
         {options.map((opt) => (
-          <Select.Option key={opt.value} value={opt.value} disabled={disabled}>
+          <Select.Option key={opt.value} value={opt.value}>
             {opt.label}
           </Select.Option>
         ))}
