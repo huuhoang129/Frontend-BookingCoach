@@ -1,0 +1,156 @@
+@keyframes growIn {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.admin-template {
+  min-height: 100vh;
+  .admin-sider {
+    background: #f7f7fa;
+    border-right: 1px solid #dedede;
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 5px;
+      margin-top: 40px;
+      margin-left: 20px;
+      margin-bottom: 50px;
+      margin-right: 5px;
+      .logo-wrapper {
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      .logo-img {
+        height: 45px;
+        width: auto;
+        transition: all 0.1s ease;
+        opacity: 1;
+        transform: scale(1);
+      }
+      .logo-img.collapsed {
+        display: none;
+        position: absolute;
+      }
+      .logo-img.expanded {
+        opacity: 0;
+        transform: scale(0.5);
+        animation: growIn 0.3s forwards;
+      }
+      .menu-toggle {
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        .menu-toggle:hover {
+          transform: scale(1.2);
+        }
+        &.collapsed {
+          transform: rotate(180deg); // Xoay 180 độ khi collapsed
+        }
+      }
+    }
+
+    .menu-admin {
+      background: #f7f7fa;
+      .ant-menu-item,
+      .ant-menu-submenu-title {
+        transition: background-color 0.1s ease-in-out, color 0.1s ease-in-out;
+
+        &:hover {
+          background-color: #4d940e;
+          color: #fff !important;
+          .anticon {
+            color: #fff;
+          }
+        }
+      }
+
+      &.ant-menu-light .ant-menu-item-selected {
+        background-color: #4d940e;
+        color: #fff;
+      }
+
+      .ant-menu-submenu-selected > .ant-menu-submenu-title {
+        color: #4d940e;
+        font-weight: 600;
+      }
+
+      .ant-menu-submenu-selected
+        > .ant-menu-submenu-title
+        .ant-menu-submenu-arrow {
+        color: #ffffff;
+      }
+    }
+
+    .logout-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 100px auto 5px; // căn giữa + khoảng cách
+      padding: 12px 10px;
+      border: 1px solid #dedede;
+      border-radius: 20px;
+      width: 85%;
+      cursor: pointer;
+      background-color: #4d940e;
+      color: #f7f7fa;
+
+      &:hover {
+        background-color: #f7f7fa;
+        color: #4d940e;
+      }
+    }
+  }
+
+  .layout-main {
+    .custom-admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f7f7fa;
+      height: 100px;
+      line-height: 1.8;
+      .header-left {
+        h3 {
+          margin: 0;
+          font-size: 30px;
+          font-weight: 500;
+
+          .greeting {
+            color: #555; // màu xám đậm
+          }
+
+          .username {
+            color: #000000; // màu xanh chủ đạo
+          }
+        }
+
+        .subtitle {
+          margin: 0;
+          font-size: 18px;
+          color: #888; // màu xám nhạt hơn
+        }
+      }
+
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+    }
+
+    .ant-layout-footer {
+      background-color: #4d940e; // màu xanh chủ đạo
+      color: #fff; // chữ màu trắng
+      font-size: 14px;
+      border-top: 1px solid #f7f7fa; // viền trên hơi đậm hơn chút
+    }
+  }
+}
