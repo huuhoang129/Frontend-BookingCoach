@@ -1,0 +1,23 @@
+.quickview-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 0.5rem;
+
+  background-color: #3b82f6;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #2f68c5;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

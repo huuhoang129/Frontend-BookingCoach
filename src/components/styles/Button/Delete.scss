@@ -1,0 +1,38 @@
+.ant-popconfirm .ant-btn-primary {
+  background-color: #4d940e;
+
+  &:hover {
+    background-color: #3c730b !important;
+  }
+}
+
+.ant-popconfirm .ant-btn-default {
+  &:hover {
+    color: #3c730b !important;
+    border: 1px solid #3c730b !important;
+  }
+}
+
+.delete-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 0.5rem;
+
+  background-color: #dc2626;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #b91c1c;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

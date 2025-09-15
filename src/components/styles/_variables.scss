@@ -1,0 +1,20 @@
+/* Biến dùng chung cho toàn website */
+
+/* 🎨 Màu sắc */
+$primary: #0077cc; // Màu chính (nút bấm, header)
+$secondary: #ffd700; // Màu phụ (nhấn mạnh)
+$background: #ffffff;
+$text-color: #333333;
+$muted: #6b6b6b;
+$danger: #cc0000;
+$success: #28a745;
+$warning: #ff9800;
+
+/* 📏 Kích thước chung */
+$container-width: 1100px;
+$border-radius: 6px;
+$spacing-unit: 8px;
+
+/* 🔠 Font chữ */
+$font-base: "Roboto", Arial, sans-serif;
+$font-size-base: 16px;
