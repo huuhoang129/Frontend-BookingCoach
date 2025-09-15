@@ -76,7 +76,7 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
             title="Quản lý người dùng"
           >
             <Menu.Item key="user-list">
-              <Link to="#">Danh sách người dùng</Link>
+              <Link to="/admin/user-manage">Danh sách người dùng</Link>
             </Menu.Item>
             <Menu.Item key="driver-employee-list" disabled>
               Đang phát triển...
@@ -89,7 +89,7 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
             title="Quản lý hệ thống"
           >
             <Menu.Item key="banner-manage">
-              <Link to="#">Quản lý banner</Link>
+              <Link to="/admin/banner-manage">Quản lý banner</Link>
             </Menu.Item>
           </SubMenu>
         </Menu>
