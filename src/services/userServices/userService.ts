@@ -6,3 +6,15 @@ const API_URL = "http://localhost:8080/api/v1";
 export const getAllUsers = async () => {
   return axios.get(`${API_URL}/get-all-user`);
 };
+
+// ✅ Sửa thông tin người dùng
+export const editUser = async (data: any) => {
+  return axios.put(`${API_URL}/edit-user`, data);
+};
+
+// ✅ Xoá người dùng
+export const deleteUser = async (id: number) => {
+  return axios.delete(`${API_URL}/delete-user`, {
+    data: { id },
+  });
+};

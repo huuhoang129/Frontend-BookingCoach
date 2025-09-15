@@ -3,8 +3,14 @@ import BaseTable from "../../../components/ui/Table/Table";
 // UI – Buttons
 import DeleteButton from "../../../components/ui/Button/Delete";
 import EditButton from "../../../components/ui/Button/Edit";
-import { getAllUsers } from "../../../services/userServices/userService.ts";
+import {
+  getAllUsers,
+  editUser,
+  deleteUser,
+} from "../../../services/userServices/userService.ts";
 import { useEffect, useState } from "react";
+import { CustomModal } from "../../../components/ui/Modal/Modal";
+import { FormInput } from "../../../components/ui/Form/FormInput";
 
 interface User {
   id: number;
@@ -18,6 +24,10 @@ export default function UserManage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // 👉 State cho modal
+  const [openEdit, setOpenEdit] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -28,8 +38,49 @@ export default function UserManage() {
       const res = await getAllUsers();
       setUsers(res.data.data || []);
     } catch (err) {
+      console.error("❌ Lỗi khi fetch users:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 👉 Mở modal edit
+  const handleOpenEdit = (user: User) => {
+    setSelectedUser(user);
+    setOpenEdit(true);
+  };
+
+  // 👉 Submit edit
+  const handleEditSubmit = async (values: any) => {
+    if (!selectedUser) return;
+    try {
+      const payload = {
+        id: selectedUser.id,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        phoneNumber: values.phoneNumber,
+      };
+
+      await editUser(payload);
+      alert("Cập nhật thành công!");
+      setOpenEdit(false);
+      fetchUsers();
+    } catch (error) {
+      console.error("❌ Lỗi cập nhật:", error);
+      alert("Cập nhật thất bại!");
+    }
+  };
+
+  // 👉 Hàm xoá user
+  const handleDelete = async (id: number) => {
+    try {
+      await deleteUser(id);
+      alert("Xoá thành công!");
+      fetchUsers();
+    } catch (error) {
+      console.error("❌ Lỗi khi xoá user:", error);
+      alert("Xoá thất bại!");
     }
   };
 
@@ -76,8 +127,12 @@ export default function UserManage() {
                   <td>{user.lastName}</td>
                   <td>{user.phoneNumber}</td>
                   <td>
-                    <EditButton>Sửa</EditButton>
-                    <DeleteButton>Xoá</DeleteButton>
+                    <EditButton onClick={() => handleOpenEdit(user)}>
+                      Sửa
+                    </EditButton>
+                    <DeleteButton onClick={() => handleDelete(user.id)}>
+                      Xoá
+                    </DeleteButton>
                   </td>
                 </tr>
               ))
@@ -85,6 +140,20 @@ export default function UserManage() {
           </tbody>
         </BaseTable>
       </div>
+
+      {/* Modal sửa user */}
+      <CustomModal
+        open={openEdit}
+        title="Chỉnh sửa người dùng"
+        onClose={() => setOpenEdit(false)}
+        onSubmit={handleEditSubmit}
+        initialValues={selectedUser || {}}
+      >
+        <FormInput name="firstName" label="Tên đầu" />
+        <FormInput name="lastName" label="Tên cuối" />
+        <FormInput name="email" label="Email" />
+        <FormInput name="phoneNumber" label="Số điện thoại" />
+      </CustomModal>
     </div>
   );
 }
