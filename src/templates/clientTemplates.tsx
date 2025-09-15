@@ -1,8 +1,8 @@
-import { Fragment } from "react";
 import { Outlet } from "react-router-dom";
 import TopBar from "../components/layout/Topbar";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
+import "./clientTemplates.scss";
 
 interface HomeTemplateProps {
   Component?: React.ComponentType<any>;
@@ -10,12 +10,14 @@ interface HomeTemplateProps {
 
 export const HomeTemplate: React.FC<HomeTemplateProps> = ({ Component }) => {
   return (
-    <Fragment>
+    <div className="home-template">
       <TopBar />
       <Header />
-      {Component ? <Component /> : <Outlet />}
+      <div className="home-content">
+        {Component ? <Component /> : <Outlet />}
+      </div>
       <Footer />
-    </Fragment>
+    </div>
   );
 };
 

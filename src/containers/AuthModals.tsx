@@ -1,0 +1,106 @@
+// src/components/auth/AuthModals.tsx
+import { CustomModal } from "../components/ui/Modal/Modal";
+import { FormInput } from "../components/ui/Form/FormInput";
+import CheckBox from "../components/ui/CheckBox/CheckBox";
+
+export default function AuthModals(props: any) {
+  const {
+    openLogin,
+    setOpenLogin,
+    openRegister,
+    setOpenRegister,
+    openForgotPassword,
+    setOpenForgotPassword,
+    openResetPassword,
+    setOpenResetPassword,
+    openVerifyOtp,
+    setOpenVerifyOtp,
+    handlers,
+  } = props;
+
+  return (
+    <>
+      {/* Modal đăng nhập */}
+      <CustomModal
+        open={openLogin}
+        title="Đăng nhập"
+        onClose={() => setOpenLogin(false)}
+        onSubmit={handlers.handleLogin}
+        width={400}
+        okText="Đăng nhập"
+        cancelText="Đóng"
+      >
+        <FormInput name="email" label="Email" />
+        <FormInput name="password" label="Mật khẩu" />
+        <CheckBox label="Remember me" />
+        <div className="forgot-password">
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              setOpenLogin(false);
+              setOpenForgotPassword(true);
+            }}
+          >
+            Quên mật khẩu?
+          </a>
+        </div>
+      </CustomModal>
+
+      {/* Modal đăng ký */}
+      <CustomModal
+        open={openRegister}
+        title="Đăng ký"
+        onClose={() => setOpenRegister(false)}
+        onSubmit={handlers.handleRegister}
+        width={400}
+        okText="Đăng kí"
+        cancelText="Đóng"
+      >
+        <FormInput name="email" label="Email" />
+        <FormInput name="password" label="Mật khẩu" />
+        <FormInput name="firstName" label="Tên" />
+        <FormInput name="lastName" label="Họ" />
+        <FormInput name="phoneNumber" label="Số điện thoại" />
+      </CustomModal>
+
+      {/* Modal quên mật khẩu */}
+      <CustomModal
+        open={openForgotPassword}
+        title="Quên mật khẩu"
+        onClose={() => setOpenForgotPassword(false)}
+        onSubmit={handlers.handleForgotPassword}
+        width={400}
+        okText="Xác nhận"
+        cancelText="Đóng"
+      >
+        <FormInput name="email" label="Nhập email để khôi phục" />
+      </CustomModal>
+
+      {/* Modal OTP */}
+      <CustomModal
+        open={openVerifyOtp}
+        title="Xác thực OTP"
+        onClose={() => setOpenVerifyOtp(false)}
+        onSubmit={handlers.handleVerifyOtp}
+        width={400}
+        okText="Xác nhận"
+        cancelText="Đóng"
+      >
+        <FormInput name="otp" label="Nhập mã OTP" />
+      </CustomModal>
+
+      {/* Modal reset mật khẩu */}
+      <CustomModal
+        open={openResetPassword}
+        title="Đặt lại mật khẩu"
+        onClose={() => setOpenResetPassword(false)}
+        onSubmit={handlers.handleResetPassword}
+        width={400}
+      >
+        <FormInput name="newPassword" label="Mật khẩu mới" />
+        <FormInput name="confirmPassword" label="Xác nhận mật khẩu" />
+      </CustomModal>
+    </>
+  );
+}

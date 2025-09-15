@@ -2,7 +2,7 @@ import type { JSX } from "react/jsx-runtime";
 import "./topbar.scss";
 import emailIcon from "../../assets/icon/email.svg";
 import phoneIcon from "../../assets/icon/call-phone.svg";
-import AuthModals from "../../containers/Modal/AuthModals.tsx";
+import AuthModals from "../../containers/AuthModals";
 import { useState } from "react";
 import {
   startSessionTimeout,
@@ -14,7 +14,7 @@ import {
   forgotPassword,
   resetPassword,
 } from "../../services/userServices/authService.ts";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function Topbar(): JSX.Element {
   const [openLogin, setOpenLogin] = useState(false);
@@ -25,7 +25,7 @@ export default function Topbar(): JSX.Element {
   const [resetEmail, setResetEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const history = useHistory();
+  const navigate = useNavigate(); // ✅ v6
 
   // ✅ Xử lý đăng nhập
   const handleLogin = async (values: any) => {
@@ -39,15 +39,14 @@ export default function Topbar(): JSX.Element {
         const user = res.data.user;
         setCurrentUser(user);
 
-        // ✅ Lưu user vào localStorage để ProtectedRoute dùng
         localStorage.setItem("user", JSON.stringify(user));
         localStorage.setItem("token", res.data.token); // nếu có token
 
-        // ✅ Chuyển hướng theo role
+        // ✅ Điều hướng theo role
         if (user.role === "Admin") {
-          history.push("/admin");
+          navigate("/admin");
         } else {
-          history.push("/");
+          navigate("/");
         }
 
         startSessionTimeout(() => {
@@ -138,6 +137,7 @@ export default function Topbar(): JSX.Element {
             <a href="tel:02033 991991">Hotline Hà Nội: 02033 991991</a>
           </div>
         </div>
+
         <div className="auth-links">
           {!currentUser ? (
             <>
@@ -174,7 +174,7 @@ export default function Topbar(): JSX.Element {
                   setCurrentUser(null);
                   clearSessionTimeout();
                   localStorage.removeItem("user");
-                  history.push("/"); // quay lại trang chủ
+                  navigate("/"); // ✅ thay history.push
                 }}
               >
                 Đăng xuất
