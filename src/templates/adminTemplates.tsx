@@ -24,7 +24,7 @@ import LogoHuongDuong from "../assets/logo/Logo-HuongDuong.jpg";
 import AvatarImg from "../assets/avatar/avatar.jpg";
 
 const { Header, Content, Footer, Sider } = Layout;
-const { SubMenu } = Menu; // 👉 nếu bạn dùng AntD v4
+const { SubMenu } = Menu;
 
 interface AdminTemplateProps {
   Component: React.ComponentType<any>;
@@ -79,7 +79,138 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
               <Link to="/admin/user-manage">Danh sách người dùng</Link>
             </Menu.Item>
             <Menu.Item key="driver-employee-list" disabled>
-              Đang phát triển...
+              Đang phát triển.....
+              {/* <Link to="#">Danh sách nhân viên</Link> */}
+            </Menu.Item>
+            <Menu.Item key="lock-unlock-account" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Khóa/mở tài khoản</Link> */}
+            </Menu.Item>
+          </SubMenu>
+
+          <SubMenu
+            key="trip-manage"
+            icon={<CarOutlined />}
+            title="Quản lý chuyến xe"
+          >
+            <Menu.Item key="trip-list" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Danh sách chuyến xe</Link> */}
+            </Menu.Item>
+            <Menu.Item key="schedule" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Lịch trình</Link> */}
+            </Menu.Item>
+            <Menu.Item key="bus-type" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Loại xe</Link> */}
+            </Menu.Item>
+            <Menu.Item key="ticket-pricing" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Giá vé theo tuyến</Link> */}
+            </Menu.Item>
+            <Menu.Item key="seat-configuration" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Số lượng ghế / sơ đồ ghế</Link> */}
+            </Menu.Item>
+          </SubMenu>
+
+          <SubMenu
+            key="ticket-manage"
+            icon={<FileTextOutlined />}
+            title="Quản lý vé"
+          >
+            <Menu.Item key="booked-tickets" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Danh sách vé đã đặt</Link> */}
+            </Menu.Item>
+            <Menu.Item key="available-tickets" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Vé còn trống</Link> */}
+            </Menu.Item>
+            <Menu.Item key="ticket-status" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Tình trạng vé</Link> */}
+            </Menu.Item>
+            <Menu.Item key="refund-cancel" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Xử lý hoàn / hủy vé</Link> */}
+            </Menu.Item>
+          </SubMenu>
+
+          <SubMenu
+            key="booking-manage"
+            icon={<CreditCardOutlined />}
+            title="Quản lý đặt chỗ & thanh toán"
+          >
+            <Menu.Item key="booking-list" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Lịch sử giao dịch thanh toán</Link> */}
+            </Menu.Item>
+            <Menu.Item key="payment-status" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Trạng thái thanh toán</Link> */}
+            </Menu.Item>
+            <Menu.Item key="payment-methods" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Quản lý phương thức thanh toán</Link> */}
+            </Menu.Item>
+          </SubMenu>
+
+          <SubMenu
+            key="vehicle-manage"
+            icon={<TeamOutlined />}
+            title="Quản lý xe & tài xế"
+          >
+            <Menu.Item key="vehicle-list" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Danh sách xe</Link> */}
+            </Menu.Item>
+            <Menu.Item key="vehicle-condition" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Bảo dưỡng, tình trạng xe</Link> */}
+            </Menu.Item>
+            <Menu.Item key="driver-schedule" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Lịch làm việc của tài xế</Link> */}
+            </Menu.Item>
+          </SubMenu>
+
+          <SubMenu
+            key="station-manage"
+            icon={<EnvironmentOutlined />}
+            title="Quản lý bến & tuyến đường"
+          >
+            <Menu.Item key="station-list" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Danh sách bến xe</Link> */}
+            </Menu.Item>
+            <Menu.Item key="route-list" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Các tuyến đường chính</Link> */}
+            </Menu.Item>
+            <Menu.Item key="default-ticket-pricing" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Giá vé mặc định cho từng tuyến</Link> */}
+            </Menu.Item>
+          </SubMenu>
+
+          <SubMenu
+            key="promotion-manage"
+            icon={<GiftOutlined />}
+            title="Quản lý khuyến mãi & mã giảm giá"
+          >
+            <Menu.Item key="create-promo-code" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Tạo mã khuyến mãi</Link> */}
+            </Menu.Item>
+            <Menu.Item key="manage-promo-programs" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Quản lý chương trình giảm giá</Link> */}
+            </Menu.Item>
+            <Menu.Item key="track-promo-usage" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Theo dõi lượt sử dụng mã</Link> */}
             </Menu.Item>
           </SubMenu>
 
@@ -90,6 +221,60 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
           >
             <Menu.Item key="banner-manage">
               <Link to="/admin/banner-manage">Quản lý banner</Link>
+            </Menu.Item>
+            <Menu.Item key="news-manage" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Quản lý tin tức</Link> */}
+            </Menu.Item>
+            <Menu.Item key="notification-manage" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Quản lý thông báo</Link> */}
+            </Menu.Item>
+            <Menu.Item key="homepage-content" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Quản lý nội dung trang chủ</Link> */}
+            </Menu.Item>
+            <Menu.Item key="email-settings" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Cài đặt email</Link> */}
+            </Menu.Item>
+          </SubMenu>
+
+          <SubMenu
+            key="support-manage"
+            icon={<CustomerServiceOutlined />}
+            title="Hỗ trợ khách hàng"
+          >
+            <Menu.Item key="support-requests" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Yêu cầu hỗ trợ</Link> */}
+            </Menu.Item>
+            <Menu.Item key="faqs" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Chat/Email phản hồi khách</Link> */}
+            </Menu.Item>
+          </SubMenu>
+
+          <SubMenu
+            key="statistics & reports"
+            icon={<BarChartOutlined />}
+            title="Thống kê & báo cáo"
+          >
+            <Menu.Item key="revenue-reports" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Doanh thu</Link> */}
+            </Menu.Item>
+            <Menu.Item key="ticket-sales" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Số lượng vé bán ra</Link> */}
+            </Menu.Item>
+            <Menu.Item key="cancellation-rates" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Tỷ lệ hủy vé</Link> */}
+            </Menu.Item>
+            <Menu.Item key="top-performing-trips" disabled>
+              Đang phát triển.....
+              {/* <Link to="#">Chuyến xe nổi bật</Link> */}
             </Menu.Item>
           </SubMenu>
         </Menu>
