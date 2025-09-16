@@ -49,8 +49,12 @@ export default function AuthModals({
         okText="Đăng nhập"
         cancelText="Đóng"
       >
-        <FormInput name="email" label="Email" />
-        <FormInput name="password" label="Mật khẩu" />
+        <FormInput name="email" label="Email" placeholder="Nhập Email" />
+        <FormInput
+          name="password"
+          label="Mật khẩu"
+          placeholder="Nhập Mật Khẩu"
+        />
         <CheckBox label="Remember me" />
         <div className="forgot-password">
           <a
@@ -73,14 +77,22 @@ export default function AuthModals({
         onClose={() => setOpenRegister(false)}
         onSubmit={handlers.handleRegister}
         width={400}
-        okText="Đăng kí"
+        okText="Đăng Kí"
         cancelText="Đóng"
       >
-        <FormInput name="email" label="Email" />
-        <FormInput name="password" label="Mật khẩu" />
-        <FormInput name="firstName" label="Tên" />
-        <FormInput name="lastName" label="Họ" />
-        <FormInput name="phoneNumber" label="Số điện thoại" />
+        <FormInput name="email" label="Email" placeholder="Nhập Email" />
+        <FormInput
+          name="password"
+          label="Mật Khẩu"
+          placeholder="Nhập Mật Khẩu"
+        />
+        <FormInput name="firstName" label="Tên" placeholder="Nhập Tên" />
+        <FormInput name="lastName" label="Họ" placeholder="Nhập Họ" />
+        <FormInput
+          name="phoneNumber"
+          label="Số Điện Thoại"
+          placeholder="Nhập Số Điện Thoại"
+        />
       </CustomModal>
 
       {/* Modal quên mật khẩu */}

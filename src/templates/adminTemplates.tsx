@@ -78,13 +78,11 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
             <Menu.Item key="user-list">
               <Link to="/admin/user-manage">Danh sách người dùng</Link>
             </Menu.Item>
-            <Menu.Item key="driver-employee-list" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Danh sách nhân viên</Link> */}
+            <Menu.Item key="driver-employee-list">
+              <Link to="/admin/employee-manage">Danh sách nhân viên</Link>
             </Menu.Item>
-            <Menu.Item key="lock-unlock-account" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Khóa/mở tài khoản</Link> */}
+            <Menu.Item key="lock-unlock-account">
+              <Link to="/admin/account-manage">Khóa/mở tài khoản</Link>
             </Menu.Item>
           </SubMenu>
 

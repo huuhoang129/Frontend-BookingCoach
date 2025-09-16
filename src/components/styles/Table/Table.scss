@@ -1,6 +1,7 @@
-table {
+.base-table {
   width: 100%;
   table-layout: fixed;
+  margin-top: 15px;
 
   thead {
     position: sticky;

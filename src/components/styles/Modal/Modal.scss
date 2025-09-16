@@ -1,0 +1,32 @@
+/* custom-modal.scss */
+
+.ant-modal {
+  // Header
+  .ant-modal-header {
+    .ant-modal-title {
+      color: #000000;
+      font-weight: 600;
+    }
+  }
+
+  // Footer
+  .ant-modal-footer {
+    .ant-btn-primary {
+      background-color: #4d940e;
+      border-color: #4d940e;
+
+      &:hover,
+      &:focus {
+        background-color: #3c740b; // màu tối hơn khi hover
+        border-color: #3c740b;
+      }
+    }
+
+    .ant-btn-default {
+      &:hover {
+        color: #4d940e;
+        border-color: #4d940e;
+      }
+    }
+  }
+}

@@ -1,13 +1,11 @@
-.create-button {
+.lock-button {
   display: inline-flex;
   align-items: center;
   padding: 0.4rem 0.8rem;
-  margin: 10px 0 5px 0;
-
   border: none;
   border-radius: 0.5rem;
 
-  background-color: #4d940e;
+  background-color: #b0030c;
   color: #fff;
   font-weight: 500;
   cursor: pointer;
@@ -15,7 +13,7 @@
   transition: background-color 0.3s ease;
 
   &:hover {
-    background-color: #3c730b;
+    background-color: #840209;
   }
 
   &:disabled {

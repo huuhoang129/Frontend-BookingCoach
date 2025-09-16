@@ -1,0 +1,21 @@
+.ant-form-item {
+  .ant-form-item-label > label {
+    font-weight: 500;
+  }
+
+  .ant-input {
+    &:hover,
+    &:focus {
+      border-color: #4d940e;
+      box-shadow: 0 0 0 2px rgba(77, 148, 14, 0.2); // hiệu ứng focus xanh lá nhạt
+    }
+  }
+
+  .ant-input-affix-wrapper {
+    &:hover,
+    &.ant-input-affix-wrapper-focused {
+      border-color: #4d940e;
+      box-shadow: 0 0 0 2px rgba(77, 148, 14, 0.2);
+    }
+  }
+}

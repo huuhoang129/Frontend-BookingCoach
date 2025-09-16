@@ -9,6 +9,8 @@ import HomePage from "./pages/clientPages/HomePage";
 import DashboardPage from "./pages/adminPages/DashboardPage";
 import BannerManage from "./pages/adminPages/systemManage/bannerManage";
 import UserManage from "./pages/adminPages/usersManage/userManage";
+import EmployeeManage from "./pages/adminPages/usersManage/employeeManage";
+import AccountManage from "./pages/adminPages/usersManage/accountManage";
 
 export default function App() {
   return (
@@ -34,6 +36,18 @@ export default function App() {
       <Route
         path="/admin/user-manage"
         element={<AdminRoute allowedRoles={["Admin"]} Component={UserManage} />}
+      />
+      <Route
+        path="/admin/employee-manage"
+        element={
+          <AdminRoute allowedRoles={["Admin"]} Component={EmployeeManage} />
+        }
+      />
+      <Route
+        path="/admin/account-manage"
+        element={
+          <AdminRoute allowedRoles={["Admin"]} Component={AccountManage} />
+        }
       />
     </Routes>
   );

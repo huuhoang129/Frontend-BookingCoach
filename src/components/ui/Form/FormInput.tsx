@@ -1,4 +1,5 @@
 import { Form, Input } from "antd";
+import "../../styles/Form/FormInput.scss";
 
 // Props
 interface FormInputProps {

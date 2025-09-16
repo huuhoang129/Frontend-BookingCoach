@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Modal, Form } from "antd";
+import "../../styles/Modal/Modal.scss";
 
 // Props
 interface ModalProps {
