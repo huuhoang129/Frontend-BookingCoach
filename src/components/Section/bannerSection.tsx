@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getAllBanners } from "../../services/systemServices/bannerServices.ts";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import "../styles/Section/bannerSection.scss";
+import defaultBanner from "../../assets/banner/banner.jpg";
 
 type Banner = {
   id: number;
@@ -47,7 +48,18 @@ export default function BannerSection() {
   };
 
   if (loading) return <div>Đang tải banner...</div>;
-  if (banners.length === 0) return <div>Không có banner</div>;
+
+  if (banners.length === 0) {
+    return (
+      <section className="banner-section">
+        <div className="banner-wrapper">
+          <div className="banner-item">
+            <img src={defaultBanner} alt="Banner mặc định" />
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="banner-section">

@@ -2,13 +2,14 @@
 
 .booking-form {
   background: #fff;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 20px 30px rgba(0, 0, 0, 0.12);
   width: 1200px;
   border-radius: 10px;
   padding: 30px 32px;
   margin: 0 auto;
   font-family: "Lexend", sans-serif;
 
+  // Override font component AntD
   .ant-select,
   .ant-select-selector,
   .ant-select-selection-item,
@@ -35,20 +36,30 @@
 
   &__field {
     flex: 1;
-    display: flex; /* icon + content ngang hàng */
+    display: flex;
     align-items: flex-start;
     border: 1px solid #ddd;
     border-radius: 6px;
     background: #fafafa;
-    min-height: 44px; /* 👈 giảm chiều cao từ 54px xuống 44px */
-    padding: 4px 8px; /* 👈 padding nhỏ lại */
+    min-height: 44px;
+    padding: 4px 8px;
+
+    &-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #888;
+    }
+
+    &-input {
+      width: 100%;
+    }
   }
 
   &__icon {
-    font-size: 18px;
-    color: #006400;
+    font-size: 20px;
+    color: #4d940e;
     margin-right: 8px;
-    margin-top: 15px; /* 👈 dịch icon xuống thêm cho cân với label */
+    margin-top: 15px;
   }
 
   &__content {
@@ -56,55 +67,6 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-  }
-
-  &__field-label {
-    font-size: 13px;
-    font-weight: 500;
-    color: #888;
-  }
-
-  /* --- Select --- */
-  .ant-select-selector {
-    height: 32px !important; /* 👈 nhỏ gọn hơn */
-    border: none !important;
-    box-shadow: none !important;
-    background: transparent !important;
-    display: flex;
-    align-items: center;
-    padding: 0 !important;
-  }
-
-  .ant-select-selection-item {
-    font-size: 16px; /* 👈 chữ hơi nhỏ lại */
-    font-weight: 600;
-    color: #000;
-  }
-
-  .ant-select-selection-placeholder {
-    font-size: 14px;
-    font-weight: 500;
-    color: #aaa !important;
-  }
-
-  /* --- DatePicker --- */
-  .ant-picker {
-    height: 32px !important; /* 👈 đồng bộ với Select */
-    border: none !important;
-    box-shadow: none !important;
-    background: transparent !important;
-    padding: 0 !important;
-  }
-
-  .ant-picker-input > input {
-    font-size: 14px;
-    font-weight: 600;
-    color: #000;
-  }
-
-  .ant-picker-input > input::placeholder {
-    font-weight: 500;
-    color: #aaa !important;
   }
 
   &__button {
@@ -115,5 +77,52 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 16px;
+    background-color: #4d940e;
+  }
+
+  /* --- Ant Select --- */
+  .ant-select {
+    &-selector {
+      height: 32px !important;
+      border: none !important;
+      box-shadow: none !important;
+      background: transparent !important;
+      display: flex;
+      align-items: center;
+      padding: 0 !important;
+    }
+
+    &-selection-item {
+      font-size: 16px;
+      font-weight: 600;
+      color: #000;
+    }
+
+    &-selection-placeholder {
+      font-size: 14px;
+      font-weight: 500;
+      color: #aaa !important;
+    }
+  }
+
+  /* --- Ant DatePicker --- */
+  .ant-picker {
+    height: 32px !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+
+    &-input > input {
+      font-size: 14px;
+      font-weight: 600;
+      color: #000;
+
+      &::placeholder {
+        font-weight: 500;
+        color: #aaa !important;
+      }
+    }
   }
 }

@@ -30,12 +30,11 @@ export default function BookingForm() {
         </Radio.Group>
       </div>
 
-      {/* Form nhập liệu */}
       <div className="booking-form__inputs">
         {/* Điểm đi */}
         <div className="booking-form__field">
           <div className="booking-form__icon">
-            <SendOutlined />
+            <SendOutlined style={{ transform: "rotate(320deg)" }} />
           </div>
           <div className="booking-form__content">
             <label className="booking-form__field-label">Điểm đi</label>

@@ -1,0 +1,11 @@
+.banner-wrapper {
+  position: relative;
+}
+
+.search-box {
+  position: absolute;
+  bottom: -80px; // 👈 phần này sẽ kéo form xuống dưới banner
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
