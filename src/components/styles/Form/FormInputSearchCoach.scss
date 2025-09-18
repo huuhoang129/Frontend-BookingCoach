@@ -1,0 +1,119 @@
+@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap");
+
+.booking-form {
+  background: #fff;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+  width: 1200px;
+  border-radius: 10px;
+  padding: 30px 32px;
+  margin: 0 auto;
+  font-family: "Lexend", sans-serif;
+
+  .ant-select,
+  .ant-select-selector,
+  .ant-select-selection-item,
+  .ant-select-selection-placeholder,
+  .ant-picker,
+  .ant-picker-input > input,
+  .ant-radio-wrapper,
+  .ant-radio-group,
+  .ant-input {
+    font-family: "Lexend", sans-serif !important;
+  }
+
+  &__trip-type {
+    margin-bottom: 15px;
+  }
+
+  &__inputs {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 12px;
+    width: 100%;
+    align-items: stretch;
+  }
+
+  &__field {
+    flex: 1;
+    display: flex; /* icon + content ngang hàng */
+    align-items: flex-start;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fafafa;
+    min-height: 44px; /* 👈 giảm chiều cao từ 54px xuống 44px */
+    padding: 4px 8px; /* 👈 padding nhỏ lại */
+  }
+
+  &__icon {
+    font-size: 18px;
+    color: #006400;
+    margin-right: 8px;
+    margin-top: 15px; /* 👈 dịch icon xuống thêm cho cân với label */
+  }
+
+  &__content {
+    margin-top: 3px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__field-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #888;
+  }
+
+  /* --- Select --- */
+  .ant-select-selector {
+    height: 32px !important; /* 👈 nhỏ gọn hơn */
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    display: flex;
+    align-items: center;
+    padding: 0 !important;
+  }
+
+  .ant-select-selection-item {
+    font-size: 16px; /* 👈 chữ hơi nhỏ lại */
+    font-weight: 600;
+    color: #000;
+  }
+
+  .ant-select-selection-placeholder {
+    font-size: 14px;
+    font-weight: 500;
+    color: #aaa !important;
+  }
+
+  /* --- DatePicker --- */
+  .ant-picker {
+    height: 32px !important; /* 👈 đồng bộ với Select */
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+
+  .ant-picker-input > input {
+    font-size: 14px;
+    font-weight: 600;
+    color: #000;
+  }
+
+  .ant-picker-input > input::placeholder {
+    font-weight: 500;
+    color: #aaa !important;
+  }
+
+  &__button {
+    flex: 0 0 150px;
+    height: auto;
+    font-weight: 600;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
