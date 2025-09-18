@@ -1,64 +1,18 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Dropdown } from "antd";
 import { FilterOutlined } from "@ant-design/icons";
-import {
-  getAllAccounts,
-  lockAccount,
-  unlockAccount,
-} from "../../../services/userServices/accountServices.ts";
 import LockButton from "../../../components/ui/Button/Lock";
 import UnlockButton from "../../../components/ui/Button/Unlock";
 import BaseTable from "../../../components/ui/Table/Table";
 import Pagination from "../../../components/ui/Pagination/Pagination";
-
-interface Account {
-  id: number;
-  email: string;
-  role: string;
-  status: string;
-}
+import { useAccounts } from "../../../hooks/useAccounts";
 
 export default function AccountManage() {
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [loading, setLoading] = useState(false);
+  const { accounts, loading, handleLock, handleUnlock } = useAccounts();
+
   const [roleFilter, setRoleFilter] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
-
-  const fetchAccounts = async () => {
-    setLoading(true);
-    try {
-      const res = await getAllAccounts();
-      const users: Account[] = res.data.data || [];
-      setAccounts(users);
-    } catch (err) {
-      console.error("❌ Lỗi khi fetch accounts:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAccounts();
-  }, []);
-
-  const handleLock = async (id: number) => {
-    try {
-      await lockAccount(id);
-      fetchAccounts();
-    } catch (err) {
-      console.error("❌ Lỗi khi khóa tài khoản:", err);
-    }
-  };
-
-  const handleUnlock = async (id: number) => {
-    try {
-      await unlockAccount(id);
-      fetchAccounts();
-    } catch (err) {
-      console.error("❌ Lỗi khi mở khóa tài khoản:", err);
-    }
-  };
 
   // Lọc theo role
   const filteredAccounts = roleFilter
@@ -67,10 +21,12 @@ export default function AccountManage() {
 
   // Phân trang
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentAccounts = filteredAccounts.slice(startIndex, endIndex);
+  const currentAccounts = filteredAccounts.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
-  // Menu filter role (chuẩn v5)
+  // Menu filter
   const roleMenu = {
     items: [
       { key: "", label: "Tất cả" },
@@ -86,9 +42,7 @@ export default function AccountManage() {
 
   return (
     <div className="panel-account-admin">
-      <div>
-        <h2>Quản Lý Tài Khoản</h2>
-      </div>
+      <h2>Quản Lý Tài Khoản</h2>
       <BaseTable>
         <thead>
           <tr>
