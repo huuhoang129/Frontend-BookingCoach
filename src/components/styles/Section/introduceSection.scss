@@ -1,0 +1,32 @@
+@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap");
+
+.service-intro {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+  margin-top: 80px;
+  font-family: "Lexend", sans-serif;
+
+  .service-item {
+    padding: 20px;
+    border-radius: 10px;
+    .service-icon {
+      margin-bottom: 15px;
+    }
+    h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    p {
+      font-size: 15px;
+      color: #666;
+      line-height: 1.6;
+    }
+  }
+}

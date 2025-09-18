@@ -1,5 +1,6 @@
 import BannerSection from "../../components/Section/bannerSection";
 import FormInputSearchCoach from "../../components/ui/Form/FormInputSearchCoach";
+import IntroduceSection from "../../components/Section/introduceSection";
 
 export default function HomePage() {
   return (
@@ -10,6 +11,8 @@ export default function HomePage() {
       >
         <FormInputSearchCoach />
       </div>
+
+      <IntroduceSection />
       <h1>Client - Trang chủ</h1>
     </div>
   );
