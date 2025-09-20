@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Tabs, Form } from "antd";
 import { FormInput } from "../../../components/ui/Form/FormInput";
 import { FormMarkDown } from "../../../components/ui/Form/FormMarkDown";
@@ -17,17 +17,20 @@ export default function HomepageManage() {
   const [form] = Form.useForm();
   const { mode, setMode, savedContent, handleSave } = useStaticPages();
 
-  const renderTabContent = (key: TabKey) => {
-    useEffect(() => {
-      form.setFieldsValue(savedContent[key]);
-    }, [key, savedContent, form]);
+  const [activeKey, setActiveKey] = useState<TabKey>("about");
 
+  useEffect(() => {
+    if (savedContent[activeKey]) {
+      form.setFieldsValue(savedContent[activeKey]);
+    }
+  }, [activeKey, savedContent, form]);
+
+  const renderTabContent = (key: TabKey) => {
     return mode[key] === "edit" ? (
       <Form
         form={form}
         layout="vertical"
         onFinish={(values) => handleSave(values, key)}
-        initialValues={savedContent[key]}
       >
         <FormInput name="title" label="Tiêu đề" placeholder="Nhập tiêu đề" />
 
@@ -66,7 +69,11 @@ export default function HomepageManage() {
         <h2>Quản Lý Nội Dung Trang Tĩnh</h2>
       </div>
 
-      <Tabs defaultActiveKey="about" type="card">
+      <Tabs
+        defaultActiveKey="about"
+        type="card"
+        onChange={(key) => setActiveKey(key as TabKey)}
+      >
         <TabPane tab="Giới thiệu" key="about">
           {renderTabContent("about")}
         </TabPane>
@@ -76,7 +83,11 @@ export default function HomepageManage() {
         </TabPane>
 
         <TabPane tab="Chính sách" key="policies">
-          <Tabs defaultActiveKey="privacy_policy" type="line">
+          <Tabs
+            defaultActiveKey="privacy_policy"
+            type="line"
+            onChange={(key) => setActiveKey(key as TabKey)}
+          >
             <TabPane tab="Chính Sách: Bảo Mật" key="privacy_policy">
               {renderTabContent("privacy_policy")}
             </TabPane>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import MDEditor from "@uiw/react-md-editor";
-import { uploadImage } from "../../../services/systemServices/staticPageServices"; // 👈 import API upload
+import { uploadImage } from "../../../services/systemServices/staticPageServices";
 
 interface FormMarkDownProps {
   label?: string;
@@ -60,7 +60,7 @@ export function FormMarkDown({
       console.error("Upload error:", err);
       alert("❌ Lỗi upload ảnh");
     } finally {
-      e.target.value = ""; // reset input file
+      e.target.value = "";
     }
   };
 

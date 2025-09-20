@@ -1,20 +1,7 @@
-// hooks/useStaticPages.ts
 import { useEffect, useState } from "react";
 import {
-  getAboutPage,
-  updateAboutPage,
-  getConditionsPage,
-  updateConditionsPage,
-  getPrivacyPolicyPage,
-  updatePrivacyPolicyPage,
-  getRefundPolicyPage,
-  updateRefundPolicyPage,
-  getPaymentPolicyPage,
-  updatePaymentPolicyPage,
-  getCancellationPolicyPage,
-  updateCancellationPolicyPage,
-  getShippingPolicyPage,
-  updateShippingPolicyPage,
+  getStaticPage,
+  updateStaticPage,
 } from "../services/systemServices/staticPageServices.ts";
 
 export type TabKey =
@@ -31,73 +18,50 @@ export interface ContentData {
   content: string;
 }
 
-const pageConfig: Record<
-  TabKey,
-  {
-    title: string;
-    getApi: () => Promise<any>;
-    updateApi: (blocks: any[]) => Promise<any>;
-  }
-> = {
-  about: {
-    title: "Giới thiệu",
-    getApi: getAboutPage,
-    updateApi: updateAboutPage,
-  },
-  terms: {
-    title: "Điều khoản",
-    getApi: getConditionsPage,
-    updateApi: updateConditionsPage,
-  },
-  privacy_policy: {
-    title: "Chính sách Bảo mật",
-    getApi: getPrivacyPolicyPage,
-    updateApi: updatePrivacyPolicyPage,
-  },
-  refund_policy: {
-    title: "Chính sách Hoàn tiền",
-    getApi: getRefundPolicyPage,
-    updateApi: updateRefundPolicyPage,
-  },
-  payment_policy: {
-    title: "Chính sách Thanh toán",
-    getApi: getPaymentPolicyPage,
-    updateApi: updatePaymentPolicyPage,
-  },
-  cancellation_policy: {
-    title: "Chính sách Hoàn huỷ",
-    getApi: getCancellationPolicyPage,
-    updateApi: updateCancellationPolicyPage,
-  },
-  shipping_policy: {
-    title: "Chính sách Vận chuyển",
-    getApi: getShippingPolicyPage,
-    updateApi: updateShippingPolicyPage,
-  },
+const backendKeyMap: Record<TabKey, string> = {
+  about: "AboutPage",
+  terms: "TermsPage",
+  privacy_policy: "PrivacyPolicyPage",
+  refund_policy: "RefundPolicyPage",
+  payment_policy: "PaymentPolicyPage",
+  cancellation_policy: "CancellationPolicyPage",
+  shipping_policy: "ShippingPolicyPage",
+};
+
+const titleMap: Record<TabKey, string> = {
+  about: "Giới thiệu",
+  terms: "Điều khoản",
+  privacy_policy: "Chính sách Bảo mật",
+  refund_policy: "Chính sách Hoàn tiền",
+  payment_policy: "Chính sách Thanh toán",
+  cancellation_policy: "Chính sách Hoàn huỷ",
+  shipping_policy: "Chính sách Vận chuyển",
 };
 
 export function useStaticPages() {
   const [mode, setMode] = useState<Record<TabKey, "edit" | "preview">>(
-    Object.keys(pageConfig).reduce(
+    Object.keys(titleMap).reduce(
       (acc, key) => ({ ...acc, [key]: "edit" }),
       {} as Record<TabKey, "edit" | "preview">
     )
   );
 
   const [savedContent, setSavedContent] = useState<Record<TabKey, ContentData>>(
-    Object.keys(pageConfig).reduce(
+    Object.keys(titleMap).reduce(
       (acc, key) => ({ ...acc, [key]: { title: "", content: "" } }),
       {} as Record<TabKey, ContentData>
     )
   );
 
-  // --- Fetch data ---
   useEffect(() => {
     const fetchData = async (key: TabKey) => {
       try {
-        const res = await pageConfig[key].getApi();
-        if (res.data.errCode === 0 && res.data.data.length > 0) {
-          const content = res.data.data
+        const res = await getStaticPage(backendKeyMap[key]);
+        const result = res.data;
+
+        if (result.errCode === 0 && result.data && result.data.length > 0) {
+          const blocks = result.data;
+          const content = blocks
             .map((b: any) =>
               b.blockType === "text"
                 ? b.content
@@ -107,7 +71,7 @@ export function useStaticPages() {
 
           setSavedContent((prev) => ({
             ...prev,
-            [key]: { title: pageConfig[key].title, content },
+            [key]: { title: titleMap[key], content },
           }));
           setMode((prev) => ({ ...prev, [key]: "preview" }));
         }
@@ -117,13 +81,12 @@ export function useStaticPages() {
     };
 
     (async () => {
-      for (const key of Object.keys(pageConfig) as TabKey[]) {
+      for (const key of Object.keys(titleMap) as TabKey[]) {
         await fetchData(key);
       }
     })();
   }, []);
 
-  // --- Save data ---
   const handleSave = async (values: ContentData, key: TabKey) => {
     try {
       const lines = (values.content || "").split(/\r?\n+/);
@@ -146,7 +109,7 @@ export function useStaticPages() {
           };
         });
 
-      await pageConfig[key].updateApi(blocks);
+      await updateStaticPage(backendKeyMap[key], blocks);
 
       setSavedContent((prev) => ({ ...prev, [key]: values }));
       setMode((prev) => ({ ...prev, [key]: "preview" }));
