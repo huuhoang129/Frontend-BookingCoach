@@ -1,22 +1,12 @@
 import { useState } from "react";
 
-// UI – Buttons
 import CreateButton from "../../../components/ui/Button/Create";
 import DeleteButton from "../../../components/ui/Button/Delete";
 import EditButton from "../../../components/ui/Button/Edit";
 import QuickViewButton from "../../../components/ui/Button/quickView";
-
-// UI – Form
-import { FormInput } from "../../../components/ui/Form/FormInput";
-import { FormImageUpload } from "../../../components/ui/Form/FormImageUpload";
-import { FormImagePreview } from "../../../components/ui/Form/FormImageReview";
-
-// UI – Table & Pagination
+import BannerModals from "../../../containers/ModalsCollect/BannerModals";
 import BaseTable from "../../../components/ui/Table/Table";
 import Pagination from "../../../components/ui/Pagination/Pagination";
-
-// Containers / Modal
-import { CustomModal } from "../../../components/ui/Modal/Modal.tsx";
 
 import { usePagination } from "../../../hooks/usePagination.ts";
 import { useBanners } from "../../../hooks/useBanners";
@@ -52,15 +42,6 @@ export default function BannerManage() {
       <CreateButton onClick={() => setOpen(true)}>
         + Thêm mới Banner
       </CreateButton>
-      <CustomModal
-        open={open}
-        title="Thêm Banner"
-        onClose={() => setOpen(false)}
-        onSubmit={handleCreate}
-      >
-        <FormInput name="title" label="Tiêu đề" />
-        <FormImageUpload name="image" />
-      </CustomModal>
 
       {/* Table */}
       <BaseTable>
@@ -116,62 +97,19 @@ export default function BannerManage() {
         </tbody>
       </BaseTable>
 
-      {/* View Modal */}
-      <CustomModal
-        open={openView}
-        title="Xem Banner"
-        onClose={() => setOpenView(false)}
-        onSubmit={() => {}}
-        initialValues={bannerData || {}}
-      >
-        {bannerData ? (
-          <>
-            <FormImagePreview
-              label="Ảnh Banner"
-              src={`data:image/png;base64,${bannerData.image}`}
-              name="bannerImage"
-            />
-            <FormInput
-              name="title"
-              label="Tiêu đề"
-              value={bannerData.title}
-              disabled
-            />
-          </>
-        ) : (
-          <p>Đang tải...</p>
-        )}
-      </CustomModal>
-
-      {/* Edit Modal */}
-      <CustomModal
-        open={openEdit}
-        title="Sửa Banner"
-        onClose={() => setOpenEdit(false)}
-        onSubmit={handleEdit}
-        initialValues={
-          bannerData
-            ? {
-                ...bannerData,
-                image: [
-                  {
-                    uid: "-1",
-                    name: "banner.png",
-                    status: "done",
-                    url: `data:image/png;base64,${bannerData.image}`,
-                  },
-                ],
-              }
-            : {}
-        }
-      >
-        <FormInput
-          name="title"
-          label="Tiêu đề"
-          value={bannerData?.title || ""}
-        />
-        <FormImageUpload name="image" />
-      </CustomModal>
+      <BannerModals
+        openCreate={open}
+        setOpenCreate={setOpen}
+        openView={openView}
+        setOpenView={setOpenView}
+        openEdit={openEdit}
+        setOpenEdit={setOpenEdit}
+        bannerData={bannerData}
+        handlers={{
+          handleCreate,
+          handleEdit,
+        }}
+      />
 
       {/* Pagination */}
       <Pagination

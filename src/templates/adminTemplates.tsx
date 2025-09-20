@@ -228,9 +228,10 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
               Đang phát triển.....
               {/* <Link to="#">Quản lý thông báo</Link> */}
             </Menu.Item>
-            <Menu.Item key="homepage-content" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Quản lý nội dung trang chủ</Link> */}
+            <Menu.Item key="homepage-content">
+              <Link to="/admin/homepage-manage">
+                Quản lý nội dung trang chủ
+              </Link>
             </Menu.Item>
             <Menu.Item key="email-settings" disabled>
               Đang phát triển.....

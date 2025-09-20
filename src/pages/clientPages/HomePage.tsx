@@ -8,13 +8,18 @@ export default function HomePage() {
     <div className="homepage">
       <div className="banner-wrapper">
         <BannerSection />
-        <div className="search-box">
+        <div className="search-box-coach">
           <FormInputSearchCoach />
         </div>
       </div>
 
       <IntroduceSection />
-      <h1>Client - Trang chủ</h1>
+      <div>
+        <h2>Lộ trình phổ biến</h2>
+        <h2>Tin nổi bật</h2>
+        <h2>Dịch vụ nổi bật</h2>
+        <h2>Tin tức cập nhật</h2>
+      </div>
     </div>
   );
 }
