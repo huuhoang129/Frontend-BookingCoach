@@ -53,6 +53,9 @@ export function useStaticPages() {
     )
   );
 
+  // 👇 lấy từ .env
+  const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
+
   useEffect(() => {
     const fetchData = async (key: TabKey) => {
       try {
@@ -61,11 +64,13 @@ export function useStaticPages() {
 
         if (result.errCode === 0 && result.data && result.data.length > 0) {
           const blocks = result.data;
+
           const content = blocks
-            .map((b: any) =>
-              b.blockType === "text"
-                ? b.content
-                : `![image](/upload/${b.imageUrl})`
+            .map(
+              (b: any) =>
+                b.blockType === "text"
+                  ? b.content
+                  : `![image](${API_URL}/upload/${b.imageUrl})` // 👈 prepend domain từ .env
             )
             .join("\n\n");
 
@@ -85,7 +90,7 @@ export function useStaticPages() {
         await fetchData(key);
       }
     })();
-  }, []);
+  }, [API_URL]);
 
   const handleSave = async (values: ContentData, key: TabKey) => {
     try {
@@ -98,7 +103,7 @@ export function useStaticPages() {
             const relativePath = imageMatch[1].split("/").pop();
             return {
               blockType: "image",
-              imageUrl: relativePath,
+              imageUrl: `${key}/${relativePath}`, // 👈 chỉ lưu folder + filename
               sortOrder: index + 1,
             };
           }

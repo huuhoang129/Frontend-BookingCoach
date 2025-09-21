@@ -96,10 +96,10 @@ export default function Footer(): JSX.Element {
                 <h2>Về Chúng Tôi</h2>
                 <ul>
                   <li>
-                    <a href="/gioi-thieu">Giới thiệu</a>
+                    <a href="/about">Giới thiệu</a>
                   </li>
                   <li>
-                    <a href="/dieu-khoan">Điều khoản quy định chung</a>
+                    <a href="/term">Điều khoản quy định chung</a>
                   </li>
                 </ul>
               </div>
@@ -111,16 +111,19 @@ export default function Footer(): JSX.Element {
                 <h2>Hỗ Trợ</h2>
                 <ul>
                   <li>
-                    <a href="/quy-che">Quy chế hoạt động của Website</a>
+                    <a href="/privacy_policy">Chính sách bảo mật</a>
                   </li>
                   <li>
-                    <a href="/bao-mat">Chính sách bảo mật</a>
+                    <a href="/refund_policy">Chính sách đổi trả</a>
                   </li>
                   <li>
-                    <a href="/huong-dan">Hướng dẫn đặt xe và thanh toán</a>
+                    <a href="/payment_policy">Chính sách thanh toán</a>
                   </li>
                   <li>
-                    <a href="/hoan-huy">Chính sách hoàn hủy và đổi trả</a>
+                    <a href="/cancellation_policy">Chính sách hoàn hủy</a>
+                  </li>
+                  <li>
+                    <a href="/shipping_policy">Chính sách vận chuyển</a>
                   </li>
                 </ul>
               </div>

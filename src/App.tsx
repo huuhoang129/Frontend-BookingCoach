@@ -12,7 +12,14 @@ import HomepageManage from "./pages/adminPages/systemManage/homePageManage";
 import UserManage from "./pages/adminPages/usersManage/userManage";
 import EmployeeManage from "./pages/adminPages/usersManage/employeeManage";
 import AccountManage from "./pages/adminPages/usersManage/accountManage";
-import ContactPage from "./pages/clientPages/contactPage";
+import ContactPage from "./pages/clientPages/staticPage/contactPage";
+import AboutPage from "./pages/clientPages/staticPage/AboutPage";
+import TermPage from "./pages/clientPages/staticPage/TermPage";
+import PrivacyPolicyPage from "./pages/clientPages/staticPage/PrivacyPolicyPage";
+import RefundPolicyPage from "./pages/clientPages/staticPage/RefundPolicyPage";
+import PaymentPolicyPage from "./pages/clientPages/staticPage/PaymentPolicyPage";
+import CancellationPolicyPage from "./pages/clientPages/staticPage/CancellationPolicyPage";
+import ShippingPolicyPage from "./pages/clientPages/staticPage/ShippingPolicyPage";
 
 export default function App() {
   return (
@@ -21,6 +28,16 @@ export default function App() {
       <Route element={<HomeTemplate />}>
         <Route index element={<HomePage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/term" element={<TermPage />} />
+        <Route path="/privacy_policy" element={<PrivacyPolicyPage />} />
+        <Route path="/refund_policy" element={<RefundPolicyPage />} />
+        <Route path="/payment_policy" element={<PaymentPolicyPage />} />
+        <Route
+          path="/cancellation_policy"
+          element={<CancellationPolicyPage />}
+        />
+        <Route path="/shipping_policy" element={<ShippingPolicyPage />} />
       </Route>
 
       {/* Admin (bọc qua AdminRoute) */}

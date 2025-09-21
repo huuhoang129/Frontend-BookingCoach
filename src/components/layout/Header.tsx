@@ -38,8 +38,8 @@ export default function Header(): JSX.Element {
               </li>
               <li>
                 <a
-                  href="/gioithieu"
-                  className={location.pathname === "/gioithieu" ? "active" : ""}
+                  href="/about"
+                  className={location.pathname === "/about" ? "active" : ""}
                 >
                   Giới Thiệu
                 </a>
