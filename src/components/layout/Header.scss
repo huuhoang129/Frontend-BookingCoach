@@ -1,8 +1,11 @@
+@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap");
+
 .header {
   position: sticky;
   top: 0;
   z-index: 1000;
   transition: all 0.3s ease;
+  font-family: "Lexend", sans-serif;
 
   .header-container {
     display: flex;

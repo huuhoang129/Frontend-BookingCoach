@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Spin } from "antd";
 import { getStaticPage } from "../../services/systemServices/staticPageServices.ts";
-import { formatDate } from "../../utils/formatDate"; // 👈 import hàm formatDate
+import { formatDate } from "../../utils/formatDate";
 import "../styles/staticPage/staticPage.scss";
 
 interface Block {
@@ -11,7 +11,7 @@ interface Block {
   content?: string;
   imageUrl?: string;
   url?: string;
-  createdAt?: string; // 👈 thêm
+  createdAt?: string;
 }
 
 interface StaticPageProps {

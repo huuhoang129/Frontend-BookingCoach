@@ -12,6 +12,8 @@ import RefundPolicyPage from "./pages/clientPages/staticPage/RefundPolicyPage";
 import PaymentPolicyPage from "./pages/clientPages/staticPage/PaymentPolicyPage";
 import CancellationPolicyPage from "./pages/clientPages/staticPage/CancellationPolicyPage";
 import ShippingPolicyPage from "./pages/clientPages/staticPage/ShippingPolicyPage";
+import NewsPage from "./pages/clientPages/newsPage";
+import NewsDetailPage from "./pages/clientPages/NewsDetailPage";
 
 // admin pages
 import DashboardPage from "./pages/adminPages/DashboardPage";
@@ -30,6 +32,8 @@ export default function App() {
         <Route index element={<HomePage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/news" element={<NewsPage />} />
+        <Route path="/news/:id/:slug" element={<NewsDetailPage />} />
         <Route path="/term" element={<TermPage />} />
         <Route path="/privacy_policy" element={<PrivacyPolicyPage />} />
         <Route path="/refund_policy" element={<RefundPolicyPage />} />

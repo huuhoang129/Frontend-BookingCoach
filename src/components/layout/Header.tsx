@@ -45,7 +45,12 @@ export default function Header(): JSX.Element {
                 </a>
               </li>
               <li>
-                <a href="#">Tin Tức</a>
+                <a
+                  href="/news"
+                  className={location.pathname === "/news" ? "active" : ""}
+                >
+                  Tin Tức
+                </a>
               </li>
               <li>
                 <a
