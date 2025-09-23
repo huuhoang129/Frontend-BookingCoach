@@ -4,14 +4,6 @@ import AdminRoute from "./routes/AdminRoute";
 
 // client pages
 import HomePage from "./pages/clientPages/HomePage";
-
-// admin pages
-import DashboardPage from "./pages/adminPages/DashboardPage";
-import BannerManage from "./pages/adminPages/systemManage/bannerManage";
-import HomepageManage from "./pages/adminPages/systemManage/homePageManage";
-import UserManage from "./pages/adminPages/usersManage/userManage";
-import EmployeeManage from "./pages/adminPages/usersManage/employeeManage";
-import AccountManage from "./pages/adminPages/usersManage/accountManage";
 import ContactPage from "./pages/clientPages/staticPage/contactPage";
 import AboutPage from "./pages/clientPages/staticPage/AboutPage";
 import TermPage from "./pages/clientPages/staticPage/TermPage";
@@ -20,6 +12,15 @@ import RefundPolicyPage from "./pages/clientPages/staticPage/RefundPolicyPage";
 import PaymentPolicyPage from "./pages/clientPages/staticPage/PaymentPolicyPage";
 import CancellationPolicyPage from "./pages/clientPages/staticPage/CancellationPolicyPage";
 import ShippingPolicyPage from "./pages/clientPages/staticPage/ShippingPolicyPage";
+
+// admin pages
+import DashboardPage from "./pages/adminPages/DashboardPage";
+import BannerManage from "./pages/adminPages/systemManage/bannerManage";
+import HomepageManage from "./pages/adminPages/systemManage/homePageManage";
+import UserManage from "./pages/adminPages/usersManage/userManage";
+import EmployeeManage from "./pages/adminPages/usersManage/employeeManage";
+import AccountManage from "./pages/adminPages/usersManage/accountManage";
+import NewsManage from "./pages/adminPages/systemManage/newsManage";
 
 export default function App() {
   return (
@@ -60,6 +61,10 @@ export default function App() {
         element={
           <AdminRoute allowedRoles={["Admin"]} Component={HomepageManage} />
         }
+      />
+      <Route
+        path="/admin/news-manage"
+        element={<AdminRoute allowedRoles={["Admin"]} Component={NewsManage} />}
       />
 
       {/* userManage */}
