@@ -54,6 +54,7 @@ export default function NewsModals({
             { value: "News", label: "Tin thường" },
             { value: "Featured", label: "Tin nổi bật" },
             { value: "Recruitment", label: "Tin tuyển dụng" },
+            { value: "Service", label: "Tin dịch vụ" },
           ]}
           rules={[{ required: true, message: "Chọn loại tin" }]}
         />
@@ -90,6 +91,7 @@ export default function NewsModals({
             { value: "News", label: "Tin thường" },
             { value: "Featured", label: "Tin nổi bật" },
             { value: "Recruitment", label: "Tin tuyển dụng" },
+            { value: "Service", label: "Tin dịch vụ" },
           ]}
           rules={[{ required: true, message: "Chọn loại tin" }]}
         />

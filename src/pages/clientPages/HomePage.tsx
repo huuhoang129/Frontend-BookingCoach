@@ -1,6 +1,7 @@
 import BannerSection from "../../components/Section/bannerSection";
 import FormInputSearchCoach from "../../components/ui/Form/FormInputSearchCoach";
 import IntroduceSection from "../../components/Section/introduceSection";
+import ServiceSection from "../../components/Section/servicesSection";
 import NewSection from "../../components/Section/newSection";
 import "./homePage.scss";
 
@@ -15,6 +16,7 @@ export default function HomePage() {
       </div>
 
       <IntroduceSection />
+      <ServiceSection />
       <NewSection />
     </div>
   );

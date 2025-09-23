@@ -56,9 +56,10 @@ export default function NewManage() {
   const typeMenu = {
     items: [
       { key: "", label: "Tất cả" },
-      { key: "News", label: "Tin thường" },
+      { key: "News", label: "Tin tức" },
       { key: "Featured", label: "Tin nổi bật" },
       { key: "Recruitment", label: "Tin tuyển dụng" },
+      { key: "Service", label: "Tin dịch vụ" },
     ],
     onClick: (e: any) => setTypeFilter(e.key),
   };

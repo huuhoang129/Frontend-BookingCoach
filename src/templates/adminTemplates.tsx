@@ -223,10 +223,6 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
             <Menu.Item key="news-manage">
               <Link to="/admin/news-manage">Quản lý tin tức</Link>
             </Menu.Item>
-            <Menu.Item key="notification-manage" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Quản lý thông báo</Link> */}
-            </Menu.Item>
             <Menu.Item key="homepage-content">
               <Link to="/admin/homepage-manage">
                 Quản lý nội dung trang chủ
