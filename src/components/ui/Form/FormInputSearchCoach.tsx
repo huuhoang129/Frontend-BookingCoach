@@ -35,39 +35,25 @@ export default function BookingForm() {
 
   const treeData = LOCATIONS.map((p) => ({
     title: (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          width: "100%",
-        }}
-      >
+      <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
         <span>{p.label}</span>
         <DownOutlined
-          style={{
-            fontSize: 14,
-            color: "#fff",
-            marginLeft: "auto",
-          }}
+          style={{ fontSize: 14, color: "#fff", marginLeft: "auto" }}
         />
       </div>
     ),
+    label: p.label, // 👈 thêm label text để filter
     value: p.value,
     key: p.value,
     selectable: false,
     children: (p.children || []).map((c) => ({
       title: (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-          }}
-        >
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <EnvironmentOutlined style={{ color: "#007bff" }} />
           <span>{c.label}</span>
         </div>
       ),
+      label: c.label, // 👈 thêm label text để filter
       value: `${p.value}/${c.value}`,
       key: `${p.value}/${c.value}`,
       isLeaf: true,
@@ -86,7 +72,9 @@ export default function BookingForm() {
             return { ...node, children: filteredChildren };
           }
         }
-        if (String(node.title).toLowerCase().includes(keyword.toLowerCase())) {
+        if (
+          (node as any).label?.toLowerCase().includes(keyword.toLowerCase())
+        ) {
           return node;
         }
         return null;
