@@ -23,6 +23,7 @@ import UserManage from "./pages/adminPages/usersManage/userManage";
 import EmployeeManage from "./pages/adminPages/usersManage/employeeManage";
 import AccountManage from "./pages/adminPages/usersManage/accountManage";
 import NewsManage from "./pages/adminPages/systemManage/newsManage";
+import LocationManage from "./pages/adminPages/stationManage/locationManage";
 
 export default function App() {
   return (
@@ -50,6 +51,14 @@ export default function App() {
         path="/admin"
         element={
           <AdminRoute allowedRoles={["Admin"]} Component={DashboardPage} />
+        }
+      />
+
+      {/* stationManage */}
+      <Route
+        path="/admin/location-list"
+        element={
+          <AdminRoute allowedRoles={["Admin"]} Component={LocationManage} />
         }
       />
 

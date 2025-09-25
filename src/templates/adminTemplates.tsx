@@ -179,9 +179,8 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
             icon={<EnvironmentOutlined />}
             title="Quản lý bến & tuyến đường"
           >
-            <Menu.Item key="station-list" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Danh sách bến xe</Link> */}
+            <Menu.Item key="location-list">
+              <Link to="/admin/location-list">Danh sách điểm dừng</Link>
             </Menu.Item>
             <Menu.Item key="route-list" disabled>
               Đang phát triển.....

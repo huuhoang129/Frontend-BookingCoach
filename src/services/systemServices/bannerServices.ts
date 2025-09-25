@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/api/v1"; // đổi đúng port backend của bạn
+const API_URL = "http://localhost:8080/api/v1";
 
 const getAllBanners = () => {
   return axios.get(`${API_URL}/get-banner`);
