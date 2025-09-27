@@ -1,0 +1,182 @@
+@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap");
+
+.popular-section {
+  font-family: "Lexend", sans-serif;
+  padding: 32px 160px;
+  .section-title {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+}
+
+.popular-block {
+  margin-bottom: 10px;
+
+  .popular-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+
+    .popular-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+    }
+  }
+
+  .popular-container {
+    position: relative;
+    margin-bottom: 30px;
+
+    .arrow {
+      position: absolute;
+      top: 35%;
+      cursor: pointer;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+
+      img {
+        width: 28px;
+        height: 28px;
+      }
+    }
+
+    .arrow-left {
+      left: -40px;
+    }
+
+    .arrow-right {
+      right: -40px;
+    }
+
+    &:hover {
+      .arrow {
+        opacity: 1;
+      }
+    }
+  }
+
+  .popular-viewport {
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .popular-slider {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+    gap: 2px;
+    margin-top: 8px;
+  }
+
+  .popular-card {
+    flex: 0 0 calc(25% - 10px);
+    margin-right: 10px;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+
+    .popular-thumbnail {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .popular-content {
+      padding: 10px;
+
+      .popular-item-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #000;
+        line-height: 1.4;
+        margin-bottom: 10px;
+
+        min-height: calc(1.4em * 2);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+    }
+
+    .popular-date {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      border: 1px solid #ddd;
+      border-radius: 15px;
+      padding: 6px 10px;
+      min-height: 10px;
+      margin-left: 15px;
+      margin-right: 15px;
+      margin-bottom: 15px;
+
+      &__label {
+        font-size: 11px;
+        font-weight: 400;
+        color: #888;
+        margin-bottom: 2px;
+        color: #4d940e;
+      }
+
+      .ant-picker {
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        height: 22px !important;
+        padding: 0 !important;
+
+        .ant-picker-suffix {
+          position: absolute;
+          left: 6px;
+          right: auto;
+          color: #4d940e;
+          font-size: 18px;
+          display: flex;
+          align-items: center;
+          margin: 0 !important;
+        }
+
+        &.ant-picker-focused {
+          border: none !important;
+          box-shadow: none !important;
+        }
+
+        .ant-picker-input > input {
+          font-size: 14px;
+          font-weight: 600;
+          color: #000;
+          line-height: 28px;
+          padding-left: 28px;
+
+          &::placeholder {
+            font-weight: 500;
+            color: #aaa !important;
+          }
+        }
+      }
+    }
+
+    /* ✅ Nút đặt xe */
+    .popular-btn {
+      font-size: 14px;
+      display: block;
+      text-align: center;
+      background: #4d940e;
+      color: #fff;
+      font-weight: 400;
+      padding: 15px 0;
+      border-radius: 15px;
+      margin: 0 10px 10px;
+      transition: background 0.3s;
+
+      &:hover {
+        background: #3a760a;
+      }
+    }
+  }
+}

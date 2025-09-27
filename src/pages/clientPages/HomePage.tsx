@@ -3,6 +3,7 @@ import FormInputSearchCoach from "../../components/ui/Form/FormInputSearchCoach"
 import IntroduceSection from "../../components/Section/introduceSection";
 import ServiceSection from "../../components/Section/servicesSection";
 import NewSection from "../../components/Section/newSection";
+import PopularRoutesSection from "../../components/Section/popularRoutesSection";
 import "./homePage.scss";
 
 export default function HomePage() {
@@ -16,6 +17,7 @@ export default function HomePage() {
       </div>
 
       <IntroduceSection />
+      <PopularRoutesSection />
       <ServiceSection />
       <NewSection />
     </div>
