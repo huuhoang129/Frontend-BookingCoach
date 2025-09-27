@@ -1,6 +1,6 @@
-import { CustomModal } from "../components/ui/Modal/Modal";
-import { FormInput } from "../components/ui/Form/FormInput";
-import CheckBox from "../components/ui/CheckBox/CheckBox";
+import { CustomModal } from "../../components/ui/Modal/Modal";
+import { FormInput } from "../../components/ui/Form/FormInput";
+import CheckBox from "../../components/ui/CheckBox/CheckBox";
 
 // Props
 interface AuthModalsProps {

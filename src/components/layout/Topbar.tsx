@@ -6,7 +6,7 @@ import emailIcon from "../../assets/icon/email.svg";
 import phoneIcon from "../../assets/icon/call-phone.svg";
 
 // Components & Hooks
-import AuthModals from "../../containers/AuthModals";
+import AuthModals from "../../containers/ModalsCollect/AuthModals";
 import { useAuth } from "../../hooks/useAuth";
 
 export default function Topbar(): JSX.Element {

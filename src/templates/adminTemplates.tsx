@@ -87,7 +87,7 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
           </SubMenu>
 
           <SubMenu
-            key="trip-manage"
+            key="route-list"
             icon={<CarOutlined />}
             title="Quản lý chuyến xe"
           >
@@ -182,13 +182,8 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
             <Menu.Item key="location-list">
               <Link to="/admin/location-list">Danh sách điểm dừng</Link>
             </Menu.Item>
-            <Menu.Item key="route-list" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Các tuyến đường chính</Link> */}
-            </Menu.Item>
-            <Menu.Item key="default-ticket-pricing" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Giá vé mặc định cho từng tuyến</Link> */}
+            <Menu.Item key="route-list">
+              <Link to="/admin/route-list">Các tuyến đường chính</Link>
             </Menu.Item>
           </SubMenu>
 
