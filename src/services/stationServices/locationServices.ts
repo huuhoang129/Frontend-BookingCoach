@@ -36,6 +36,10 @@ const deleteLocation = (id: number | string) => {
   return axios.delete(`${API_URL}/locations/${id}`);
 };
 
+const getLocationsTree = () => {
+  return axios.get(`${API_URL}/locations-tree`);
+};
+
 export {
   getAllProvinces,
   getProvinceById,
@@ -45,4 +49,5 @@ export {
   getLocationById,
   createLocation,
   deleteLocation,
+  getLocationsTree,
 };

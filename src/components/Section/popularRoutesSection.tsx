@@ -108,9 +108,13 @@ function RouteSlider({ title, routes }: { title: string; routes: Route[] }) {
                     </div>
 
                     <Link
-                      to={`/booking/${route.id}?date=${date?.format(
+                      to={`/booking?fromLocationId=${
+                        route.fromLocation?.id
+                      }&toLocationId=${
+                        route.toLocation?.id
+                      }&tripDateStart=${date?.format(
                         "YYYY-MM-DD"
-                      )}`}
+                      )}&roundTrip=one`}
                       className="popular-btn"
                     >
                       Đặt xe ngay

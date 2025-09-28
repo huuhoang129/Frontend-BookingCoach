@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { DatePicker, Radio, Button, TreeSelect } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import {
@@ -9,59 +10,107 @@ import {
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import "../../styles/Form/FormInputSearchCoach.scss";
-import { LOCATIONS } from "../../../constants/locations.ts";
 import type { TreeSelectProps } from "antd";
+import { getLocationsTree } from "../../../services/stationServices/locationServices";
 
 export default function BookingForm() {
-  const [tripType, setTripType] = useState("oneway");
-  const [departureDate, setDepartureDate] = useState(dayjs());
-  const [returnDate, setReturnDate] = useState(dayjs().add(1, "day"));
-  const [from, setFrom] = useState<{ value: string; label: string }>();
-  const [to, setTo] = useState<{ value: string; label: string }>();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // lấy từ query param
+  const qpFrom = searchParams.get("fromLocationId");
+  const qpTo = searchParams.get("toLocationId");
+  const qpStart = searchParams.get("tripDateStart");
+  const qpEnd = searchParams.get("tripDateEnd");
+  const qpRound = searchParams.get("roundTrip");
+
+  const [tripType, setTripType] = useState(
+    qpRound === "both" ? "round" : "oneway"
+  );
+  const [departureDate, setDepartureDate] = useState(
+    qpStart ? dayjs(qpStart) : dayjs()
+  );
+  const [returnDate, setReturnDate] = useState(
+    qpEnd ? dayjs(qpEnd) : dayjs().add(1, "day")
+  );
+  const [from, setFrom] = useState<
+    { value: string; label: string } | undefined
+  >(qpFrom ? { value: qpFrom, label: "" } : undefined);
+  const [to, setTo] = useState<{ value: string; label: string } | undefined>(
+    qpTo ? { value: qpTo, label: "" } : undefined
+  );
+
   const [searchFrom, setSearchFrom] = useState("");
   const [searchTo, setSearchTo] = useState("");
+  const [treeData, setTreeData] = useState<any[]>([]);
 
   const handleSearch = () => {
-    console.log("===== Booking Data =====");
-    console.log("Loại chuyến đi:", tripType);
-    console.log("Điểm đi:", from);
-    console.log("Điểm đến:", to);
-    console.log("Ngày đi:", departureDate?.format("DD/MM/YYYY"));
-    if (tripType === "round") {
-      console.log("Ngày về:", returnDate?.format("DD/MM/YYYY"));
+    if (!from || !to || !departureDate) return;
+
+    let url = `/booking?fromLocationId=${from.value}&toLocationId=${
+      to.value
+    }&tripDateStart=${departureDate.format("YYYY-MM-DD")}`;
+
+    if (tripType === "round" && returnDate) {
+      url += `&tripDateEnd=${returnDate.format("YYYY-MM-DD")}`;
     }
-    console.log("========================");
+    url += `&roundTrip=${tripType === "round" ? "both" : "one"}`;
+
+    navigate(url);
   };
 
-  const treeData = LOCATIONS.map((p) => ({
-    title: (
-      <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-        <span>{p.label}</span>
-        <DownOutlined
-          style={{ fontSize: 14, color: "#fff", marginLeft: "auto" }}
-        />
-      </div>
-    ),
-    label: p.label, // 👈 thêm label text để filter
-    value: p.value,
-    key: p.value,
-    selectable: false,
-    children: (p.children || []).map((c) => ({
-      title: (
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <EnvironmentOutlined style={{ color: "#007bff" }} />
-          <span>{c.label}</span>
-        </div>
-      ),
-      label: c.label, // 👈 thêm label text để filter
-      value: `${p.value}/${c.value}`,
-      key: `${p.value}/${c.value}`,
-      isLeaf: true,
-    })),
-  }));
+  // load tree data
+  useEffect(() => {
+    getLocationsTree().then((res) => {
+      if (res.data && Array.isArray(res.data.data)) {
+        const mapped = res.data.data.map((p: any) => ({
+          title: (
+            <div
+              style={{ display: "flex", alignItems: "center", width: "100%" }}
+            >
+              <span>{p.label}</span>
+              <DownOutlined
+                style={{ fontSize: 14, color: "#fff", marginLeft: "auto" }}
+              />
+            </div>
+          ),
+          label: p.label,
+          value: p.value,
+          key: p.value,
+          selectable: false,
+          children: (p.children || []).map((c: any) => ({
+            title: (
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <EnvironmentOutlined style={{ color: "#007bff" }} />
+                <span>{c.label}</span>
+              </div>
+            ),
+            label: c.label,
+            value: c.value,
+            key: c.value,
+            isLeaf: true,
+          })),
+        }));
+        setTreeData(mapped);
+
+        // gán lại label cho from/to
+        if (qpFrom) {
+          const found = mapped
+            .flatMap((p: any) => p.children)
+            .find((c: any) => c.value === qpFrom);
+          if (found) setFrom({ value: found.value, label: found.label });
+        }
+        if (qpTo) {
+          const found = mapped
+            .flatMap((p: any) => p.children)
+            .find((c: any) => c.value === qpTo);
+          if (found) setTo({ value: found.value, label: found.label });
+        }
+      }
+    });
+  }, []);
 
   type TreeNode = NonNullable<TreeSelectProps["treeData"]>[number];
-
   const filterTree = (data: TreeNode[], keyword: string): TreeNode[] => {
     if (!keyword) return data;
     return data
@@ -155,7 +204,6 @@ export default function BookingForm() {
           </div>
         </div>
 
-        {/* Điểm đến */}
         {/* Điểm đến */}
         <div className="booking-form__field">
           <div className="booking-form__icon">

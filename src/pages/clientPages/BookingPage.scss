@@ -1,0 +1,527 @@
+.booking-page {
+  .banner-booking-wrapper {
+    position: relative;
+
+    .bus-search_bgSearch__nV7TX {
+      width: 100%;
+      height: 150px;
+      background: linear-gradient(
+        180deg,
+        rgba(77, 148, 14, 0.5),
+        rgba(194, 201, 221, 0.5) 61.55%,
+        hsla(0, 0%, 100%, 0.5) 115.86%
+      );
+    }
+
+    .search-box-coach {
+      position: absolute;
+      top: 15%;
+    }
+  }
+
+  .booking-wrapper {
+    display: flex;
+    gap: 24px;
+
+    max-width: 1200px; // chiều rộng tối đa
+    width: 100%;
+
+    margin: 80px auto 40px; // top 80px, ngang auto, bottom 40px
+
+    /* Panel bộ lọc bên trái */
+    .filter-panel {
+      flex: 0 0 280px;
+      background-color: rgb(244 245 247 / var(--tw-bg-opacity));
+      --tw-bg-opacity: 1;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      font-family: "Lexend", sans-serif;
+
+      /* Header */
+      .filter-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+
+        h3 {
+          font-size: 18px;
+          font-weight: 700;
+          margin: 0;
+        }
+
+        .reset-btn {
+          font-size: 14px;
+          color: #4d940e;
+          background: none;
+          border: none;
+          cursor: pointer;
+        }
+      }
+
+      /* Mỗi section trong bộ lọc */
+      .filter-section {
+        margin-bottom: 20px;
+
+        h4 {
+          font-size: 16px;
+          font-weight: 600;
+          margin-bottom: 10px;
+        }
+
+        .filter-options {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+
+          label {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+          }
+        }
+
+        /* ----------- Dual slider chung (Giờ chạy + Ghế trống) ----------- */
+        .mobi-multi-range {
+          position: relative;
+          width: 100%;
+          height: 50px;
+
+          input[type="range"] {
+            position: absolute;
+            pointer-events: none;
+            -webkit-appearance: none;
+            z-index: 2;
+            width: 100%;
+            height: 0;
+          }
+
+          input[type="range"]::-webkit-slider-thumb {
+            pointer-events: all;
+            width: 16px;
+            height: 16px;
+            margin-top: 6px; /* 👈 hạ nút tròn xuống cho thẳng hàng */
+            border-radius: 50%;
+            background: #4d940e; /* xanh lá */
+            cursor: pointer;
+            -webkit-appearance: none;
+            position: relative;
+            z-index: 3;
+          }
+
+          .slider {
+            position: relative;
+            width: 100%;
+            height: 4px;
+            margin: 20px 0;
+          }
+
+          .slider__track,
+          .slider__range {
+            position: absolute;
+            border-radius: 2px;
+            height: 4px;
+          }
+
+          .slider__track {
+            width: 100%;
+            background-color: #dcdcdc; /* nền xám */
+            z-index: 1;
+          }
+
+          .slider__range {
+            background-color: #4d940e; /* đoạn chọn highlight xanh lá */
+            z-index: 2;
+          }
+
+          .slider__left-value,
+          .slider__right-value {
+            position: absolute;
+            top: 30px;
+            font-size: 12px;
+            color: #333;
+          }
+
+          .slider__left-value {
+            left: 0;
+          }
+
+          .slider__right-value {
+            right: 0;
+          }
+        }
+      }
+    }
+
+    /* Danh sách chuyến xe bên phải */
+    .trip-list {
+      flex: 1;
+
+      .trip-section {
+      }
+
+      .weekday-section {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+
+        padding: 12px;
+        margin-bottom: 20px;
+
+        .arrow {
+          width: 40px;
+          height: 40px;
+          border: none;
+          background: none;
+          cursor: pointer;
+          font-size: 16px;
+          color: #333;
+          padding: 8px;
+          outline: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          &:hover:not(:disabled) {
+            color: #4d940e;
+          }
+
+          &.hidden {
+            visibility: hidden;
+          }
+
+          &:disabled {
+            cursor: default;
+          }
+        }
+
+        .weekday-list {
+          flex: 1;
+          display: flex;
+          justify-content: space-around;
+          align-items: center;
+          margin: 0 8px;
+
+          .weekday {
+            flex: 1;
+            text-align: center;
+            border: none;
+            background: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            padding: 8px 12px;
+            cursor: pointer;
+            outline: none;
+
+            &:last-child {
+              border-right: none;
+            }
+
+            &.active {
+              color: #4d940e;
+              font-weight: 600;
+              border-bottom: 2px solid #4d940e;
+            }
+          }
+        }
+      }
+
+      .direction-section {
+        .direction-options {
+          display: flex;
+          gap: 12px;
+
+          .direction {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            border-radius: 8px;
+            border: none; // 👈 bỏ border
+            cursor: pointer;
+            outline: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+
+            &.active {
+              background: #4d940e; // nền xanh lá
+              color: #fff; // chữ trắng
+
+              .icon {
+                color: #fff; // icon trắng
+              }
+            }
+
+            &:not(.active) {
+              background: #f0f5f0; // nền xám nhạt có chút xanh
+              color: #4d940e; // chữ xanh lá
+
+              .icon {
+                color: #4d940e; // icon xanh lá
+              }
+            }
+          }
+        }
+      }
+
+      .trip-date-section {
+        margin-top: 16px;
+        margin-bottom: 10px;
+        h3 {
+          font-size: 15px;
+          font-weight: 600;
+          margin: 0;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+      }
+
+      .note-section {
+        margin-top: 16px;
+
+        h4 {
+          font-size: 16px;
+          font-weight: 700;
+          margin-bottom: 8px;
+          color: #ff0024;
+        }
+
+        ul {
+          list-style: none;
+          padding-left: 20px;
+          margin: 0;
+
+          li {
+            font-size: 15px;
+            color: #ff0024;
+            margin-bottom: 6px;
+            line-height: 1.4;
+            font-weight: 600;
+
+            &::marker {
+              content: "- ";
+              color: #ff0024;
+            }
+          }
+        }
+      }
+
+      .trip-list-section {
+        .booking-list {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+
+          .booking-empty {
+            text-align: center;
+            font-size: 16px;
+            font-weight: 500;
+            color: #d32f2f; // đỏ nổi bật
+            padding: 24px 0;
+            margin: 10px 0;
+          }
+
+          .booking-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-radius: 12px;
+            padding: 30px 16px;
+            background: #f9f9f9;
+
+            // 👇 Thêm nền xám cho card chẵn
+            &:nth-child(even) {
+              background: #fff;
+            }
+
+            .trip-image {
+              width: 80px;
+              height: 40px;
+              flex-shrink: 0;
+              overflow: hidden;
+              border-radius: 6px;
+
+              img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+              }
+            }
+
+            .trip-details {
+              flex: 1;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 20px;
+
+              .trip-name {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+
+                h3 {
+                  font-size: 18px;
+                  font-weight: 600;
+                  margin: 0;
+                }
+
+                .vehicle-type {
+                  margin-top: 5px;
+                  border: 1px solid #e4e3e3;
+                  color: #000000;
+                  font-size: 12px;
+                  font-weight: 500;
+                  padding: 3px 9px;
+                  border-radius: 5px;
+                  width: fit-content;
+                  background-color: #ffffff;
+                }
+
+                .trip-start {
+                  font-size: 15px;
+                  color: #353535;
+                  margin-top: 5px;
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                  font-weight: 500;
+
+                  .anticon {
+                    font-size: 14px;
+                    color: #13663b; // xanh lá cho nổi bật
+                  }
+                }
+              }
+
+              .trip-time {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                flex: 0 0 auto; // 👈 chỉ chiếm vừa nội dung, không kéo dãn
+                width: auto; // 👈 bỏ full width
+
+                .time-left,
+                .time-right {
+                  p {
+                    margin: 0;
+                    font-size: 17px;
+                    font-weight: 600;
+                    color: #2d2d2f;
+                  }
+                }
+
+                .time-middle {
+                  width: 70px; // 👈 độ dài gạch ngang cố định (tùy chỉnh)
+                  height: 1px;
+                  background: #ccc;
+                  position: relative;
+
+                  .time-duration {
+                    position: absolute;
+                    font-weight: 500;
+                    top: -23px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    font-size: 15px;
+                    color: #2d2d2f;
+                    padding: 0 4px;
+                  }
+                }
+              }
+
+              .trip-seats {
+                position: relative;
+                font-size: 14px;
+                font-weight: 500;
+                color: #000000;
+                padding: 8px 20px; // tạo khoảng cách cho chữ nằm giữa
+                text-align: center;
+
+                &::before,
+                &::after {
+                  content: "";
+                  position: absolute;
+                  top: -12px; // kéo dài hơn block chữ
+                  bottom: -12px;
+                  width: 1px;
+                  background: #d5d5d5;
+                }
+
+                &::before {
+                  left: 0;
+                }
+
+                &::after {
+                  right: 0;
+                }
+
+                p {
+                  margin: 0 0 6px 0;
+                  .available {
+                    color: #4d940e; // xanh lá
+                    font-weight: 600; // in đậm cho nổi bật
+                  }
+                }
+
+                .seats-bar {
+                  width: 100%; // kéo theo chiều rộng block
+                  height: 4px;
+                  border-radius: 8px;
+                  background: #d2d2d2; // nền xám nhạt
+                  overflow: hidden;
+                  margin-top: 2px;
+
+                  .seats-fill {
+                    height: 100%;
+                    background: #4d940e; // xanh lá
+                    transition: width 0.3s ease;
+                  }
+                }
+              }
+
+              .trip-price {
+                font-size: 18px;
+                font-weight: 700;
+                color: #d32f2f;
+                margin-right: 20px;
+              }
+            }
+
+            .trip-action {
+              .booking-btn {
+                padding: 10px 36px;
+                border: none;
+                border: 1px solid #4d940e;
+                border-radius: 6px;
+                color: #4d940e;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 600;
+                background: #ffffff;
+                outline: none;
+
+                &:hover {
+                  background: #4d940e;
+                  color: #ccc;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

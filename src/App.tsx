@@ -25,6 +25,7 @@ import AccountManage from "./pages/adminPages/usersManage/accountManage";
 import NewsManage from "./pages/adminPages/systemManage/newsManage";
 import LocationManage from "./pages/adminPages/stationManage/locationManage";
 import RoutesManage from "./pages/adminPages/stationManage/routesManage";
+import BookingPage from "./pages/clientPages/BookingPage";
 
 export default function App() {
   return (
@@ -45,6 +46,8 @@ export default function App() {
           element={<CancellationPolicyPage />}
         />
         <Route path="/shipping_policy" element={<ShippingPolicyPage />} />
+
+        <Route path="/booking" element={<BookingPage />} />
       </Route>
 
       {/* Admin (bọc qua AdminRoute) */}
