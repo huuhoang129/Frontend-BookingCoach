@@ -1,0 +1,280 @@
+.twentytwo-seat-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: "Lexend", sans-serif;
+
+  .twentytwo-seat-container {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 20px;
+  }
+
+  .twentytwo-seat-header {
+    margin-left: -30px;
+
+    .twentytwo-seat-title {
+      margin: 0 0 8px 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: #222;
+      line-height: 1.3;
+
+      h2 {
+        margin: 0;
+        font-size: inherit;
+        font-weight: inherit;
+        color: inherit;
+      }
+    }
+
+    .twentytwo-seat-type {
+      display: inline-block;
+      padding: 4px 12px;
+      border: 1px solid #c7c7c7;
+      border-radius: 6px;
+      margin-bottom: 16px;
+
+      p {
+        margin: 0;
+        font-size: 11px;
+        font-weight: 400;
+        color: #000;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+    }
+
+    .twentytwo-seat-route {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 15px;
+
+      span {
+        font-size: 18px;
+        font-weight: 600;
+        color: #000;
+      }
+    }
+
+    .twentytwo-seat-time {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 10px;
+
+      span {
+        font-size: 22px;
+        font-weight: 500;
+        color: #333;
+      }
+
+      span:first-child {
+        font-weight: 600;
+        color: #4d940e;
+      }
+
+      span:nth-child(3) {
+        font-weight: 600;
+        color: #d9534f;
+      }
+
+      span:nth-child(2) {
+        font-size: 18px;
+        font-weight: 600;
+        color: #555;
+        margin: 0 4px;
+      }
+
+      .twentytwo-seat-duration {
+        font-size: 15px;
+        font-weight: 400;
+        color: #666;
+        margin-left: 4px;
+      }
+    }
+
+    .twentytwo-seat-price-box {
+      margin: 12px auto 0;
+      padding: 5px;
+      border: 1px solid #4d940e;
+      border-radius: 8px;
+      font-size: 14px;
+      width: 250px;
+
+      h4 {
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #4d940e;
+      }
+
+      .price-row {
+        display: flex;
+        justify-content: space-between;
+        margin: 2px 0;
+
+        span:first-child {
+          font-weight: 500;
+          color: #333;
+        }
+
+        span:last-child {
+          font-weight: 600;
+          color: #4d940e;
+        }
+
+        &.total span:last-child {
+          color: #e63946; // tổng tiền đỏ
+          font-size: 14px;
+        }
+      }
+
+      .divider {
+        border: none;
+        border-top: 1px dashed #ccc; // gạch ngang nét đứt
+      }
+    }
+
+    .twentytwo-seat-services {
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background: #fafafa;
+
+      h4 {
+        margin: 0 0 8px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #4d940e;
+      }
+
+      ul {
+        padding-left: 18px;
+        margin: 0;
+
+        li {
+          font-size: 13px;
+          color: #000;
+          margin-bottom: 4px;
+        }
+      }
+    }
+  }
+
+  .twentytwo-seat-wrapper {
+    border: 1px solid #cdcdcd;
+    border-radius: 10px;
+    padding: 20px 15px 40px;
+
+    .twentytwo-seat-title {
+      text-align: center;
+      margin-bottom: 15px;
+      font-weight: 600;
+      font-size: 20px;
+    }
+
+    .twentytwo-seat-legend {
+      display: flex;
+      justify-content: center;
+      gap: 26px;
+      margin: 0 50px 20px;
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        color: #333;
+
+        img {
+          width: 18px;
+          margin-right: 6px;
+        }
+      }
+    }
+
+    .twentytwo-floors {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 10px;
+    }
+
+    .floor-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .twentytwo-floor-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #4d940e;
+    }
+
+    .twentytwo-seat-table {
+      border-collapse: collapse;
+
+      td {
+        width: 50px;
+        height: 55px;
+        text-align: center;
+        vertical-align: middle;
+      }
+
+      .aisle {
+        width: 40px;
+      }
+
+      .twentytwo-seat {
+        cursor: pointer;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+
+        img {
+          width: 22px;
+          height: 22px;
+          display: block;
+          margin: 0 auto;
+        }
+
+        p {
+          margin-top: 2px;
+          font-size: 12px;
+          font-weight: 600;
+          color: #333;
+        }
+      }
+
+      .twentytwo-seat-sold {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+    }
+  }
+
+  .twentytwo-seat-btn {
+    margin-top: 20px;
+    padding: 10px 40px;
+    border-radius: 6px;
+    border: none;
+    background: #4d940e;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #3a770b;
+    }
+
+    &:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+  }
+}

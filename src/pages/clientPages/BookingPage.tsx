@@ -5,6 +5,10 @@ import "dayjs/locale/vi";
 import FormInputSearchCoach from "../../components/ui/Form/FormInputSearchCoach";
 import { searchTrips } from "../../services/stationServices/tripServices.ts";
 import "./BookingPage.scss";
+import SeatBookingModal from "../../containers/ModalsCollect/SeatBookingModal";
+import { formatDuration, formatStartTime, calcEndTime } from "../../utils/time";
+import { useNavigate } from "react-router-dom";
+import { capitalizeFirst } from "../../utils/string";
 import {
   LeftOutlined,
   RightOutlined,
@@ -15,11 +19,15 @@ import {
 import DefaultBusImg from "../../assets/logo/default-bus.jpg";
 
 dayjs.locale("vi");
-function capitalizeFirst(str: string) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
 
 /* ---------------- Types ---------------- */
+interface Seat {
+  id: number;
+  name: string;
+  status: "AVAILABLE" | "HOLD" | "SOLD";
+  floor: number;
+}
+
 interface Province {
   id: number;
   nameProvince: string;
@@ -48,6 +56,17 @@ interface Trip {
   status: string;
   route: Route;
   vehicle: Vehicle;
+  basePrice: number;
+  totalSeats: number; // backend trả về
+  availableSeats: number; // backend trả về
+  seats: Seat[];
+}
+
+interface BookingDraft {
+  goTrip?: Trip;
+  returnTrip?: Trip;
+  goSeats?: Seat[];
+  returnSeats?: Seat[];
 }
 
 /* ---------------- DualRangeSlider ---------------- */
@@ -127,26 +146,11 @@ function DualRangeSlider({
 
 /* ---------------- Helpers ---------------- */
 const VEHICLE_TYPE_MAP: Record<string, string> = {
-  Normal: "Xe Khách Ngồi 29 chỗ",
-  Sleeper: "Xe Giường Nằm 40 chỗ",
-  DoubleSleeper: "Xe Giường Nằm Đôi 20 chỗ",
+  Normal: "Xe Khách Ngồi 45 chỗ",
+  Sleeper: "Xe Giường Nằm 36 chỗ",
+  DoubleSleeper: "Xe Giường Nằm VIP 22 chỗ",
   Limousine: "Xe Limousine 9 chỗ",
 };
-
-const VEHICLE_SEAT_MAP: Record<string, number> = {
-  Normal: 29,
-  Sleeper: 40,
-  DoubleSleeper: 20,
-  Limousine: 9,
-};
-
-function formatDuration(duration?: string) {
-  if (!duration) return "?";
-  const [hours, minutes] = duration.split(":");
-  const h = parseInt(hours, 10);
-  const m = parseInt(minutes, 10);
-  return m > 0 ? `${h}h${m}m` : `${h}h`;
-}
 
 /* ---------------- BookingPage ---------------- */
 export default function BookingPage() {
@@ -165,6 +169,11 @@ export default function BookingPage() {
   const [vehicleType, setVehicleType] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<[number, number]>([0, 1439]);
   const [seatRange, setSeatRange] = useState<[number, number]>([0, 60]);
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedVehicleType, setSelectedVehicleType] = useState<string>("");
+  const [selectedSeats, setSelectedSeats] = useState<any[]>([]);
+  const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
+  const [bookingDraft, setBookingDraft] = useState<BookingDraft>({});
 
   const weekdays = Array.from({ length: 6 }, (_, i) => {
     const d = dayjs(tripDateStart).add(i, "day");
@@ -180,6 +189,26 @@ export default function BookingPage() {
 
   const roundTrip = searchParams.get("roundTrip") || "one";
   const [activeDirection, setActiveDirection] = useState<"go" | "return">("go");
+
+  const navigate = useNavigate();
+
+  const handleConfirmBooking = (trip: Trip, seats: Seat[]) => {
+    if (roundTrip === "one") {
+      navigate("/checkout", { state: { trip, seats } });
+    } else {
+      if (activeDirection === "go") {
+        setBookingDraft((prev) => ({ ...prev, goTrip: trip, goSeats: seats }));
+        setActiveDirection("return"); // sau khi đặt chiều đi thì ép sang chiều về
+      } else {
+        setBookingDraft((prev) => ({
+          ...prev,
+          returnTrip: trip,
+          returnSeats: seats,
+        }));
+      }
+    }
+    setOpenModal(false);
+  };
 
   useEffect(() => {
     const fetchTrips = async () => {
@@ -234,66 +263,216 @@ export default function BookingPage() {
       <div className="booking-wrapper">
         {/* Bộ lọc bên trái */}
         <div className="filter-panel">
-          <div className="filter-header">
-            <h3>BỘ LỌC</h3>
-            <button
-              className="reset-btn"
-              onClick={() => {
-                setVehicleType(null);
-                setTimeRange([0, 1439]);
-                setSeatRange([0, 60]);
-              }}
-            >
-              Đặt lại bộ lọc
-            </button>
-          </div>
+          <div className="filter-inner">
+            <div className="filter-header">
+              <h3>BỘ LỌC</h3>
+              <button
+                className="reset-btn"
+                onClick={() => {
+                  setVehicleType(null);
+                  setTimeRange([0, 1439]);
+                  setSeatRange([0, 60]);
+                }}
+              >
+                Đặt lại bộ lọc
+              </button>
+            </div>
 
-          {/* Loại xe */}
-          <div className="filter-section">
-            <h4>Loại xe</h4>
-            <div className="filter-options">
-              {Object.keys(VEHICLE_TYPE_MAP).map((type) => (
-                <label key={type}>
-                  <input
-                    type="radio"
-                    name="vehicleType"
-                    value={type}
-                    checked={vehicleType === type}
-                    onChange={() => setVehicleType(type)}
-                  />
-                  {VEHICLE_TYPE_MAP[type]}
-                </label>
-              ))}
+            {/* Loại xe */}
+            <div className="filter-section">
+              <h4>Loại xe</h4>
+              <div className="filter-options">
+                {Object.keys(VEHICLE_TYPE_MAP).map((type) => (
+                  <label key={type}>
+                    <input
+                      type="radio"
+                      name="vehicleType"
+                      value={type}
+                      checked={vehicleType === type}
+                      onChange={() => setVehicleType(type)}
+                    />
+                    {VEHICLE_TYPE_MAP[type]}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Giờ chạy */}
+            <div className="filter-section">
+              <h4>Giờ chạy</h4>
+              <DualRangeSlider
+                min={0}
+                max={1439}
+                defaultMin={timeRange[0]}
+                defaultMax={timeRange[1]}
+                step={1}
+                formatLabel={(val) =>
+                  dayjs().startOf("day").add(val, "minute").format("HH:mm")
+                }
+                onChange={(min, max) => setTimeRange([min, max])}
+              />
+            </div>
+
+            {/* Lượng ghế trống */}
+            <div className="filter-section">
+              <h4>Lượng ghế trống</h4>
+              <DualRangeSlider
+                min={0}
+                max={60}
+                defaultMin={seatRange[0]}
+                defaultMax={seatRange[1]}
+                onChange={(min, max) => setSeatRange([min, max])}
+              />
             </div>
           </div>
 
-          {/* Giờ chạy */}
-          <div className="filter-section">
-            <h4>Giờ chạy</h4>
-            <DualRangeSlider
-              min={0}
-              max={1439}
-              defaultMin={timeRange[0]}
-              defaultMax={timeRange[1]}
-              step={1}
-              formatLabel={(val) =>
-                dayjs().startOf("day").add(val, "minute").format("HH:mm")
-              }
-              onChange={(min, max) => setTimeRange([min, max])}
-            />
-          </div>
+          {roundTrip === "both" && (
+            <div className="your-trip-box">
+              {bookingDraft.goTrip && (
+                <div className="trip-summary">
+                  <h3>Chuyến của bạn</h3>
+                  <h4>
+                    Chiều đi:{" "}
+                    {dayjs(bookingDraft.goTrip.startDate).format("DD/MM/YYYY")}
+                  </h4>
+                  <div className="trip-row-tille">
+                    <span className="value">
+                      {bookingDraft.goTrip.route.fromLocation.nameLocations} →{" "}
+                      {bookingDraft.goTrip.route.toLocation.nameLocations}
+                    </span>
+                  </div>
+                  <div className="trip-row">
+                    <span className="label">Khởi hành:</span>
+                    <span className="value">
+                      {formatStartTime(bookingDraft.goTrip.startTime)}
+                    </span>
+                  </div>
+                  <div className="trip-row">
+                    <span className="label">Biển số xe:</span>
+                    <span className="value">
+                      {bookingDraft.goTrip.vehicle.name}
+                    </span>
+                  </div>
+                  <div className="trip-row">
+                    <span className="label">Số ghế/giường:</span>
+                    <span className="value">
+                      {bookingDraft.goSeats?.map((s) => s.name).join(", ")}
+                    </span>
+                  </div>
+                  <div className="trip-row">
+                    <span className="label" style={{ fontWeight: "700" }}>
+                      Giá ghế:
+                    </span>
+                    <span className="value">
+                      {bookingDraft.goSeats?.length} x{" "}
+                      {bookingDraft.goTrip.basePrice.toLocaleString()} đ
+                    </span>
+                  </div>
+                  <hr className="divider" />
+                </div>
+              )}
 
-          {/* Lượng ghế trống */}
-          <div className="filter-section">
-            <h4>Lượng ghế trống</h4>
-            <DualRangeSlider
-              min={0}
-              max={60}
-              defaultMin={seatRange[0]}
-              defaultMax={seatRange[1]}
-              onChange={(min, max) => setSeatRange([min, max])}
-            />
-          </div>
+              {bookingDraft.returnTrip && (
+                <div className="trip-summary">
+                  <h4>
+                    Chiều về:{" "}
+                    {dayjs(bookingDraft.returnTrip.startDate).format(
+                      "DD/MM/YYYY"
+                    )}
+                  </h4>
+
+                  <div className="trip-row-tille">
+                    <span className="value">
+                      {bookingDraft.returnTrip.route.fromLocation.nameLocations}{" "}
+                      → {bookingDraft.returnTrip.route.toLocation.nameLocations}
+                    </span>
+                  </div>
+
+                  <div className="trip-row">
+                    <span className="label">Khởi hành:</span>
+                    <span className="value">
+                      {formatStartTime(bookingDraft.returnTrip.startTime)}
+                    </span>
+                  </div>
+
+                  <div className="trip-row">
+                    <span className="label">Biển số xe:</span>
+                    <span className="value">
+                      {bookingDraft.returnTrip.vehicle.name}
+                    </span>
+                  </div>
+
+                  <div className="trip-row">
+                    <span className="label">Số ghế/giường:</span>
+                    <span className="value">
+                      {bookingDraft.returnSeats?.map((s) => s.name).join(", ")}
+                    </span>
+                  </div>
+
+                  <div className="trip-row">
+                    <span className="label" style={{ fontWeight: "700" }}>
+                      Giá ghế:
+                    </span>
+                    <span className="value">
+                      {bookingDraft.returnSeats?.length} x{" "}
+                      {bookingDraft.returnTrip.basePrice.toLocaleString()} đ
+                    </span>
+                  </div>
+                </div>
+              )}
+              <hr className="divider" />
+
+              {bookingDraft.goTrip && bookingDraft.returnTrip && (
+                <div className="trip-total">
+                  <h4>Tổng Thanh Toán</h4>
+
+                  <div className="trip-row">
+                    <span className="label">Giá ghế chiều đi:</span>
+                    <span className="value">
+                      {(
+                        (bookingDraft.goSeats?.length || 0) *
+                        bookingDraft.goTrip.basePrice
+                      ).toLocaleString()}{" "}
+                      đ
+                    </span>
+                  </div>
+
+                  <div className="trip-row">
+                    <span className="label">Giá ghế chiều về:</span>
+                    <span className="value">
+                      {(
+                        (bookingDraft.returnSeats?.length || 0) *
+                        bookingDraft.returnTrip.basePrice
+                      ).toLocaleString()}{" "}
+                      đ
+                    </span>
+                  </div>
+
+                  <div className="trip-row total">
+                    <span className="label">Tổng cộng:</span>
+                    <span className="value">
+                      {(
+                        (bookingDraft.goSeats?.length || 0) *
+                          bookingDraft.goTrip.basePrice +
+                        (bookingDraft.returnSeats?.length || 0) *
+                          bookingDraft.returnTrip.basePrice
+                      ).toLocaleString()}{" "}
+                      đ
+                    </span>
+                  </div>
+
+                  <button
+                    className="continue-btn"
+                    onClick={() =>
+                      navigate("/checkout", { state: { ...bookingDraft } })
+                    }
+                  >
+                    Tiếp tục
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Danh sách chuyến bên phải */}
@@ -393,12 +572,9 @@ export default function BookingPage() {
                   return false;
 
                 // lọc theo ghế
-                const totalSeats =
-                  VEHICLE_SEAT_MAP[trip.vehicle?.type] ||
-                  trip.vehicle?.seatCount ||
-                  0;
-                const bookedSeats = 5;
-                const availableSeats = totalSeats - bookedSeats;
+                const totalSeats = Number(trip.totalSeats) || 0;
+                const availableSeats = Number(trip.availableSeats) || 0;
+
                 if (
                   availableSeats < seatRange[0] ||
                   availableSeats > seatRange[1]
@@ -432,12 +608,9 @@ export default function BookingPage() {
                     )
                       return false;
 
-                    const totalSeats =
-                      VEHICLE_SEAT_MAP[trip.vehicle?.type] ||
-                      trip.vehicle?.seatCount ||
-                      0;
-                    const bookedSeats = 5;
-                    const availableSeats = totalSeats - bookedSeats;
+                    const totalSeats = Number(trip.totalSeats) || 0;
+                    const availableSeats = Number(trip.availableSeats) || 0;
+
                     if (
                       availableSeats < seatRange[0] ||
                       availableSeats > seatRange[1]
@@ -454,12 +627,8 @@ export default function BookingPage() {
                           .add(Number(trip.totalTime.split(":")[1]), "minute")
                       : null;
 
-                    const totalSeats =
-                      VEHICLE_SEAT_MAP[trip.vehicle?.type] ||
-                      trip.vehicle?.seatCount ||
-                      0;
-                    const bookedSeats = 5;
-                    const availableSeats = totalSeats - bookedSeats;
+                    const totalSeats = Number(trip.totalSeats) || 0;
+                    const availableSeats = Number(trip.availableSeats) || 0;
 
                     return (
                       <div key={trip.id} className="booking-card">
@@ -478,13 +647,13 @@ export default function BookingPage() {
                               <ClockCircleOutlined
                                 style={{ marginRight: 6, color: "#13663b" }}
                               />
-                              Khởi hành lúc: {start.format("HH:mm")}
+                              Khởi hành lúc: {formatStartTime(trip.startTime)}
                             </p>
                           </div>
 
                           <div className="trip-time">
                             <div className="time-left">
-                              <p>{start.format("HH:mm")}</p>
+                              <p>{formatStartTime(trip.startTime)}</p>
                             </div>
                             <div className="time-middle">
                               <span className="time-duration">
@@ -492,7 +661,10 @@ export default function BookingPage() {
                               </span>
                             </div>
                             <div className="time-right">
-                              <p>{end ? end.format("HH:mm") : "??:??"}</p>
+                              <p>
+                                {calcEndTime(trip.startTime, trip.totalTime) ||
+                                  "??:??"}
+                              </p>
                             </div>
                           </div>
 
@@ -516,12 +688,42 @@ export default function BookingPage() {
                             </div>
                           </div>
 
-                          <div className="trip-price">200.000 đ</div>
+                          <div className="trip-price">
+                            {trip.basePrice.toLocaleString("vi-VN")} đ
+                          </div>
                         </div>
-
                         <div className="trip-action">
-                          <button className="booking-btn">Đặt xe</button>
+                          {(activeDirection === "go" &&
+                            bookingDraft.goTrip?.id === trip.id) ||
+                          (activeDirection === "return" &&
+                            bookingDraft.returnTrip?.id === trip.id) ? (
+                            <button className="booking-btn selected" disabled>
+                              Đang chọn
+                            </button>
+                          ) : (
+                            <button
+                              className="booking-btn"
+                              onClick={() => {
+                                setSelectedVehicleType(
+                                  trip.vehicle?.type || ""
+                                );
+                                setSelectedSeats(trip.seats || []);
+                                setSelectedTrip(trip);
+                                setOpenModal(true);
+                              }}
+                            >
+                              Đặt xe
+                            </button>
+                          )}
                         </div>
+                        <SeatBookingModal
+                          open={openModal}
+                          onClose={() => setOpenModal(false)}
+                          onConfirm={handleConfirmBooking}
+                          vehicleType={selectedVehicleType}
+                          seats={selectedSeats}
+                          trip={selectedTrip}
+                        />
                       </div>
                     );
                   })

@@ -26,6 +26,8 @@ import NewsManage from "./pages/adminPages/systemManage/newsManage";
 import LocationManage from "./pages/adminPages/stationManage/locationManage";
 import RoutesManage from "./pages/adminPages/stationManage/routesManage";
 import BookingPage from "./pages/clientPages/BookingPage";
+import CheckOutPage from "./pages/clientPages/CheckoutPage";
+import TestPage from "./pages/clientPages/testClient";
 
 export default function App() {
   return (
@@ -48,6 +50,8 @@ export default function App() {
         <Route path="/shipping_policy" element={<ShippingPolicyPage />} />
 
         <Route path="/booking" element={<BookingPage />} />
+        <Route path="/checkout" element={<CheckOutPage />} />
+        <Route path="/test" element={<TestPage />} />
       </Route>
 
       {/* Admin (bọc qua AdminRoute) */}

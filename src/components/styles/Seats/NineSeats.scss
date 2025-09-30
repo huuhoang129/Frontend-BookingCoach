@@ -1,0 +1,273 @@
+.seat-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: "Lexend", sans-serif;
+
+  .seat-container {
+    display: flex; // cho ngang
+    justify-content: center;
+    gap: 32px;
+    margin-top: 20px;
+  }
+
+  .seat-header {
+    margin-left: -30px;
+    .seat-title {
+      margin: 0 0 8px 0; // bỏ margin trên, chỉ cách dưới 12px
+      font-size: 22px; // chữ lớn
+      font-weight: 700; // đậm
+      color: #222; // màu chữ chính (dễ đọc)
+      line-height: 1.3; // khoảng cách dòng hợp lý
+
+      h2 {
+        margin: 0; // bỏ khoảng mặc định của h2
+        font-size: inherit; // kế thừa size ở trên
+        font-weight: inherit; // kế thừa font-weight ở trên
+        color: inherit; // kế thừa màu ở trên
+      }
+    }
+
+    .seat-type {
+      display: inline-block; // để border ôm chữ
+      padding: 4px 12px; // khoảng cách trong
+      border: 1px solid #c7c7c7; // viền xanh
+      border-radius: 6px; // bo tròn nhẹ
+      margin-bottom: 16px;
+
+      p {
+        margin: 0; // bỏ margin mặc định
+        font-size: 11px;
+        font-weight: 400;
+        color: #000000; // chữ cùng màu với viền
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+    }
+
+    .seat-route {
+      display: flex;
+      gap: 6px; // khoảng cách giữa các span
+      align-items: center;
+      justify-content: flex-start; // căn trái (đổi thành center nếu muốn giữa)
+      margin-bottom: 15px;
+
+      span {
+        font-size: 18px;
+        font-weight: 600;
+        color: #000000;
+      }
+    }
+
+    .seat-time {
+      display: flex;
+      align-items: center;
+      gap: 6px; // khoảng cách giữa các span
+      margin-bottom: 10px;
+
+      span {
+        font-size: 22px;
+        font-weight: 500;
+        color: #333;
+      }
+
+      // giờ bắt đầu
+      span:first-child {
+        font-weight: 600;
+        color: #4d940e; // xanh cho giờ đi
+      }
+
+      // giờ đến
+      span:nth-child(3) {
+        font-weight: 600;
+        color: #d9534f; // đỏ cho giờ đến
+      }
+
+      // mũi tên
+      span:nth-child(2) {
+        font-size: 18px;
+        font-weight: 600;
+        color: #555;
+        margin: 0 4px;
+      }
+
+      // thời lượng
+      .seat-duration {
+        font-size: 15px;
+        font-weight: 400;
+        color: #666;
+        margin-left: 4px;
+      }
+    }
+
+    .seat-price-box {
+      margin: 12px auto 0;
+      padding: 5px;
+      border: 1px solid #4d940e;
+      border-radius: 8px;
+      font-size: 14px;
+      width: 250px;
+
+      h4 {
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #4d940e;
+      }
+
+      .price-row {
+        display: flex;
+        justify-content: space-between;
+        margin: 2px 0;
+
+        span:first-child {
+          font-weight: 500;
+          color: #333;
+        }
+
+        span:last-child {
+          font-weight: 600;
+          color: #4d940e;
+        }
+
+        &.total span:last-child {
+          color: #e63946; // tổng tiền đỏ
+          font-size: 14px;
+        }
+      }
+
+      .divider {
+        border: none;
+        border-top: 1px dashed #ccc; // gạch ngang nét đứt
+      }
+    }
+
+    .seat-services {
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background: #fafafa;
+
+      h4 {
+        margin: 0 0 8px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #4d940e; // xanh nhấn mạnh
+      }
+
+      ul {
+        padding-left: 18px; // giữ bullet gọn
+        margin: 0;
+
+        li {
+          font-size: 13px;
+          color: #000000;
+          margin-bottom: 4px;
+        }
+      }
+    }
+  }
+
+  .seat-wrapper {
+    border: 1px solid #cdcdcd;
+    border-radius: 10px;
+    padding: 20px 15px 60px;
+    .seat-title {
+      text-align: center;
+      margin-bottom: 15px;
+      font-weight: 600;
+      font-size: 20px;
+    }
+
+    .seat-legend {
+      display: flex;
+      justify-content: center;
+      gap: 26px;
+      margin-bottom: 16px;
+      margin-left: 50px;
+      margin-right: 50px;
+      .seat-legend-item {
+        display: flex;
+        align-items: center;
+        font-size: 15px;
+        font-weight: 400;
+        color: #333;
+
+        img {
+          width: 20px;
+          margin-right: 6px;
+        }
+      }
+    }
+
+    .seat-table {
+      border-collapse: collapse;
+      margin: 0 auto;
+      margin-top: 40px;
+      td {
+        width: 75px;
+        height: 30px;
+        text-align: center;
+        vertical-align: middle;
+        position: relative;
+      }
+
+      .seat {
+        cursor: pointer;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+        padding: 3px;
+
+        img {
+          width: 28px;
+          height: 28px;
+          display: block;
+          margin: 0 auto;
+        }
+
+        p {
+          margin-top: 4px;
+          font-size: 14px;
+          font-weight: 600;
+          color: #333;
+        }
+      }
+
+      /* trạng thái */
+      .seat-available {
+      }
+
+      .seat-selected {
+      }
+
+      .seat-sold {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+    }
+  }
+
+  .seat-btn {
+    display: inline-block;
+    margin-top: 30px;
+    padding: 10px 50px;
+    border-radius: 8px;
+    border: none;
+    background: #4d940e; // màu xanh chủ đạo
+    color: #fff;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+
+    &:hover {
+      background: #3e780c; // xanh đậm hơn khi hover
+    }
+
+    &:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+  }
+}
