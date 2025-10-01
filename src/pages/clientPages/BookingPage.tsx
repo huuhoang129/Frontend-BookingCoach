@@ -42,6 +42,7 @@ interface Vehicle {
   name: string;
   type: string;
   seatCount: number;
+  licensePlate: string;
 }
 interface Route {
   id: number;
@@ -194,17 +195,20 @@ export default function BookingPage() {
 
   const handleConfirmBooking = (trip: Trip, seats: Seat[]) => {
     if (roundTrip === "one") {
-      navigate("/checkout", { state: { trip, seats } });
+      // Lưu localStorage để giữ dữ liệu khi F5
+      localStorage.setItem("bookingData", JSON.stringify({ trip, seats }));
+      navigate("/checkout");
     } else {
       if (activeDirection === "go") {
         setBookingDraft((prev) => ({ ...prev, goTrip: trip, goSeats: seats }));
-        setActiveDirection("return"); // sau khi đặt chiều đi thì ép sang chiều về
+        setActiveDirection("return");
       } else {
-        setBookingDraft((prev) => ({
-          ...prev,
-          returnTrip: trip,
-          returnSeats: seats,
-        }));
+        const draft = { ...bookingDraft, returnTrip: trip, returnSeats: seats };
+        setBookingDraft(draft);
+
+        // Khi đã chọn đủ cả đi và về -> lưu vào localStorage
+        localStorage.setItem("bookingData", JSON.stringify(draft));
+        navigate("/checkout");
       }
     }
     setOpenModal(false);

@@ -26,6 +26,7 @@ interface Vehicle {
   name: string;
   type: string;
   seatCount: number;
+  licensePlate: string;
 }
 interface Route {
   id: number;
