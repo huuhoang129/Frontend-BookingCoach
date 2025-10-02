@@ -45,13 +45,11 @@ export default function DoubleDeckSeats22({
       if (clickedSeat) {
         setSelectedSeats((prevSel) => {
           if (clickedSeat.status === "HOLD") {
-            // chỉ thêm nếu chưa có (tránh 2, 2)
             if (!prevSel.some((s) => s.id === clickedSeat.id)) {
               return [...prevSel, clickedSeat];
             }
             return prevSel;
           } else {
-            // bỏ chọn
             return prevSel.filter((s) => s.id !== clickedSeat.id);
           }
         });
@@ -72,16 +70,16 @@ export default function DoubleDeckSeats22({
     }
   };
 
-  // 💰 Tính toán tiền
-  const basePrice = trip?.basePrice || 0;
+  // 💰 Lấy giá từ trip.price
+  const unitPrice = trip?.price?.priceTrip ? Number(trip.price.priceTrip) : 0;
+
   const seatCount = selectedSeats.length;
-  const total = seatCount * basePrice;
+  const total = seatCount * unitPrice;
 
   // render ghế theo tầng
   const renderFloor = (floor: number) => {
     const floorSeats = seatState.filter((s) => s.floor === floor);
 
-    // mỗi tầng có 11 ghế: 5 hàng đôi + 1 ghế lẻ
     const rows = [
       [floorSeats[0], floorSeats[1]],
       [floorSeats[2], floorSeats[3]],
@@ -176,7 +174,7 @@ export default function DoubleDeckSeats22({
               <hr className="divider" />
               <div className="price-row">
                 <span>Đơn giá:</span>
-                <span>{basePrice.toLocaleString("vi-VN")} đ</span>
+                <span>{unitPrice.toLocaleString("vi-VN")} đ</span>
               </div>
               <div className="price-row">
                 <span>Tổng tiền:</span>
@@ -204,7 +202,7 @@ export default function DoubleDeckSeats22({
         {/* Wrapper */}
         <div className="twentytwo-seat-wrapper">
           <h2 className="twentytwo-seat-title">
-            {trip?.vehicle.name || "Hương Dương"}
+            {trip?.vehicle?.name || "Hương Dương"}
           </h2>
 
           {/* legend */}

@@ -91,25 +91,14 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
             icon={<CarOutlined />}
             title="Quản lý chuyến xe"
           >
-            <Menu.Item key="trip-list" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Danh sách chuyến xe</Link> */}
+            <Menu.Item key="trip-list">
+              <Link to="/admin/trip-list">Danh sách chuyến xe</Link>
             </Menu.Item>
-            <Menu.Item key="schedule" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Lịch trình</Link> */}
+            <Menu.Item key="schedule">
+              <Link to="/admin/schedule">Lịch trình</Link>
             </Menu.Item>
-            <Menu.Item key="bus-type" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Loại xe</Link> */}
-            </Menu.Item>
-            <Menu.Item key="ticket-pricing" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Giá vé theo tuyến</Link> */}
-            </Menu.Item>
-            <Menu.Item key="seat-configuration" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Số lượng ghế / sơ đồ ghế</Link> */}
+            <Menu.Item key="ticket-pricing">
+              <Link to="/admin/ticket-pricing">Giá vé theo tuyến</Link>
             </Menu.Item>
           </SubMenu>
 
@@ -118,17 +107,15 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
             icon={<FileTextOutlined />}
             title="Quản lý vé"
           >
-            <Menu.Item key="booked-tickets" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Danh sách vé đã đặt</Link> */}
+            <Menu.Item key="booked-tickets">
+              <Link to="/admin/booking-tickets">Danh sách vé đã đặt</Link>
             </Menu.Item>
             <Menu.Item key="available-tickets" disabled>
               Đang phát triển.....
               {/* <Link to="#">Vé còn trống</Link> */}
             </Menu.Item>
-            <Menu.Item key="ticket-status" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Tình trạng vé</Link> */}
+            <Menu.Item key="ticket-status">
+              <Link to="/admin/ticket-status">Tình trạng vé</Link>
             </Menu.Item>
             <Menu.Item key="refund-cancel" disabled>
               Đang phát triển.....
@@ -136,33 +123,32 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
             </Menu.Item>
           </SubMenu>
 
-          <SubMenu
+          {/* <SubMenu
             key="booking-manage"
             icon={<CreditCardOutlined />}
             title="Quản lý đặt chỗ & thanh toán"
           >
             <Menu.Item key="booking-list" disabled>
               Đang phát triển.....
-              {/* <Link to="#">Lịch sử giao dịch thanh toán</Link> */}
+              <Link to="#">Lịch sử giao dịch thanh toán</Link>
             </Menu.Item>
             <Menu.Item key="payment-status" disabled>
               Đang phát triển.....
-              {/* <Link to="#">Trạng thái thanh toán</Link> */}
+              <Link to="#">Trạng thái thanh toán</Link>
             </Menu.Item>
             <Menu.Item key="payment-methods" disabled>
               Đang phát triển.....
-              {/* <Link to="#">Quản lý phương thức thanh toán</Link> */}
+              <Link to="#">Quản lý phương thức thanh toán</Link>
             </Menu.Item>
-          </SubMenu>
+          </SubMenu> */}
 
           <SubMenu
             key="vehicle-manage"
             icon={<TeamOutlined />}
             title="Quản lý xe & tài xế"
           >
-            <Menu.Item key="vehicle-list" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Danh sách xe</Link> */}
+            <Menu.Item key="vehicle-list">
+              <Link to="/admin/vehicle-list">Danh sách xe</Link>
             </Menu.Item>
             <Menu.Item key="vehicle-condition" disabled>
               Đang phát triển.....
@@ -187,24 +173,24 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
             </Menu.Item>
           </SubMenu>
 
-          <SubMenu
+          {/* <SubMenu
             key="promotion-manage"
             icon={<GiftOutlined />}
             title="Quản lý khuyến mãi & mã giảm giá"
           >
             <Menu.Item key="create-promo-code" disabled>
               Đang phát triển.....
-              {/* <Link to="#">Tạo mã khuyến mãi</Link> */}
+              <Link to="#">Tạo mã khuyến mãi</Link>
             </Menu.Item>
             <Menu.Item key="manage-promo-programs" disabled>
               Đang phát triển.....
-              {/* <Link to="#">Quản lý chương trình giảm giá</Link> */}
+              <Link to="#">Quản lý chương trình giảm giá</Link>
             </Menu.Item>
             <Menu.Item key="track-promo-usage" disabled>
               Đang phát triển.....
-              {/* <Link to="#">Theo dõi lượt sử dụng mã</Link> */}
+              <Link to="#">Theo dõi lượt sử dụng mã</Link>
             </Menu.Item>
-          </SubMenu>
+          </SubMenu> */}
 
           <SubMenu
             key="system-manage"
@@ -221,10 +207,6 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
               <Link to="/admin/homepage-manage">
                 Quản lý nội dung trang chủ
               </Link>
-            </Menu.Item>
-            <Menu.Item key="email-settings" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Cài đặt email</Link> */}
             </Menu.Item>
           </SubMenu>
 
@@ -248,21 +230,14 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
             icon={<BarChartOutlined />}
             title="Thống kê & báo cáo"
           >
-            <Menu.Item key="revenue-reports" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Doanh thu</Link> */}
+            <Menu.Item key="revenue-reports">
+              <Link to="/admin/revenue-reports">Doanh thu</Link>
             </Menu.Item>
-            <Menu.Item key="ticket-sales" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Số lượng vé bán ra</Link> */}
+            <Menu.Item key="ticket-sales">
+              <Link to="/admin/ticket-sales">Số lượng vé bán ra</Link>
             </Menu.Item>
-            <Menu.Item key="cancellation-rates" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Tỷ lệ hủy vé</Link> */}
-            </Menu.Item>
-            <Menu.Item key="top-performing-trips" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Chuyến xe nổi bật</Link> */}
+            <Menu.Item key="cancellation-rates">
+              <Link to="/admin/cancellation-rates">Tỷ lệ hủy vé</Link>
             </Menu.Item>
           </SubMenu>
         </Menu>

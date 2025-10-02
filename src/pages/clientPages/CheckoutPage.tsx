@@ -45,12 +45,18 @@ export default function CheckoutPage() {
   // Step 1 -> Step 2
   const handleNextStep1 = async () => {
     try {
+      const unitPrice = booking.trip?.price?.priceTrip
+        ? Number(booking.trip.price.priceTrip)
+        : 0;
+
+      console.log("💰 Unit price (Step1):", unitPrice);
+
       const requestData = {
         coachTripId: booking.trip?.id,
-        totalAmount: booking.seats.length * booking.trip.basePrice,
+        totalAmount: booking.seats.length * unitPrice,
         seats: booking.seats.map((s: any) => ({
           seatId: s.id,
-          price: booking.trip.basePrice,
+          price: unitPrice,
         })),
         customers: [
           {
@@ -108,27 +114,47 @@ export default function CheckoutPage() {
         return;
       }
 
-      const total = booking.seats.length * booking.trip.basePrice;
+      if (!formData.paymentMethod) {
+        alert("Vui lòng chọn phương thức thanh toán!");
+        return;
+      }
 
-      const res = await createPaymentQR({
-        bookingId: booking.id,
-        amount: total,
-      });
-
-      if (res.data.errCode === 0) {
-        console.log("📌 QR Code raw data:", res.data.data.qrCode); // 👈 log full dữ liệu
-        console.log(
-          "📌 QR Code first 100 chars:",
-          res.data.data.qrCode.slice(0, 100)
-        ); // 👈 log 100 ký tự đầu
-
-        setPaymentData(res.data.data);
+      // Nếu BANKING và đã có QR thì bấm tiếp để qua step 3
+      if (formData.paymentMethod === "BANKING" && paymentData) {
         setStep(3);
+        return;
+      }
+
+      const unitPrice = booking.trip?.price?.priceTrip
+        ? Number(booking.trip.price.priceTrip)
+        : 0;
+      const total = booking.seats.length * unitPrice;
+
+      console.log("💰 Unit price (Step2):", unitPrice);
+      console.log("🧾 Total amount gửi lên API:", total);
+
+      if (formData.paymentMethod === "BANKING") {
+        // gọi API tạo QR
+        const res = await createPaymentQR({
+          bookingId: booking.id,
+          amount: total,
+        });
+
+        console.log("📨 Response createPaymentQR:", res.data);
+
+        if (res.data.errCode === 0) {
+          console.log("✅ QR Code nhận về:", res.data.data.qrCode);
+          setPaymentData(res.data.data);
+          // giữ step = 2, QR sẽ hiện ra
+        } else {
+          alert(res.data.errMessage);
+        }
       } else {
-        alert(res.data.errMessage);
+        // Với CARD hoặc CASH → qua luôn step 3
+        setStep(3);
       }
     } catch (err) {
-      console.error("Error creating payment:", err);
+      console.error("❌ Error creating payment:", err);
       alert("Có lỗi khi tạo thanh toán!");
     }
   };
@@ -138,6 +164,11 @@ export default function CheckoutPage() {
     localStorage.removeItem("bookingData");
     navigate("/");
   };
+
+  // trước khi return JSX
+  if (formData.paymentMethod === "BANKING" && paymentData) {
+    console.log("👉 QRCode value = ", paymentData.qrCode);
+  }
 
   return (
     <div className="checkout-page">
@@ -174,7 +205,10 @@ export default function CheckoutPage() {
 
             {/* --- Tổng thanh toán (Một chiều) --- */}
             {(() => {
-              const total = booking.seats.length * booking.trip.basePrice;
+              const unitPrice = booking.trip?.price?.priceTrip
+                ? Number(booking.trip.price.priceTrip)
+                : 0;
+              const total = booking.seats.length * unitPrice;
               const finalPay = total;
               return (
                 <div className="payment-summary">
@@ -260,9 +294,17 @@ export default function CheckoutPage() {
 
             {/* --- Tổng thanh toán (Khứ hồi) --- */}
             {(() => {
-              const goPrice = booking.goSeats.length * booking.goTrip.basePrice;
+              const goPrice =
+                booking.goSeats.length *
+                (booking.goTrip?.price?.priceTrip
+                  ? Number(booking.goTrip.price.priceTrip)
+                  : 0);
               const returnPrice =
-                booking.returnSeats.length * booking.returnTrip.basePrice;
+                booking.returnSeats.length *
+                (booking.returnTrip?.price?.priceTrip
+                  ? Number(booking.returnTrip.price.priceTrip)
+                  : 0);
+
               const total = goPrice + returnPrice;
               const finalPay = total;
 
@@ -276,9 +318,9 @@ export default function CheckoutPage() {
                     </span>
                   </div>
                   <div className="trip-row">
-                    <span className="label">Tổng tiền:</span>
+                    <span className="label">Giá ghế chiều về:</span>
                     <span className="value">
-                      {total.toLocaleString("vi-VN")} đ
+                      {returnPrice.toLocaleString("vi-VN")} đ
                     </span>
                   </div>
                   <div className="trip-row final">

@@ -27,6 +27,17 @@ import LocationManage from "./pages/adminPages/stationManage/locationManage";
 import RoutesManage from "./pages/adminPages/stationManage/routesManage";
 import BookingPage from "./pages/clientPages/BookingPage";
 import CheckOutPage from "./pages/clientPages/CheckoutPage";
+import VehiclePage from "./pages/adminPages/vehicleManage/vehiclePage";
+import TicketPricingPage from "./pages/adminPages/tripManage/ticketPricingPage";
+import TicketListPage from "./pages/adminPages/tripManage/tripListPage";
+import SchedulePage from "./pages/adminPages/tripManage/schedulePage";
+import BookingPageAdmin from "./pages/adminPages/ticketManage/bookingPage";
+import TicketStatusPage from "./pages/adminPages/ticketManage/ticketStatusPage";
+
+import RevenueReportPage from "./pages/adminPages/reportManage/revenueReportPage";
+import TicketSalesPage from "./pages/adminPages/reportManage/ticketSalesPage";
+import CancellationRatePage from "./pages/adminPages/reportManage/cancellationRatePage";
+
 import TestPage from "./pages/clientPages/testClient";
 
 export default function App() {
@@ -74,6 +85,74 @@ export default function App() {
         path="/admin/route-list"
         element={
           <AdminRoute allowedRoles={["Admin"]} Component={RoutesManage} />
+        }
+      />
+
+      {/* Booking */}
+      <Route
+        path="/admin/booking-tickets"
+        element={
+          <AdminRoute allowedRoles={["Admin"]} Component={BookingPageAdmin} />
+        }
+      />
+
+      <Route
+        path="/admin/ticket-status"
+        element={
+          <AdminRoute allowedRoles={["Admin"]} Component={TicketStatusPage} />
+        }
+      />
+
+      {/* route-list */}
+      <Route
+        path="/admin/ticket-pricing"
+        element={
+          <AdminRoute allowedRoles={["Admin"]} Component={TicketPricingPage} />
+        }
+      />
+      <Route
+        path="/admin/trip-list"
+        element={
+          <AdminRoute allowedRoles={["Admin"]} Component={TicketListPage} />
+        }
+      />
+      <Route
+        path="/admin/schedule"
+        element={
+          <AdminRoute allowedRoles={["Admin"]} Component={SchedulePage} />
+        }
+      />
+
+      {/* vehicleManage */}
+      <Route
+        path="/admin/vehicle-list"
+        element={
+          <AdminRoute allowedRoles={["Admin"]} Component={VehiclePage} />
+        }
+      />
+
+      {/* reportManage */}
+      <Route
+        path="/admin/revenue-reports"
+        element={
+          <AdminRoute allowedRoles={["Admin"]} Component={RevenueReportPage} />
+        }
+      />
+
+      <Route
+        path="/admin/ticket-sales"
+        element={
+          <AdminRoute allowedRoles={["Admin"]} Component={TicketSalesPage} />
+        }
+      />
+
+      <Route
+        path="/admin/cancellation-rates"
+        element={
+          <AdminRoute
+            allowedRoles={["Admin"]}
+            Component={CancellationRatePage}
+          />
         }
       />
 

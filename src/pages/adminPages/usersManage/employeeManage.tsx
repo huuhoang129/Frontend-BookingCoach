@@ -65,7 +65,7 @@ export default function EmployeeManage() {
       <BaseTable>
         <thead>
           <tr>
-            <th>Mã Nhân Viên</th>
+            <th style={{ width: "130px" }}>Mã Nhân Viên</th>
             <th>Email</th>
             <th>SĐT</th>
             <th>

@@ -35,7 +35,14 @@ export interface Route {
   toLocation: Location;
 }
 
-// Chuyến đi
+export interface TripPrice {
+  id: number;
+  coachRouteId: number;
+  seatType: "SEAT" | "SLEEPER" | "DOUBLESLEEPER" | "LIMOUSINE";
+  priceTrip: number | string;
+  typeTrip: "NORMAL" | "HOLIDAY";
+}
+
 export interface Trip {
   id: number;
   startDate: string;
@@ -44,7 +51,7 @@ export interface Trip {
   status: string;
   route: Route;
   vehicle: Vehicle;
-  basePrice: number;
+  price?: TripPrice; // ✅ thay basePrice
   totalSeats: number;
   availableSeats: number;
   seats: Seat[];

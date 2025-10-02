@@ -70,10 +70,11 @@ export default function FortyFiveSeats({
     }
   };
 
-  // 💰 Tính tiền
-  const basePrice = trip?.basePrice || 0;
+  // 💰 Tính tiền từ trip.price
+  const unitPrice = trip?.price?.priceTrip ? Number(trip.price.priceTrip) : 0;
+
   const seatCount = selectedSeats.length;
-  const total = seatCount * basePrice;
+  const total = seatCount * unitPrice;
 
   // render thân xe (40 ghế: 2 bên × 2 dãy × 10 hàng)
   const renderBody = () => {
@@ -199,7 +200,7 @@ export default function FortyFiveSeats({
               <hr className="divider" />
               <div className="price-row">
                 <span>Đơn giá:</span>
-                <span>{basePrice.toLocaleString("vi-VN")} đ</span>
+                <span>{unitPrice.toLocaleString("vi-VN")} đ</span>
               </div>
               <div className="price-row">
                 <span>Tổng tiền:</span>

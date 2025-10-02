@@ -1,18 +1,19 @@
 import { useState } from "react";
 import "../styles/Seats/ThirtySixSeats.scss";
 
-// import icon
+// icon ghế
 import SeatAvailable from "../../assets/icon/seat-1.svg";
 import SeatSelected from "../../assets/icon/seat-2.svg";
 import SeatSold from "../../assets/icon/seat-3.svg";
+
 import { formatDuration, formatStartTime, calcEndTime } from "../../utils/time";
 import type { Trip, Seat } from "../../types/booking";
 
 interface DoubleDeckSeats36Props {
   seats: Seat[];
   trip: Trip | null;
-  onConfirm?: (trip: Trip, seats: Seat[]) => void; // ✅ thêm
-  onClose?: () => void; // ✅ thêm
+  onConfirm?: (trip: Trip, seats: Seat[]) => void;
+  onClose?: () => void;
 }
 
 export default function DoubleDeckSeats36({
@@ -66,11 +67,11 @@ export default function DoubleDeckSeats36({
     }
   };
 
-  // 💰 Tính toán tiền
-  const basePrice = trip?.basePrice || 0;
+  // ✅ Lấy giá vé từ trip.price
+  const unitPrice = trip?.price?.priceTrip ? Number(trip.price.priceTrip) : 0;
+
   const seatCount = selectedSeats.length;
-  const total = seatCount * basePrice;
-  const final = total;
+  const total = seatCount * unitPrice;
 
   // render một tầng (18 ghế: 6 hàng × 3 cột)
   const renderFloor = (floor: number) => {
@@ -112,7 +113,7 @@ export default function DoubleDeckSeats36({
         {/* Header */}
         <div className="thirtysix-seat-header">
           <div className="thirtysix-seat-title">
-            <h2>Xe Hương Dương</h2>
+            <h2>{trip?.vehicle?.name || "Xe Hương Dương"}</h2>
           </div>
           <div className="thirtysix-seat-type">
             <p>XE GIƯỜNG NẰM</p>
@@ -146,7 +147,7 @@ export default function DoubleDeckSeats36({
               <hr className="divider" />
               <div className="price-row">
                 <span>Đơn giá:</span>
-                <span>{basePrice.toLocaleString("vi-VN")} đ</span>
+                <span>{unitPrice.toLocaleString("vi-VN")} đ</span>
               </div>
               <div className="price-row">
                 <span>Tổng tiền:</span>
@@ -155,7 +156,7 @@ export default function DoubleDeckSeats36({
               <hr className="divider" />
               <div className="price-row total">
                 <span>Thanh toán:</span>
-                <span>{final.toLocaleString("vi-VN")} đ</span>
+                <span>{total.toLocaleString("vi-VN")} đ</span>
               </div>
             </div>
           )}
@@ -212,7 +213,7 @@ export default function DoubleDeckSeats36({
           if (trip && onConfirm) {
             onConfirm(trip, selectedSeats);
           }
-          onClose?.(); // đóng modal
+          onClose?.();
         }}
       >
         Đặt xe

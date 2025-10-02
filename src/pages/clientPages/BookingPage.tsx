@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 import FormInputSearchCoach from "../../components/ui/Form/FormInputSearchCoach";
@@ -7,7 +7,6 @@ import { searchTrips } from "../../services/stationServices/tripServices.ts";
 import "./BookingPage.scss";
 import SeatBookingModal from "../../containers/ModalsCollect/SeatBookingModal";
 import { formatDuration, formatStartTime, calcEndTime } from "../../utils/time";
-import { useNavigate } from "react-router-dom";
 import { capitalizeFirst } from "../../utils/string";
 import {
   LeftOutlined,
@@ -49,6 +48,15 @@ interface Route {
   fromLocation: Location;
   toLocation: Location;
 }
+
+interface TripPrice {
+  id: number;
+  coachRouteId: number;
+  seatType: "SEAT" | "SLEEPER" | "DOUBLESLEEPER" | "LIMOUSINE";
+  priceTrip: number | string; // backend có thể trả string (DECIMAL)
+  typeTrip: "NORMAL" | "HOLIDAY";
+}
+
 interface Trip {
   id: number;
   startDate: string;
@@ -57,7 +65,7 @@ interface Trip {
   status: string;
   route: Route;
   vehicle: Vehicle;
-  basePrice: number;
+  price?: TripPrice; // ✅ thay cho basePrice
   totalSeats: number; // backend trả về
   availableSeats: number; // backend trả về
   seats: Seat[];
@@ -100,7 +108,7 @@ function DualRangeSlider({
   const width = getPercent(maxVal) - getPercent(minVal);
 
   useEffect(() => {
-    if (onChange) onChange(minVal, maxVal);
+    onChange?.(minVal, maxVal);
   }, [minVal, maxVal]);
 
   return (
@@ -153,6 +161,14 @@ const VEHICLE_TYPE_MAP: Record<string, string> = {
   Limousine: "Xe Limousine 9 chỗ",
 };
 
+// Giá 1 ghế của trip (đọc từ trip.price.priceTrip, ép về number an toàn)
+const getUnitPrice = (trip?: Trip) => {
+  if (!trip?.price?.priceTrip && trip?.price?.priceTrip !== 0) return 0;
+  const p = trip.price.priceTrip as any;
+  const n = typeof p === "string" ? Number(p) : (p as number);
+  return Number.isFinite(n) ? n : 0;
+};
+
 /* ---------------- BookingPage ---------------- */
 export default function BookingPage() {
   const [searchParams] = useSearchParams();
@@ -195,7 +211,6 @@ export default function BookingPage() {
 
   const handleConfirmBooking = (trip: Trip, seats: Seat[]) => {
     if (roundTrip === "one") {
-      // Lưu localStorage để giữ dữ liệu khi F5
       localStorage.setItem("bookingData", JSON.stringify({ trip, seats }));
       navigate("/checkout");
     } else {
@@ -205,8 +220,6 @@ export default function BookingPage() {
       } else {
         const draft = { ...bookingDraft, returnTrip: trip, returnSeats: seats };
         setBookingDraft(draft);
-
-        // Khi đã chọn đủ cả đi và về -> lưu vào localStorage
         localStorage.setItem("bookingData", JSON.stringify(draft));
         navigate("/checkout");
       }
@@ -364,12 +377,12 @@ export default function BookingPage() {
                     </span>
                   </div>
                   <div className="trip-row">
-                    <span className="label" style={{ fontWeight: "700" }}>
+                    <span className="label" style={{ fontWeight: 700 }}>
                       Giá ghế:
                     </span>
                     <span className="value">
                       {bookingDraft.goSeats?.length} x{" "}
-                      {bookingDraft.goTrip.basePrice.toLocaleString()} đ
+                      {getUnitPrice(bookingDraft.goTrip).toLocaleString()} đ
                     </span>
                   </div>
                   <hr className="divider" />
@@ -414,12 +427,12 @@ export default function BookingPage() {
                   </div>
 
                   <div className="trip-row">
-                    <span className="label" style={{ fontWeight: "700" }}>
+                    <span className="label" style={{ fontWeight: 700 }}>
                       Giá ghế:
                     </span>
                     <span className="value">
                       {bookingDraft.returnSeats?.length} x{" "}
-                      {bookingDraft.returnTrip.basePrice.toLocaleString()} đ
+                      {getUnitPrice(bookingDraft.returnTrip).toLocaleString()} đ
                     </span>
                   </div>
                 </div>
@@ -435,7 +448,7 @@ export default function BookingPage() {
                     <span className="value">
                       {(
                         (bookingDraft.goSeats?.length || 0) *
-                        bookingDraft.goTrip.basePrice
+                        getUnitPrice(bookingDraft.goTrip)
                       ).toLocaleString()}{" "}
                       đ
                     </span>
@@ -446,7 +459,7 @@ export default function BookingPage() {
                     <span className="value">
                       {(
                         (bookingDraft.returnSeats?.length || 0) *
-                        bookingDraft.returnTrip.basePrice
+                        getUnitPrice(bookingDraft.returnTrip)
                       ).toLocaleString()}{" "}
                       đ
                     </span>
@@ -457,9 +470,9 @@ export default function BookingPage() {
                     <span className="value">
                       {(
                         (bookingDraft.goSeats?.length || 0) *
-                          bookingDraft.goTrip.basePrice +
+                          getUnitPrice(bookingDraft.goTrip) +
                         (bookingDraft.returnSeats?.length || 0) *
-                          bookingDraft.returnTrip.basePrice
+                          getUnitPrice(bookingDraft.returnTrip)
                       ).toLocaleString()}{" "}
                       đ
                     </span>
@@ -576,9 +589,7 @@ export default function BookingPage() {
                   return false;
 
                 // lọc theo ghế
-                const totalSeats = Number(trip.totalSeats) || 0;
                 const availableSeats = Number(trip.availableSeats) || 0;
-
                 if (
                   availableSeats < seatRange[0] ||
                   availableSeats > seatRange[1]
@@ -612,9 +623,7 @@ export default function BookingPage() {
                     )
                       return false;
 
-                    const totalSeats = Number(trip.totalSeats) || 0;
                     const availableSeats = Number(trip.availableSeats) || 0;
-
                     if (
                       availableSeats < seatRange[0] ||
                       availableSeats > seatRange[1]
@@ -633,6 +642,7 @@ export default function BookingPage() {
 
                     const totalSeats = Number(trip.totalSeats) || 0;
                     const availableSeats = Number(trip.availableSeats) || 0;
+                    const unitPrice = getUnitPrice(trip);
 
                     return (
                       <div key={trip.id} className="booking-card">
@@ -693,7 +703,7 @@ export default function BookingPage() {
                           </div>
 
                           <div className="trip-price">
-                            {trip.basePrice.toLocaleString("vi-VN")} đ
+                            {unitPrice.toLocaleString("vi-VN")} đ
                           </div>
                         </div>
                         <div className="trip-action">
@@ -726,7 +736,7 @@ export default function BookingPage() {
                           onConfirm={handleConfirmBooking}
                           vehicleType={selectedVehicleType}
                           seats={selectedSeats}
-                          trip={selectedTrip}
+                          trip={selectedTrip as any}
                         />
                       </div>
                     );

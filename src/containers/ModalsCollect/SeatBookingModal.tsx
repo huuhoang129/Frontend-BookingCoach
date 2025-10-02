@@ -4,48 +4,8 @@ import NineSeats from "../../components/Seat/NineSeats";
 import DoubleDeckSeats36 from "../../components/Seat/ThirtySixSeats";
 import DoubleDeckSeats22 from "../../components/Seat/TwentyTwoSeats";
 
-// 🔥 Thêm định nghĩa Seat ở đây
-interface Seat {
-  id: number;
-  name: string;
-  status: "AVAILABLE" | "HOLD" | "SOLD";
-  floor: number;
-}
-
-interface Province {
-  id: number;
-  nameProvince: string;
-}
-interface Location {
-  id: number;
-  nameLocations: string;
-  province?: Province;
-}
-interface Vehicle {
-  id: number;
-  name: string;
-  type: string;
-  seatCount: number;
-  licensePlate: string;
-}
-interface Route {
-  id: number;
-  fromLocation: Location;
-  toLocation: Location;
-}
-interface Trip {
-  id: number;
-  startDate: string;
-  startTime: string;
-  totalTime?: string;
-  status: string;
-  route: Route;
-  vehicle: Vehicle;
-  basePrice: number;
-  totalSeats: number;
-  availableSeats: number;
-  seats: Seat[];
-}
+// ✅ import type chung, không khai báo lại để tránh lỗi
+import type { Trip, Seat } from "../../types/booking";
 
 interface SeatBookingModalProps {
   open: boolean;
@@ -85,7 +45,7 @@ export default function SeatBookingModal({
     <Modal
       open={open}
       onCancel={onClose}
-      footer={null} // ✅ giữ nguyên
+      footer={null}
       width={890}
       bodyStyle={{ height: "550px", overflowY: "auto" }}
     >

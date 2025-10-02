@@ -45,13 +45,11 @@ export default function NineSeats({
       if (clickedSeat) {
         setSelectedSeats((prevSel) => {
           if (clickedSeat.status === "HOLD") {
-            // chỉ thêm nếu chưa tồn tại
             if (!prevSel.some((s) => s.id === clickedSeat.id)) {
               return [...prevSel, clickedSeat];
             }
             return prevSel;
           } else {
-            // nếu bỏ chọn thì filter ra
             return prevSel.filter((s) => s.id !== clickedSeat.id);
           }
         });
@@ -72,10 +70,11 @@ export default function NineSeats({
     }
   };
 
-  // 💰 tiền
-  const basePrice = trip?.basePrice || 0;
+  // 💰 Tính tiền từ trip.price
+  const unitPrice = trip?.price?.priceTrip ? Number(trip.price.priceTrip) : 0;
+
   const seatCount = selectedSeats.length;
-  const total = seatCount * basePrice;
+  const total = seatCount * unitPrice;
 
   return (
     <div className="seat-layout">
@@ -120,7 +119,7 @@ export default function NineSeats({
               <hr className="divider" />
               <div className="price-row">
                 <span>Đơn giá:</span>
-                <span>{basePrice.toLocaleString("vi-VN")} đ</span>
+                <span>{unitPrice.toLocaleString("vi-VN")} đ</span>
               </div>
               <div className="price-row">
                 <span>Tổng tiền:</span>
