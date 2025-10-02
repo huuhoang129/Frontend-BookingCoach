@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import { message } from "antd";
 // import { getRevenue } from "../../services/reportServices/reportServices";
-import { getRevenue } from "../../services/reportServices/reportServices.mock";
+import { getRevenue } from "../../services/reportServices/reportServices.allRevenue.mock";
 export type GroupBy = "day" | "month" | "year";
 
 export interface Revenue {

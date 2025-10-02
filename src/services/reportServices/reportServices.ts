@@ -8,4 +8,11 @@ const getRevenue = (from: string, to: string, groupBy: string) => {
   });
 };
 
-export { getRevenue };
+// Lấy báo cáo vé bán
+const getTicketSales = (from: string, to: string) => {
+  return axios.get(`${API_URL}/reports/ticket-sales`, {
+    params: { from, to },
+  });
+};
+
+export { getRevenue, getTicketSales };
