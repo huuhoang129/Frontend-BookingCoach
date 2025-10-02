@@ -12,6 +12,7 @@ import {
   Empty,
   Tag,
   Switch,
+  Select,
 } from "antd";
 import {
   BarChart,
@@ -34,6 +35,8 @@ import {
   ColumnHeightOutlined,
   LineChartOutlined,
   BarChartOutlined,
+  AreaChartOutlined,
+  FundOutlined,
 } from "@ant-design/icons";
 import { useTicketSales } from "../../../hooks/reportHooks/useTicketSales.ts";
 import type { RowView } from "../../../hooks/reportHooks/useTicketSales.ts";
@@ -54,9 +57,12 @@ export default function TicketSalesPage() {
     tableRows,
     handleExportCSV,
     setPreset,
+    groupBy,
+    setGroupBy,
+    chartMA,
+    setChartMA,
   } = useTicketSales();
 
-  const [showAverage, setShowAverage] = useState(true);
   const [chartType, setChartType] = useState<"bar" | "line">("bar");
 
   return (
@@ -65,64 +71,114 @@ export default function TicketSalesPage() {
         🎟️ Báo cáo vé bán ra
       </Title>
 
-      {/* Filter */}
-      <Card style={{ marginBottom: 16 }} bodyStyle={{ padding: 16 }}>
-        <Space wrap size="middle">
-          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <CalendarOutlined style={{ color: "#4d940e" }} />
-            <b>Khoảng thời gian:</b>
-          </span>
-          <RangePicker
-            value={range}
-            allowClear={false}
-            onChange={(val) => {
-              if (val && val[0] && val[1]) setRange([val[0], val[1]]);
-            }}
-          />
-          <Button onClick={() => setPreset("7d")}>7 ngày</Button>
-          <Button onClick={() => setPreset("30d")}>30 ngày</Button>
-          <Button onClick={() => setPreset("ytd")}>YTD</Button>
-          <Button onClick={fetchData} icon={<ReloadOutlined />}>
-            Tải lại
-          </Button>
-          <Button
-            type="primary"
-            onClick={handleExportCSV}
-            icon={<FileExcelOutlined />}
-            style={{ backgroundColor: "#4d940e", borderColor: "#4d940e" }}
-          >
-            Xuất CSV
-          </Button>
+      {/* Bộ lọc */}
+      <Card
+        style={{ marginBottom: 16, borderRadius: 10, background: "#fafafa" }}
+        bodyStyle={{ padding: 16 }}
+      >
+        <Space
+          wrap
+          size="middle"
+          style={{ width: "100%", justifyContent: "space-between" }}
+        >
+          {/* Chọn thời gian */}
+          <Space>
+            <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <CalendarOutlined style={{ color: "#4d940e" }} />
+              <b>Khoảng thời gian:</b>
+            </span>
+            <RangePicker
+              value={range}
+              allowClear={false}
+              onChange={(val) => {
+                if (val && val[0] && val[1]) setRange([val[0], val[1]]);
+              }}
+            />
+          </Space>
 
-          {/* Switch chart */}
-          <Switch
-            checkedChildren={<ColumnHeightOutlined />}
-            unCheckedChildren={<LineChartOutlined />}
-            checked={chartType === "bar"}
-            onChange={(checked) => setChartType(checked ? "bar" : "line")}
-          />
-          <Switch
-            checked={showAverage}
-            onChange={setShowAverage}
-            checkedChildren="TB On"
-            unCheckedChildren="TB Off"
-          />
+          {/* Nhóm theo */}
+          <Space>
+            <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <BarChartOutlined style={{ color: "#722ed1" }} />
+              <b>Nhóm theo:</b>
+            </span>
+            <Select
+              style={{ width: 160 }}
+              value={groupBy}
+              onChange={(g) => setGroupBy(g)}
+              options={[
+                { value: "day", label: "Ngày" },
+                { value: "month", label: "Tháng" },
+                { value: "year", label: "Năm" },
+              ]}
+            />
+          </Space>
+
+          {/* Preset buttons */}
+          <Space>
+            <Button onClick={() => setPreset("7d")} icon={<CalendarOutlined />}>
+              7 ngày
+            </Button>
+            <Button onClick={() => setPreset("30d")} type="dashed">
+              30 ngày
+            </Button>
+            <Button
+              onClick={() => setPreset("ytd")}
+              icon={<AreaChartOutlined />}
+              style={{ borderColor: "#52c41a", color: "#52c41a" }}
+            >
+              YTD
+            </Button>
+            <Button
+              onClick={() => setPreset("thisYear")}
+              icon={<FundOutlined />}
+              style={{ borderColor: "#fa8c16", color: "#fa8c16" }}
+            >
+              Năm nay
+            </Button>
+          </Space>
+
+          {/* Action buttons */}
+          <Space>
+            <Switch
+              checkedChildren={<ColumnHeightOutlined />}
+              unCheckedChildren={<LineChartOutlined />}
+              checked={chartType === "bar"}
+              onChange={(checked) => setChartType(checked ? "bar" : "line")}
+            />
+            {groupBy === "day" && (
+              <Button
+                type={chartMA ? "primary" : "default"}
+                onClick={() => setChartMA((s) => !s)}
+                style={
+                  chartMA
+                    ? { backgroundColor: "#4d940e", borderColor: "#4d940e" }
+                    : {}
+                }
+              >
+                {chartMA ? "Tắt MA7" : "Bật MA7"}
+              </Button>
+            )}
+            <Button onClick={fetchData} icon={<ReloadOutlined />}>
+              Tải lại
+            </Button>
+            <Button
+              type="primary"
+              onClick={handleExportCSV}
+              icon={<FileExcelOutlined />}
+              style={{ backgroundColor: "#4d940e", borderColor: "#4d940e" }}
+            >
+              Xuất CSV
+            </Button>
+          </Space>
         </Space>
       </Card>
 
-      {/* KPI */}
+      {/* KPIs */}
       <Row gutter={16} style={{ marginBottom: 16 }}>
-        {/* Tổng vé bán */}
-        <Col xs={24} sm={12} md={8}>
+        <Col xs={24} sm={12} md={6}>
           <Card>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                marginBottom: 8,
-              }}
-            >
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <BarChartOutlined style={{ color: "#4d940e" }} />
               <span style={{ fontWeight: 500 }}>Tổng vé bán</span>
             </div>
@@ -132,19 +188,31 @@ export default function TicketSalesPage() {
           </Card>
         </Col>
 
-        {/* Trung bình/ngày */}
-        <Col xs={24} sm={12} md={8}>
+        <Col xs={24} sm={12} md={6}>
           <Card>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                marginBottom: 8,
-              }}
-            >
-              <LineChartOutlined style={{ color: "#1890ff" }} />
-              <span style={{ fontWeight: 500 }}>Trung bình/ngày</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <CalendarOutlined style={{ color: "#722ed1" }} />
+              <span style={{ fontWeight: 500 }}>
+                {groupBy === "day"
+                  ? "Số ngày"
+                  : groupBy === "month"
+                  ? "Số tháng"
+                  : "Số năm"}
+              </span>
+            </div>
+            <div style={{ fontSize: 24, fontWeight: 600, color: "#722ed1" }}>
+              {data.length}
+            </div>
+          </Card>
+        </Col>
+
+        <Col xs={24} sm={12} md={6}>
+          <Card>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <AreaChartOutlined style={{ color: "#1890ff" }} />
+              <span style={{ fontWeight: 500 }}>
+                Trung bình / {groupBy === "day" ? "ngày" : groupBy}
+              </span>
             </div>
             <div style={{ fontSize: 24, fontWeight: 600, color: "#1890ff" }}>
               {avgTickets.toFixed(1)}
@@ -152,19 +220,13 @@ export default function TicketSalesPage() {
           </Card>
         </Col>
 
-        {/* Ngày cao nhất */}
-        <Col xs={24} sm={12} md={8}>
+        <Col xs={24} sm={12} md={6}>
           <Card>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                marginBottom: 8,
-              }}
-            >
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <RiseOutlined style={{ color: "#fa8c16" }} />
-              <span style={{ fontWeight: 500 }}>Ngày cao nhất</span>
+              <span style={{ fontWeight: 500 }}>
+                {groupBy === "day" ? "Ngày cao nhất" : "Kỳ cao nhất"}
+              </span>
             </div>
             {maxItem ? (
               <div
@@ -201,14 +263,12 @@ export default function TicketSalesPage() {
               <XAxis dataKey="date" />
               <YAxis />
               <Tooltip formatter={(val: number) => [`${val} vé`, "Số vé"]} />
-              {showAverage && (
-                <ReferenceLine
-                  y={avgTickets}
-                  stroke="#999"
-                  strokeDasharray="4 4"
-                  label="Trung bình"
-                />
-              )}
+              <ReferenceLine
+                y={avgTickets}
+                stroke="#999"
+                strokeDasharray="4 4"
+                label="Trung bình"
+              />
               <Bar dataKey="ticketsSold" fill="#4d940e" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -219,20 +279,27 @@ export default function TicketSalesPage() {
               <XAxis dataKey="date" />
               <YAxis />
               <Tooltip formatter={(val: number) => [`${val} vé`, "Số vé"]} />
-              {showAverage && (
-                <ReferenceLine
-                  y={avgTickets}
-                  stroke="#999"
-                  strokeDasharray="4 4"
-                  label="Trung bình"
-                />
-              )}
+              <ReferenceLine
+                y={avgTickets}
+                stroke="#999"
+                strokeDasharray="4 4"
+                label="Trung bình"
+              />
               <Line
                 type="monotone"
                 dataKey="ticketsSold"
                 stroke="#4d940e"
                 strokeWidth={2}
               />
+              {chartMA && (
+                <Line
+                  type="monotone"
+                  dataKey="ma7"
+                  stroke="#1890ff"
+                  strokeWidth={2}
+                  dot={false}
+                />
+              )}
             </LineChart>
           </ResponsiveContainer>
         )}

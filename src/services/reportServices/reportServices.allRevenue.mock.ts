@@ -8,10 +8,7 @@ export interface Revenue {
   totalRevenue: number;
 }
 
-// Các mức giá vé cố định
 const PRICE_LEVELS = [200_000, 250_000, 300_000];
-
-// Tạo mảng ngày liên tiếp [from..to]
 const rangeDays = (fromISO: string, toISO: string) => {
   const out: string[] = [];
   const start = new Date(fromISO + "T00:00:00");
@@ -31,12 +28,11 @@ const toGroupKey = (iso: string, groupBy: GroupBy) => {
 
 // Doanh thu giả lập: giá vé * số vé
 const synthRevenue = (idx: number) => {
-  const price = PRICE_LEVELS[idx % PRICE_LEVELS.length]; // chọn 200k/250k/300k
-  const ticketsSold = 5 + Math.floor(Math.random() * 16); // từ 5 → 20 vé
-  return price * ticketsSold; // luôn chẵn theo bội số
+  const price = PRICE_LEVELS[idx % PRICE_LEVELS.length];
+  const ticketsSold = 5 + Math.floor(Math.random() * 16);
+  return price * ticketsSold;
 };
 
-// Gom nhóm dữ liệu cho month/year
 const groupByMap = (
   items: { date: string; value: number }[],
   groupBy: GroupBy
@@ -54,7 +50,7 @@ const groupByMap = (
     .sort((a, b) => a.date.localeCompare(b.date));
 };
 
-// Fake holiday: tăng doanh thu dịp lễ
+// Fake holiday
 const isHoliday = (iso: string) => {
   const m = iso.slice(5, 10);
   return m === "01-01" || m === "04-30" || m === "05-01" || m === "09-02";
@@ -73,7 +69,7 @@ export const getRevenue = async (
     const days = rangeDays(from, to);
     const dayValues = days.map((iso, idx) => {
       let value = synthRevenue(idx);
-      if (isHoliday(iso)) value = Math.round(value * 1.5); // dịp lễ tăng 50%
+      if (isHoliday(iso)) value = Math.round(value * 1.5);
       return { date: iso, value };
     });
 

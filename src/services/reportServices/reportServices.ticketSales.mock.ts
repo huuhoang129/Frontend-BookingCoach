@@ -8,7 +8,7 @@ export interface Sales {
   ticketsSold: number;
 }
 
-// Tạo mảng ngày liên tiếp [from..to]
+// Tạo mảng ngày liên tiếp
 const rangeDays = (fromISO: string, toISO: string) => {
   const out: string[] = [];
   const start = new Date(fromISO + "T00:00:00");
@@ -19,7 +19,7 @@ const rangeDays = (fromISO: string, toISO: string) => {
   return out;
 };
 
-// Fake holiday (ngày lễ thì bán nhiều vé hơn)
+// Fake holiday
 const isHoliday = (iso: string) => {
   const m = iso.slice(5, 10);
   return m === "01-01" || m === "04-30" || m === "05-01" || m === "09-02";
@@ -34,7 +34,31 @@ const synthTickets = (idx: number) => {
   return trend;
 };
 
-export const getTicketSales = async (from: string, to: string) => {
+// gộp theo groupBy
+const aggregate = (data: Sales[], groupBy: "day" | "month" | "year") => {
+  if (groupBy === "day") return data;
+
+  const map = new Map<string, number>();
+
+  data.forEach((d) => {
+    const key =
+      groupBy === "month"
+        ? dayjs(d.date).format("YYYY-MM")
+        : dayjs(d.date).format("YYYY");
+    map.set(key, (map.get(key) || 0) + d.ticketsSold);
+  });
+
+  return Array.from(map.entries()).map(([date, ticketsSold]) => ({
+    date,
+    ticketsSold,
+  }));
+};
+
+export const getTicketSales = async (
+  from: string,
+  to: string,
+  groupBy: "day" | "month" | "year" = "day"
+) => {
   const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
   await delay(200 + Math.random() * 300);
 
@@ -49,10 +73,12 @@ export const getTicketSales = async (from: string, to: string) => {
       };
     });
 
+    const grouped = aggregate(data, groupBy);
+
     return {
       data: {
         errCode: 0,
-        data,
+        data: grouped,
         errMessage: "",
       },
     };

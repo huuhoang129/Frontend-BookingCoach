@@ -8,11 +8,20 @@ const getRevenue = (from: string, to: string, groupBy: string) => {
   });
 };
 
-// Lấy báo cáo vé bán
-const getTicketSales = (from: string, to: string) => {
+const getTicketSales = (from: string, to: string, groupBy?: string) => {
   return axios.get(`${API_URL}/reports/ticket-sales`, {
-    params: { from, to },
+    params: { from, to, groupBy },
   });
 };
 
-export { getRevenue, getTicketSales };
+const getCancellationRate = (
+  startDate: string,
+  endDate: string,
+  groupBy: string
+) => {
+  return axios.get(`${API_URL}/reports/cancellation-rate`, {
+    params: { startDate, endDate, groupBy },
+  });
+};
+
+export { getRevenue, getTicketSales, getCancellationRate };

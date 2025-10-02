@@ -20,9 +20,15 @@ export interface RowView {
 export function useTicketSales(initialRange?: [Dayjs, Dayjs]) {
   const [data, setData] = useState<Sales[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Range 14 ngày gần nhất
   const [range, setRange] = useState<[Dayjs, Dayjs]>(
     initialRange || [dayjs().subtract(14, "day"), dayjs()]
   );
+
+  // groupBy và chartMA
+  const [groupBy, setGroupBy] = useState<"day" | "month" | "year">("day");
+  const [chartMA, setChartMA] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -30,7 +36,7 @@ export function useTicketSales(initialRange?: [Dayjs, Dayjs]) {
       const from = range[0].format("YYYY-MM-DD");
       const to = range[1].format("YYYY-MM-DD");
 
-      const res = await getTicketSales(from, to);
+      const res = await getTicketSales(from, to, groupBy);
 
       if (res.data.errCode === 0) {
         setData(
@@ -53,7 +59,7 @@ export function useTicketSales(initialRange?: [Dayjs, Dayjs]) {
 
   useEffect(() => {
     fetchData();
-  }, [range]);
+  }, [range, groupBy]);
 
   // KPI
   const totalTickets = useMemo(
@@ -100,13 +106,15 @@ export function useTicketSales(initialRange?: [Dayjs, Dayjs]) {
   };
 
   // Preset ranges
-  const setPreset = (type: "7d" | "30d" | "ytd") => {
+  const setPreset = (type: "7d" | "30d" | "ytd" | "thisYear") => {
     if (type === "7d") {
       setRange([dayjs().subtract(6, "day"), dayjs()]);
     } else if (type === "30d") {
       setRange([dayjs().subtract(29, "day"), dayjs()]);
-    } else {
+    } else if (type === "ytd") {
       setRange([dayjs().startOf("year"), dayjs()]);
+    } else if (type === "thisYear") {
+      setRange([dayjs().startOf("year"), dayjs().endOf("year")]);
     }
   };
 
@@ -122,5 +130,9 @@ export function useTicketSales(initialRange?: [Dayjs, Dayjs]) {
     tableRows,
     handleExportCSV,
     setPreset,
+    groupBy,
+    setGroupBy,
+    chartMA,
+    setChartMA,
   };
 }
