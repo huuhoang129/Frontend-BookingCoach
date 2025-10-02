@@ -1,5 +1,3 @@
-// RevenueReportPage.tsx
-import { useEffect, useMemo, useState } from "react";
 import {
   Card,
   Table,
@@ -11,9 +9,7 @@ import {
   Button,
   Row,
   Col,
-  Statistic,
   Empty,
-  message,
   Tag,
 } from "antd";
 import {
@@ -37,163 +33,33 @@ import {
   FallOutlined,
   FundOutlined,
 } from "@ant-design/icons";
-import axios from "axios";
-import dayjs, { Dayjs } from "dayjs";
+import { useRevenueReport } from "../../../hooks/reportHooks/useRevenueReport";
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
-type GroupBy = "day" | "month" | "year";
-
-interface Revenue {
-  date: string;
-  totalRevenue: number;
-}
-interface RowView {
-  key: string;
-  label: string;
-  totalRevenue: number;
-  delta: number | null;
-  deltaPct: number | null;
-  cumulative: number;
-}
 
 const fmtMoney = (v: number) =>
   new Intl.NumberFormat("vi-VN").format(Math.round(v)) + " đ";
 
-const fmtLabel = (iso: string, groupBy: GroupBy) => {
-  const d = dayjs(iso);
-  if (groupBy === "day") return d.format("DD/MM/YYYY");
-  if (groupBy === "month") return d.format("MM/YYYY");
-  return d.format("YYYY");
-};
-
-const groupClientSide = (raw: Revenue[], groupBy: GroupBy): Revenue[] => {
-  if (groupBy === "day") return raw;
-  const map = new Map<string, number>();
-  for (const r of raw) {
-    const k =
-      groupBy === "month"
-        ? dayjs(r.date).format("YYYY-MM-01")
-        : dayjs(r.date).format("YYYY-01-01");
-    map.set(k, (map.get(k) || 0) + Number(r.totalRevenue || 0));
-  }
-  const out: Revenue[] = Array.from(map.entries())
-    .map(([k, sum]) => ({ date: k, totalRevenue: sum }))
-    .sort((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf());
-  return out;
-};
-
-const movingAverage = (arr: Revenue[], windowSize = 7): number[] => {
-  if (arr.length === 0) return [];
-  const res: number[] = [];
-  let running = 0;
-  const w = Math.max(1, windowSize);
-  for (let i = 0; i < arr.length; i++) {
-    running += Number(arr[i].totalRevenue || 0);
-    if (i >= w) running -= Number(arr[i - w].totalRevenue || 0);
-    const denom = i + 1 < w ? i + 1 : w;
-    res.push(running / denom);
-  }
-  return res;
-};
-
 export default function RevenueReportPage() {
-  const [rawData, setRawData] = useState<Revenue[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [groupBy, setGroupBy] = useState<GroupBy>("day");
-  const [range, setRange] = useState<[Dayjs, Dayjs]>([
-    dayjs().subtract(29, "day"),
-    dayjs(),
-  ]);
-  const [chartMA, setChartMA] = useState(true);
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const from = range[0].format("YYYY-MM-DD");
-      const to = range[1].format("YYYY-MM-DD");
-      const res = await axios.get(
-        `http://localhost:8080/api/v1/reports/revenue`,
-        { params: { from, to, groupBy } }
-      );
-      if (res.data?.errCode === 0) {
-        const items: Revenue[] = (res.data.data || []).map((r: any) => ({
-          date: r.date,
-          totalRevenue: Number(r.totalRevenue || 0),
-        }));
-        const grouped =
-          groupBy === "day" ? items : groupClientSide(items, groupBy);
-        setRawData(
-          grouped.sort(
-            (a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf()
-          )
-        );
-      } else {
-        setRawData([]);
-        if (res.data?.errMessage) message.warning(res.data.errMessage);
-      }
-    } catch (e) {
-      setRawData([]);
-      message.error("Không tải được dữ liệu doanh thu");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [groupBy, range]);
-
-  const data = useMemo(() => {
-    return rawData.map((r) => ({
-      ...r,
-      label: fmtLabel(r.date, groupBy),
-    }));
-  }, [rawData, groupBy]);
-
-  const dataWithMA = useMemo(() => {
-    if (!chartMA || groupBy !== "day") return data;
-    const ma = movingAverage(rawData, 7);
-    return data.map((d, idx) => ({
-      ...d,
-      ma7: ma[idx],
-    }));
-  }, [data, chartMA, groupBy, rawData]);
-
-  const totalRevenue = useMemo(
-    () => data.reduce((acc, cur) => acc + Number(cur.totalRevenue || 0), 0),
-    [data]
-  );
-  const periods = data.length;
-  const avgPerPeriod = periods ? totalRevenue / periods : 0;
-  const maxItem =
-    periods > 0
-      ? data.reduce((a, b) => (a.totalRevenue > b.totalRevenue ? a : b))
-      : null;
-
-  const tableRows: RowView[] = useMemo(() => {
-    let cumul = 0;
-    return data.map((d, idx) => {
-      const prev = idx > 0 ? data[idx - 1] : null;
-      const delta = prev
-        ? Number(d.totalRevenue || 0) - Number(prev.totalRevenue || 0)
-        : null;
-      const deltaPct =
-        prev && prev.totalRevenue
-          ? (delta! / Number(prev.totalRevenue)) * 100
-          : null;
-      cumul += Number(d.totalRevenue || 0);
-      return {
-        key: d.date,
-        label: d.label,
-        totalRevenue: Number(d.totalRevenue || 0),
-        delta,
-        deltaPct,
-        cumulative: cumul,
-      };
-    });
-  }, [data]);
+  const {
+    loading,
+    groupBy,
+    setGroupBy,
+    range,
+    setRange,
+    chartMA,
+    setChartMA,
+    data,
+    dataWithMA,
+    totalRevenue,
+    periods,
+    avgPerPeriod,
+    maxItem,
+    tableRows,
+    fetchData,
+    setPreset,
+  } = useRevenueReport();
 
   const handleExportCSV = () => {
     const headers = ["label", "totalRevenue"];
@@ -210,22 +76,6 @@ export default function RevenueReportPage() {
     )}_${range[1].format("YYYYMMDD")}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  };
-
-  const setPreset = (type: "7d" | "30d" | "ytd" | "thisYear") => {
-    if (type === "7d") {
-      setRange([dayjs().subtract(6, "day"), dayjs()]);
-      setGroupBy("day");
-    } else if (type === "30d") {
-      setRange([dayjs().subtract(29, "day"), dayjs()]);
-      setGroupBy("day");
-    } else if (type === "ytd") {
-      setRange([dayjs().startOf("year"), dayjs()]);
-      setGroupBy("month");
-    } else {
-      setRange([dayjs().startOf("year"), dayjs().endOf("year")]);
-      setGroupBy("month");
-    }
   };
 
   const columns = [
@@ -315,7 +165,7 @@ export default function RevenueReportPage() {
               <BarChartOutlined style={{ color: "#722ed1" }} />
               <b>Nhóm theo:</b>
             </span>
-            <Select<GroupBy>
+            <Select
               style={{ width: 160 }}
               value={groupBy}
               onChange={(g) => setGroupBy(g)}
@@ -329,11 +179,7 @@ export default function RevenueReportPage() {
 
           {/* Preset buttons */}
           <Space>
-            <Button
-              onClick={() => setPreset("7d")}
-              icon={<CalendarOutlined />}
-              type="default"
-            >
+            <Button onClick={() => setPreset("7d")} icon={<CalendarOutlined />}>
               7 ngày
             </Button>
             <Button
@@ -361,11 +207,7 @@ export default function RevenueReportPage() {
 
           {/* Action buttons */}
           <Space>
-            <Button
-              onClick={fetchData}
-              icon={<ReloadOutlined />}
-              type="default"
-            >
+            <Button onClick={fetchData} icon={<ReloadOutlined />}>
               Tải lại
             </Button>
             <Button
@@ -534,7 +376,6 @@ export default function RevenueReportPage() {
                 dot={false}
                 name="Doanh thu"
               />
-
               {chartMA && groupBy === "day" && (
                 <Line
                   type="monotone"
@@ -559,7 +400,7 @@ export default function RevenueReportPage() {
 
       {/* Table phân tích */}
       <Card>
-        <Table<RowView>
+        <Table
           rowKey="key"
           dataSource={tableRows}
           columns={columns as any}
