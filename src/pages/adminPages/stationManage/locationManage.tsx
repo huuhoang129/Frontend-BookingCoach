@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   Table,
   Input,
@@ -12,9 +11,9 @@ import {
   Breadcrumb,
   Modal,
   Form,
-  message,
-  Tabs,
   Select,
+  Popconfirm,
+  Tabs,
 } from "antd";
 import {
   SearchOutlined,
@@ -24,169 +23,20 @@ import {
   HomeOutlined,
   EnvironmentOutlined,
 } from "@ant-design/icons";
-import axios from "axios";
 import type { ColumnsType } from "antd/es/table";
+import { useLocationManage } from "../../../hooks/stationHooks/useLocationManage.ts";
+import type { Province } from "../../../hooks/stationHooks/useLocationManage.ts";
+import type { Location } from "../../../hooks/stationHooks/useLocationManage.ts";
 
 const { Title } = Typography;
 const { Option } = Select;
 
-interface Province {
-  id: number;
-  nameProvince: string;
-  valueProvince: string;
-}
+export default function LocationManage() {
+  const lm = useLocationManage();
 
-interface Location {
-  id: number;
-  nameLocations: string;
-  type: string;
-  provinceId: number;
-  province?: Province;
-}
-
-export default function LocationPage() {
-  // province state
-  const [provinces, setProvinces] = useState<Province[]>([]);
-  const [loadingProvinces, setLoadingProvinces] = useState(false);
-
-  // location state
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [loadingLocations, setLoadingLocations] = useState(false);
-
-  // search
-  const [searchProvince, setSearchProvince] = useState("");
-  const [searchLocation, setSearchLocation] = useState("");
-
-  // filters for locations
-  const [filterProvince, setFilterProvince] = useState<string | null>(null);
-  const [filterType, setFilterType] = useState<string | null>(null);
-
-  // modal
-  const [isAddProvince, setIsAddProvince] = useState(false);
-  const [isEditProvince, setIsEditProvince] = useState(false);
-  const [editingProvince, setEditingProvince] = useState<Province | null>(null);
-
-  const [isAddLocation, setIsAddLocation] = useState(false);
-  const [isEditLocation, setIsEditLocation] = useState(false);
-  const [editingLocation, setEditingLocation] = useState<Location | null>(null);
-
-  const [provinceForm] = Form.useForm();
-  const [provinceEditForm] = Form.useForm();
-  const [locationForm] = Form.useForm();
-  const [locationEditForm] = Form.useForm();
-
-  // fetch
-  const fetchProvinces = async () => {
-    setLoadingProvinces(true);
-    try {
-      const res = await axios.get("http://localhost:8080/api/v1/provinces");
-      if (res.data.errCode === 0) {
-        setProvinces(res.data.data);
-      }
-    } finally {
-      setLoadingProvinces(false);
-    }
-  };
-
-  const fetchLocations = async () => {
-    setLoadingLocations(true);
-    try {
-      const res = await axios.get("http://localhost:8080/api/v1/locations");
-      if (res.data.errCode === 0) {
-        setLocations(res.data.data);
-      }
-    } finally {
-      setLoadingLocations(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchProvinces();
-    fetchLocations();
-  }, []);
-
-  // CRUD Provinces
-  const handleAddProvince = async () => {
-    try {
-      const values = await provinceForm.validateFields();
-      const res = await axios.post(
-        "http://localhost:8080/api/v1/provinces",
-        values
-      );
-      if (res.data.errCode === 0) {
-        message.success("Thêm tỉnh thành công");
-        setIsAddProvince(false);
-        provinceForm.resetFields();
-        fetchProvinces();
-      }
-    } catch (e) {}
-  };
-
-  const handleEditProvince = async () => {
-    try {
-      const values = await provinceEditForm.validateFields();
-      if (!editingProvince) return;
-      // giả sử có update API PUT /provinces/:id
-      // nếu chưa có thì thêm service update
-      message.info("API updateProvince chưa implement");
-      setIsEditProvince(false);
-    } catch (e) {}
-  };
-
-  // CRUD Locations
-  const handleAddLocation = async () => {
-    try {
-      const values = await locationForm.validateFields();
-      const res = await axios.post(
-        "http://localhost:8080/api/v1/locations",
-        values
-      );
-      if (res.data.errCode === 0) {
-        message.success("Thêm điểm đón/trả thành công");
-        setIsAddLocation(false);
-        locationForm.resetFields();
-        fetchLocations();
-      }
-    } catch (e) {}
-  };
-
-  const handleEditLocation = async () => {
-    try {
-      const values = await locationEditForm.validateFields();
-      if (!editingLocation) return;
-      message.info("API updateLocation chưa implement");
-      setIsEditLocation(false);
-    } catch (e) {}
-  };
-
-  // filter
-  const filteredProvinces = provinces.filter((p) =>
-    p.nameProvince.toLowerCase().includes(searchProvince.toLowerCase())
-  );
-  const filteredLocations = locations.filter((l) => {
-    let match = true;
-
-    if (
-      searchLocation &&
-      !l.nameLocations.toLowerCase().includes(searchLocation.toLowerCase())
-    ) {
-      match = false;
-    }
-
-    if (filterProvince && l.provinceId.toString() !== filterProvince) {
-      match = false;
-    }
-
-    if (filterType && l.type !== filterType) {
-      match = false;
-    }
-
-    return match;
-  });
-
-  // columns
-  const provinceColumns: ColumnsType<Province> = [
-    { title: "ID", dataIndex: "id", key: "id", width: 80 },
+  // columns province
+  const provinceColumns: ColumnsType<Province & { index: number }> = [
+    { title: "STT", dataIndex: "index", key: "index", width: 80 },
     { title: "Tên tỉnh", dataIndex: "nameProvince", key: "nameProvince" },
     {
       title: "Mã tỉnh",
@@ -197,38 +47,54 @@ export default function LocationPage() {
     {
       title: "Actions",
       key: "actions",
-      width: 100, // 👈 giới hạn chiều rộng
+      width: 120,
       render: (_, record) => (
-        <Space size="small">
+        <Space>
           <Tooltip title="Sửa">
             <Button
+              type="text"
               size="small"
               shape="circle"
               icon={<EditOutlined />}
-              style={{ border: "none", color: "#4d940e" }}
+              style={{ color: "#4d940e" }}
               onClick={() => {
-                setEditingProvince(record);
-                provinceEditForm.setFieldsValue(record);
-                setIsEditProvince(true);
+                lm.setEditingProvince(record);
+                lm.provinceEditForm.setFieldsValue(record);
+                lm.setIsEditProvince(true);
               }}
             />
           </Tooltip>
-          <Tooltip title="Xoá">
+
+          <Popconfirm
+            title="Xác nhận xoá"
+            description={`Bạn có chắc chắn muốn xoá tỉnh "${record.nameProvince}" không?`}
+            okText="Xoá"
+            cancelText="Hủy"
+            okButtonProps={{ danger: true }}
+            onConfirm={() => lm.handleDeleteProvince(record.id)}
+          >
             <Button
+              type="text"
               size="small"
               shape="circle"
-              icon={<DeleteOutlined />}
               danger
-              style={{ border: "none" }}
+              icon={<DeleteOutlined />}
             />
-          </Tooltip>
+          </Popconfirm>
         </Space>
       ),
     },
   ];
 
-  const locationColumns: ColumnsType<Location> = [
-    { title: "ID", dataIndex: "id", key: "id", width: 80, fixed: "left" },
+  // columns location
+  const locationColumns: ColumnsType<Location & { index: number }> = [
+    {
+      title: "STT",
+      dataIndex: "index",
+      key: "index",
+      width: 80,
+      fixed: "left",
+    },
     {
       title: "Tên địa điểm",
       dataIndex: "nameLocations",
@@ -274,24 +140,36 @@ export default function LocationPage() {
         <Space>
           <Tooltip title="Sửa">
             <Button
+              type="text"
               shape="circle"
               icon={<EditOutlined />}
-              style={{ border: "none", color: "#4d940e" }}
+              style={{ color: "#4d940e" }}
               onClick={() => {
-                setEditingLocation(record);
-                locationEditForm.setFieldsValue(record);
-                setIsEditLocation(true);
+                lm.setEditingLocation(record);
+                lm.locationEditForm.setFieldsValue({
+                  ...record,
+                  provinceId: record.provinceId,
+                });
+                lm.setIsEditLocation(true);
               }}
             />
           </Tooltip>
-          <Tooltip title="Xoá">
+
+          <Popconfirm
+            title="Xác nhận xoá"
+            description={`Bạn có chắc chắn muốn xoá địa điểm "${record.nameLocations}" không?`}
+            okText="Xoá"
+            cancelText="Hủy"
+            okButtonProps={{ danger: true }}
+            onConfirm={() => lm.handleDeleteLocation(record.id)}
+          >
             <Button
+              type="text"
               shape="circle"
-              icon={<DeleteOutlined />}
               danger
-              style={{ border: "none" }}
+              icon={<DeleteOutlined />}
             />
-          </Tooltip>
+          </Popconfirm>
         </Space>
       ),
     },
@@ -302,23 +180,16 @@ export default function LocationPage() {
       {/* Breadcrumb */}
       <Breadcrumb style={{ marginBottom: 16 }}>
         <Breadcrumb.Item href="">
-          <HomeOutlined />
-          <span>Dashboard</span>
+          <HomeOutlined /> <span>Dashboard</span>
         </Breadcrumb.Item>
         <Breadcrumb.Item>
-          <EnvironmentOutlined />
-          <span>Provinces & Locations</span>
+          <EnvironmentOutlined /> <span>Provinces & Locations</span>
         </Breadcrumb.Item>
       </Breadcrumb>
 
       <Title
         level={3}
-        style={{
-          marginBottom: 20,
-          fontWeight: 700,
-          color: "#111",
-          textAlign: "left",
-        }}
+        style={{ marginBottom: 20, fontWeight: 700, color: "#111" }}
       >
         Quản lý Tỉnh / Địa điểm
       </Title>
@@ -331,8 +202,8 @@ export default function LocationPage() {
               <Input
                 placeholder="🔍 Tìm tỉnh..."
                 prefix={<SearchOutlined />}
-                value={searchProvince}
-                onChange={(e) => setSearchProvince(e.target.value)}
+                value={lm.searchProvince}
+                onChange={(e) => lm.setSearchProvince(e.target.value)}
                 style={{ width: 240, borderRadius: 8 }}
               />
               <Button
@@ -345,7 +216,7 @@ export default function LocationPage() {
                   color: "#fff",
                   fontWeight: 500,
                 }}
-                onClick={() => setIsAddProvince(true)}
+                onClick={() => lm.setIsAddProvince(true)}
               >
                 Thêm tỉnh
               </Button>
@@ -355,8 +226,8 @@ export default function LocationPage() {
           <Card style={{ borderRadius: 12 }}>
             <Table
               rowKey="id"
-              loading={loadingProvinces}
-              dataSource={filteredProvinces}
+              loading={lm.loadingProvinces}
+              dataSource={lm.filteredProvinces}
               columns={provinceColumns}
               pagination={{ pageSize: 8 }}
               bordered={false}
@@ -372,33 +243,31 @@ export default function LocationPage() {
                 <Input
                   placeholder="🔍 Tìm địa điểm..."
                   prefix={<SearchOutlined />}
-                  value={searchLocation}
-                  onChange={(e) => setSearchLocation(e.target.value)}
+                  value={lm.searchLocation}
+                  onChange={(e) => lm.setSearchLocation(e.target.value)}
                   style={{ width: 240, borderRadius: 8 }}
                 />
 
-                {/* Bộ lọc theo tỉnh */}
                 <Select
                   allowClear
                   placeholder="Chọn tỉnh"
                   style={{ width: 200 }}
-                  value={filterProvince || undefined}
-                  onChange={(val) => setFilterProvince(val || null)}
+                  value={lm.filterProvince || undefined}
+                  onChange={(val) => lm.setFilterProvince(val || null)}
                 >
-                  {provinces.map((p) => (
+                  {lm.provinces.map((p) => (
                     <Option key={p.id} value={p.id.toString()}>
                       {p.nameProvince}
                     </Option>
                   ))}
                 </Select>
 
-                {/* Bộ lọc theo loại địa điểm */}
                 <Select
                   allowClear
                   placeholder="Loại địa điểm"
                   style={{ width: 160 }}
-                  value={filterType || undefined}
-                  onChange={(val) => setFilterType(val || null)}
+                  value={lm.filterType || undefined}
+                  onChange={(val) => lm.setFilterType(val || null)}
                 >
                   <Option value="station">Bến xe</Option>
                   <Option value="stopPoint">Điểm dừng</Option>
@@ -415,7 +284,7 @@ export default function LocationPage() {
                   color: "#fff",
                   fontWeight: 500,
                 }}
-                onClick={() => setIsAddLocation(true)}
+                onClick={() => lm.setIsAddLocation(true)}
               >
                 Thêm địa điểm
               </Button>
@@ -425,8 +294,8 @@ export default function LocationPage() {
           <Card style={{ borderRadius: 12 }}>
             <Table
               rowKey="id"
-              loading={loadingLocations}
-              dataSource={filteredLocations}
+              loading={lm.loadingLocations}
+              dataSource={lm.filteredLocations}
               columns={locationColumns}
               pagination={{ pageSize: 8 }}
               bordered={false}
@@ -438,16 +307,16 @@ export default function LocationPage() {
       {/* Modal Province Add */}
       <Modal
         title="Thêm tỉnh mới"
-        open={isAddProvince}
-        onCancel={() => setIsAddProvince(false)}
-        onOk={handleAddProvince}
+        open={lm.isAddProvince}
+        onCancel={() => lm.setIsAddProvince(false)}
+        onOk={lm.handleAddProvince}
         okText="Lưu"
         cancelText="Hủy"
         okButtonProps={{
           style: { background: "#4d940e", borderColor: "#4d940e" },
         }}
       >
-        <Form form={provinceForm} layout="vertical">
+        <Form form={lm.provinceForm} layout="vertical">
           <Form.Item
             name="nameProvince"
             label="Tên tỉnh"
@@ -461,16 +330,16 @@ export default function LocationPage() {
       {/* Modal Province Edit */}
       <Modal
         title="Sửa tỉnh"
-        open={isEditProvince}
-        onCancel={() => setIsEditProvince(false)}
-        onOk={handleEditProvince}
+        open={lm.isEditProvince}
+        onCancel={() => lm.setIsEditProvince(false)}
+        onOk={lm.handleEditProvince}
         okText="Cập nhật"
         cancelText="Hủy"
         okButtonProps={{
           style: { background: "#4d940e", borderColor: "#4d940e" },
         }}
       >
-        <Form form={provinceEditForm} layout="vertical">
+        <Form form={lm.provinceEditForm} layout="vertical">
           <Form.Item
             name="nameProvince"
             label="Tên tỉnh"
@@ -484,16 +353,16 @@ export default function LocationPage() {
       {/* Modal Location Add */}
       <Modal
         title="Thêm địa điểm mới"
-        open={isAddLocation}
-        onCancel={() => setIsAddLocation(false)}
-        onOk={handleAddLocation}
+        open={lm.isAddLocation}
+        onCancel={() => lm.setIsAddLocation(false)}
+        onOk={lm.handleAddLocation}
         okText="Lưu"
         cancelText="Hủy"
         okButtonProps={{
           style: { background: "#4d940e", borderColor: "#4d940e" },
         }}
       >
-        <Form form={locationForm} layout="vertical">
+        <Form form={lm.locationForm} layout="vertical">
           <Form.Item
             name="nameLocations"
             label="Tên địa điểm"
@@ -507,7 +376,7 @@ export default function LocationPage() {
             rules={[{ required: true }]}
           >
             <Select>
-              {provinces.map((p) => (
+              {lm.provinces.map((p) => (
                 <Option key={p.id} value={p.id}>
                   {p.nameProvince}
                 </Option>
@@ -526,16 +395,16 @@ export default function LocationPage() {
       {/* Modal Location Edit */}
       <Modal
         title="Sửa địa điểm"
-        open={isEditLocation}
-        onCancel={() => setIsEditLocation(false)}
-        onOk={handleEditLocation}
+        open={lm.isEditLocation}
+        onCancel={() => lm.setIsEditLocation(false)}
+        onOk={lm.handleEditLocation}
         okText="Cập nhật"
         cancelText="Hủy"
         okButtonProps={{
           style: { background: "#4d940e", borderColor: "#4d940e" },
         }}
       >
-        <Form form={locationEditForm} layout="vertical">
+        <Form form={lm.locationEditForm} layout="vertical">
           <Form.Item
             name="nameLocations"
             label="Tên địa điểm"
@@ -549,7 +418,7 @@ export default function LocationPage() {
             rules={[{ required: true }]}
           >
             <Select>
-              {provinces.map((p) => (
+              {lm.provinces.map((p) => (
                 <Option key={p.id} value={p.id}>
                   {p.nameProvince}
                 </Option>
@@ -559,6 +428,7 @@ export default function LocationPage() {
           <Form.Item name="type" label="Loại">
             <Select>
               <Option value="station">Bến xe</Option>
+              <Option value="stopPoint">Điểm dừng</Option>
               <Option value="office">Văn phòng</Option>
               <Option value="other">Khác</Option>
             </Select>

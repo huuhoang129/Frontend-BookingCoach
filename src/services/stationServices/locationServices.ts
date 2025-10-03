@@ -15,6 +15,10 @@ const createProvince = (data: any) => {
   return axios.post(`${API_URL}/provinces`, data);
 };
 
+const updateProvince = (id: number | string, data: any) => {
+  return axios.put(`${API_URL}/provinces/${id}`, data);
+};
+
 const deleteProvince = (id: number | string) => {
   return axios.delete(`${API_URL}/provinces/${id}`);
 };
@@ -32,6 +36,10 @@ const createLocation = (data: any) => {
   return axios.post(`${API_URL}/locations`, data);
 };
 
+const updateLocation = (id: number | string, data: any) => {
+  return axios.put(`${API_URL}/locations/${id}`, data);
+};
+
 const deleteLocation = (id: number | string) => {
   return axios.delete(`${API_URL}/locations/${id}`);
 };
@@ -44,10 +52,12 @@ export {
   getAllProvinces,
   getProvinceById,
   createProvince,
+  updateProvince,
   deleteProvince,
   getAllLocations,
   getLocationById,
   createLocation,
+  updateLocation,
   deleteLocation,
   getLocationsTree,
 };
