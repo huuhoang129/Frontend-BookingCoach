@@ -1,18 +1,23 @@
-export type SeatStatus = "AVAILABLE" | "HOLD" | "SOLD";
+// src/types/booking.ts
 
-// Ghế
+// Trạng thái ghế trong 1 chuyến cụ thể
+export type SeatStatus = "HOLD" | "SOLD" | "CANCELLED" | undefined;
+
+// Ghế (Seat trong Vehicle)
 export interface Seat {
   id: number;
   name: string;
-  status: "AVAILABLE" | "HOLD" | "SOLD";
   floor: number;
+  // status có thể đến từ BookingSeats (khi fetch theo trip)
+  status?: SeatStatus;
 }
 
-// Tỉnh, địa điểm
+// Tỉnh / Địa điểm
 export interface Province {
   id: number;
   nameProvince: string;
 }
+
 export interface Location {
   id: number;
   nameLocations: string;
@@ -26,6 +31,7 @@ export interface Vehicle {
   type: string;
   seatCount: number;
   licensePlate: string;
+  numberFloors?: number;
 }
 
 // Tuyến
@@ -35,6 +41,7 @@ export interface Route {
   toLocation: Location;
 }
 
+// Bảng giá chuyến
 export interface TripPrice {
   id: number;
   coachRouteId: number;
@@ -43,16 +50,25 @@ export interface TripPrice {
   typeTrip: "NORMAL" | "HOLIDAY";
 }
 
+// Chuyến xe (CoachTrip)
 export interface Trip {
   id: number;
   startDate: string;
   startTime: string;
   totalTime?: string;
-  status: string;
+  status: "OPEN" | "FULL" | "CANCELLED";
   route: Route;
   vehicle: Vehicle;
-  price?: TripPrice; // ✅ thay basePrice
+  price?: TripPrice;
   totalSeats: number;
   availableSeats: number;
-  seats: Seat[];
+  seats: Seat[]; // Bao gồm status ghế theo từng chuyến
+}
+
+// Thông tin tạm thời của booking (frontend)
+export interface BookingDraft {
+  goTrip?: Trip;
+  returnTrip?: Trip;
+  goSeats?: Seat[];
+  returnSeats?: Seat[];
 }

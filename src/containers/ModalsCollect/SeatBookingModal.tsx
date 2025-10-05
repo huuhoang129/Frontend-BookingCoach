@@ -1,10 +1,10 @@
+// src/containers/ModalsCollect/SeatBookingModal.tsx
 import { Modal } from "antd";
 import FortyFiveSeats from "../../components/Seat/FortyFiveSeats";
 import NineSeats from "../../components/Seat/NineSeats";
 import DoubleDeckSeats36 from "../../components/Seat/ThirtySixSeats";
 import DoubleDeckSeats22 from "../../components/Seat/TwentyTwoSeats";
 
-// ✅ import type chung, không khai báo lại để tránh lỗi
 import type { Trip, Seat } from "../../types/booking";
 
 interface SeatBookingModalProps {
@@ -24,9 +24,20 @@ export default function SeatBookingModal({
   seats,
   trip,
 }: SeatBookingModalProps) {
-  const renderSeatLayout = () => {
-    const commonProps = { seats, trip, onConfirm, onClose };
+  // Lọc ghế không thể chọn (đã bán hoặc đang giữ)
+  const disabledSeats = seats
+    .filter((s) => s.status === "SOLD" || s.status === "HOLD")
+    .map((s) => s.id);
 
+  const commonProps = {
+    seats,
+    trip,
+    onConfirm,
+    onClose,
+    disabledSeats,
+  };
+
+  const renderSeatLayout = () => {
     switch (vehicleType) {
       case "Normal":
         return <FortyFiveSeats {...commonProps} />;

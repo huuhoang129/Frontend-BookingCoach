@@ -28,6 +28,7 @@ import RoutesManage from "./pages/adminPages/stationManage/routesManage";
 import BookingPage from "./pages/clientPages/BookingPage";
 import CheckOutPage from "./pages/clientPages/CheckoutPage";
 import VehiclePage from "./pages/adminPages/vehicleManage/vehiclePage";
+import VehicleStatusPage from "./pages/adminPages/vehicleManage/vehicleStatusPage";
 import TicketPricingPage from "./pages/adminPages/tripManage/ticketPricingPage";
 import TicketListPage from "./pages/adminPages/tripManage/tripListPage";
 import SchedulePage from "./pages/adminPages/tripManage/schedulePage";
@@ -128,6 +129,12 @@ export default function App() {
         path="/admin/vehicle-list"
         element={
           <AdminRoute allowedRoles={["Admin"]} Component={VehiclePage} />
+        }
+      />
+      <Route
+        path="/admin/vehicle-condition"
+        element={
+          <AdminRoute allowedRoles={["Admin"]} Component={VehicleStatusPage} />
         }
       />
 

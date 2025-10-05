@@ -14,6 +14,7 @@ import {
   Modal,
   Form,
   message,
+  Popconfirm,
 } from "antd";
 import {
   SearchOutlined,
@@ -36,9 +37,6 @@ interface Vehicle {
   type: string;
   numberFloors: number;
   seatCount: number;
-  totalSeats: number;
-  availableSeats: number;
-  bookedSeats: number;
   description?: string;
 }
 
@@ -50,7 +48,6 @@ export default function VehiclePage() {
   const [searchText, setSearchText] = useState("");
   const [filterType, setFilterType] = useState<string | null>(null);
   const [filterFloor, setFilterFloor] = useState<string | null>(null);
-  const [filterSeatStatus, setFilterSeatStatus] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<string | null>(null);
 
   // modal states
@@ -61,6 +58,7 @@ export default function VehiclePage() {
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
 
+  // Fetch vehicles
   const fetchVehicles = async () => {
     try {
       setLoading(true);
@@ -79,7 +77,7 @@ export default function VehiclePage() {
     fetchVehicles();
   }, []);
 
-  // handle add
+  // Handle Add
   const handleAdd = async () => {
     try {
       const values = await form.validateFields();
@@ -100,7 +98,7 @@ export default function VehiclePage() {
     }
   };
 
-  // handle edit
+  // Handle Edit
   const handleEdit = async () => {
     try {
       const values = await editForm.validateFields();
@@ -119,6 +117,26 @@ export default function VehiclePage() {
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  // Handle Delete
+  const handleDelete = async (id: number) => {
+    try {
+      const res = await axios.delete(
+        `http://localhost:8080/api/v1/vehicles/${id}`
+      );
+      if (res.data.errCode === 0) {
+        message.success("Xoá xe thành công!");
+        fetchVehicles();
+      } else {
+        message.error(res.data.errMessage || "Lỗi khi xoá xe");
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+      message.error(
+        "Không thể xoá xe. Kiểm tra kết nối hoặc dữ liệu liên quan."
+      );
     }
   };
 
@@ -143,23 +161,11 @@ export default function VehiclePage() {
       if (filterFloor && v.numberFloors.toString() !== filterFloor)
         match = false;
 
-      if (filterSeatStatus === "many" && v.availableSeats / v.totalSeats <= 0.7)
-        match = false;
-      if (
-        filterSeatStatus === "medium" &&
-        (v.availableSeats / v.totalSeats > 0.7 ||
-          v.availableSeats / v.totalSeats < 0.2)
-      )
-        match = false;
-      if (filterSeatStatus === "few" && v.availableSeats / v.totalSeats >= 0.2)
-        match = false;
-
       return match;
     })
     .sort((a, b) => {
       if (sortBy === "name") return a.name.localeCompare(b.name);
       if (sortBy === "seats") return a.seatCount - b.seatCount;
-      if (sortBy === "available") return b.availableSeats - a.availableSeats;
       return 0;
     });
 
@@ -177,6 +183,7 @@ export default function VehiclePage() {
     Limousine: "🚐",
   };
 
+  // Table columns
   const columns: ColumnsType<Vehicle> = [
     {
       title: "Tên xe",
@@ -201,21 +208,7 @@ export default function VehiclePage() {
       key: "numberFloors",
       width: 90,
     },
-    { title: "Ghế", dataIndex: "seatCount", key: "seatCount", width: 90 },
-    {
-      title: "Trống",
-      dataIndex: "availableSeats",
-      key: "availableSeats",
-      render: (value) => <Tag color="green">🟢 {value}</Tag>,
-      width: 110,
-    },
-    {
-      title: "Đã đặt",
-      dataIndex: "bookedSeats",
-      key: "bookedSeats",
-      render: (value) => <Tag color="red">🔴 {value}</Tag>,
-      width: 110,
-    },
+    { title: "Số ghế", dataIndex: "seatCount", key: "seatCount", width: 90 },
     {
       title: "Actions",
       key: "actions",
@@ -233,14 +226,23 @@ export default function VehiclePage() {
               }}
             />
           </Tooltip>
-          <Tooltip title="Xoá">
-            <Button
-              shape="circle"
-              icon={<DeleteOutlined />}
-              danger
-              style={{ border: "none" }}
-            />
-          </Tooltip>
+          <Popconfirm
+            title="Xác nhận xoá"
+            description={`Bạn có chắc muốn xoá xe "${record.name}" không?`}
+            okText="Xoá"
+            cancelText="Hủy"
+            okButtonProps={{ danger: true }}
+            onConfirm={() => handleDelete(record.id)}
+          >
+            <Tooltip title="Xoá">
+              <Button
+                shape="circle"
+                icon={<DeleteOutlined />}
+                danger
+                style={{ border: "none" }}
+              />
+            </Tooltip>
+          </Popconfirm>
         </Space>
       ),
       width: 120,
@@ -318,18 +320,6 @@ export default function VehiclePage() {
 
             <Select
               allowClear
-              placeholder="Tình trạng ghế"
-              style={{ width: 180 }}
-              value={filterSeatStatus || undefined}
-              onChange={(val) => setFilterSeatStatus(val || null)}
-            >
-              <Option value="many">Còn trống nhiều</Option>
-              <Option value="medium">Còn ít</Option>
-              <Option value="few">Gần đầy</Option>
-            </Select>
-
-            <Select
-              allowClear
               placeholder="Sắp xếp"
               style={{ width: 180 }}
               value={sortBy || undefined}
@@ -337,7 +327,6 @@ export default function VehiclePage() {
             >
               <Option value="name">Tên xe (A → Z)</Option>
               <Option value="seats">Số ghế ↑</Option>
-              <Option value="available">Ghế trống ↓</Option>
             </Select>
           </Flex>
 

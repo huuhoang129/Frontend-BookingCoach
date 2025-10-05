@@ -1,3 +1,4 @@
+// src/pages/BookingPage/BookingPage.tsx
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
@@ -23,8 +24,9 @@ dayjs.locale("vi");
 interface Seat {
   id: number;
   name: string;
-  status: "AVAILABLE" | "HOLD" | "SOLD";
   floor: number;
+  /** Trạng thái đến từ BookingSeats (ghế theo chuyến). Ghế trống là khi không có status. */
+  status?: "HOLD" | "SOLD" | "CANCELLED";
 }
 
 interface Province {
@@ -68,7 +70,7 @@ interface Trip {
   price?: TripPrice; // ✅ thay cho basePrice
   totalSeats: number; // backend trả về
   availableSeats: number; // backend trả về
-  seats: Seat[];
+  seats: Seat[]; // danh sách ghế; ghế có status = HOLD/SOLD là đã bị giữ/đặt
 }
 
 interface BookingDraft {
@@ -109,7 +111,7 @@ function DualRangeSlider({
 
   useEffect(() => {
     onChange?.(minVal, maxVal);
-  }, [minVal, maxVal]);
+  }, [minVal, maxVal]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="mobi-multi-range">
@@ -188,7 +190,7 @@ export default function BookingPage() {
   const [seatRange, setSeatRange] = useState<[number, number]>([0, 60]);
   const [openModal, setOpenModal] = useState(false);
   const [selectedVehicleType, setSelectedVehicleType] = useState<string>("");
-  const [selectedSeats, setSelectedSeats] = useState<any[]>([]);
+  const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [bookingDraft, setBookingDraft] = useState<BookingDraft>({});
 
@@ -216,7 +218,9 @@ export default function BookingPage() {
     } else {
       if (activeDirection === "go") {
         setBookingDraft((prev) => ({ ...prev, goTrip: trip, goSeats: seats }));
+        setOpenModal(false);
         setActiveDirection("return");
+        return;
       } else {
         const draft = { ...bookingDraft, returnTrip: trip, returnSeats: seats };
         setBookingDraft(draft);
@@ -246,15 +250,20 @@ export default function BookingPage() {
 
         if (res && res.data && Array.isArray(res.data.data)) {
           setTrips(res.data.data);
+        } else {
+          setTrips([]);
         }
       } catch (err) {
         console.error("❌ Lỗi fetch trips:", err);
+        setTrips([]);
       } finally {
         setLoading(false);
       }
     };
 
+    setLoading(true);
     fetchTrips();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     fromLocationId,
     toLocationId,
@@ -306,7 +315,9 @@ export default function BookingPage() {
                       name="vehicleType"
                       value={type}
                       checked={vehicleType === type}
-                      onChange={() => setVehicleType(type)}
+                      onChange={() =>
+                        setVehicleType((prev) => (prev === type ? null : type))
+                      }
                     />
                     {VEHICLE_TYPE_MAP[type]}
                   </label>
@@ -382,7 +393,10 @@ export default function BookingPage() {
                     </span>
                     <span className="value">
                       {bookingDraft.goSeats?.length} x{" "}
-                      {getUnitPrice(bookingDraft.goTrip).toLocaleString()} đ
+                      {getUnitPrice(bookingDraft.goTrip).toLocaleString(
+                        "vi-VN"
+                      )}{" "}
+                      đ
                     </span>
                   </div>
                   <hr className="divider" />
@@ -432,7 +446,10 @@ export default function BookingPage() {
                     </span>
                     <span className="value">
                       {bookingDraft.returnSeats?.length} x{" "}
-                      {getUnitPrice(bookingDraft.returnTrip).toLocaleString()} đ
+                      {getUnitPrice(bookingDraft.returnTrip).toLocaleString(
+                        "vi-VN"
+                      )}{" "}
+                      đ
                     </span>
                   </div>
                 </div>
@@ -449,7 +466,7 @@ export default function BookingPage() {
                       {(
                         (bookingDraft.goSeats?.length || 0) *
                         getUnitPrice(bookingDraft.goTrip)
-                      ).toLocaleString()}{" "}
+                      ).toLocaleString("vi-VN")}{" "}
                       đ
                     </span>
                   </div>
@@ -460,7 +477,7 @@ export default function BookingPage() {
                       {(
                         (bookingDraft.returnSeats?.length || 0) *
                         getUnitPrice(bookingDraft.returnTrip)
-                      ).toLocaleString()}{" "}
+                      ).toLocaleString("vi-VN")}{" "}
                       đ
                     </span>
                   </div>
@@ -473,7 +490,7 @@ export default function BookingPage() {
                           getUnitPrice(bookingDraft.goTrip) +
                         (bookingDraft.returnSeats?.length || 0) *
                           getUnitPrice(bookingDraft.returnTrip)
-                      ).toLocaleString()}{" "}
+                      ).toLocaleString("vi-VN")}{" "}
                       đ
                     </span>
                   </div>
@@ -633,13 +650,6 @@ export default function BookingPage() {
                     return true;
                   })
                   .map((trip) => {
-                    const start = dayjs(trip.startTime, "HH:mm:ss");
-                    const end = trip.totalTime
-                      ? start
-                          .add(Number(trip.totalTime.split(":")[0]), "hour")
-                          .add(Number(trip.totalTime.split(":")[1]), "minute")
-                      : null;
-
                     const totalSeats = Number(trip.totalSeats) || 0;
                     const availableSeats = Number(trip.availableSeats) || 0;
                     const unitPrice = getUnitPrice(trip);
@@ -730,6 +740,10 @@ export default function BookingPage() {
                             </button>
                           )}
                         </div>
+
+                        {/* Modal chọn ghế. 
+                            Lưu ý: trong SeatBookingModal, cần disable ghế nếu status === "HOLD" || "SOLD".
+                            Ghế không có status (undefined) hoặc "CANCELLED" là ghế trống */}
                         <SeatBookingModal
                           open={openModal}
                           onClose={() => setOpenModal(false)}

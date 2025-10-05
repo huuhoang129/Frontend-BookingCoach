@@ -150,9 +150,10 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
             <Menu.Item key="vehicle-list">
               <Link to="/admin/vehicle-list">Danh sách xe</Link>
             </Menu.Item>
-            <Menu.Item key="vehicle-condition" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Bảo dưỡng, tình trạng xe</Link> */}
+            <Menu.Item key="vehicle-condition">
+              <Link to="/admin/vehicle-condition">
+                Bảo dưỡng, tình trạng xe
+              </Link>
             </Menu.Item>
             <Menu.Item key="driver-schedule" disabled>
               Đang phát triển.....
@@ -168,7 +169,7 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
             <Menu.Item key="location-list">
               <Link to="/admin/location-list">Danh sách điểm dừng</Link>
             </Menu.Item>
-            <Menu.Item key="route-list">
+            <Menu.Item key="route-list-trip">
               <Link to="/admin/route-list">Các tuyến đường chính</Link>
             </Menu.Item>
           </SubMenu>
@@ -210,20 +211,20 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
             </Menu.Item>
           </SubMenu>
 
-          <SubMenu
+          {/* <SubMenu
             key="support-manage"
             icon={<CustomerServiceOutlined />}
             title="Hỗ trợ khách hàng"
           >
             <Menu.Item key="support-requests" disabled>
               Đang phát triển.....
-              {/* <Link to="#">Yêu cầu hỗ trợ</Link> */}
+              <Link to="#">Yêu cầu hỗ trợ</Link>
             </Menu.Item>
             <Menu.Item key="faqs" disabled>
               Đang phát triển.....
-              {/* <Link to="#">Chat/Email phản hồi khách</Link> */}
+              <Link to="#">Chat/Email phản hồi khách</Link>
             </Menu.Item>
-          </SubMenu>
+          </SubMenu> */}
 
           <SubMenu
             key="statistics & reports"

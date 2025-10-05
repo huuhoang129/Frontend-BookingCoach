@@ -22,60 +22,42 @@ export default function DoubleDeckSeats36({
   onConfirm,
   onClose,
 }: DoubleDeckSeats36Props) {
-  const [seatState, setSeatState] = useState<Seat[]>(seats);
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
 
-  const toggleSeat = (id: number) => {
-    setSeatState((prev) =>
-      prev.map((s) =>
-        s.id === id
-          ? {
-              ...s,
-              status:
-                s.status === "AVAILABLE"
-                  ? "HOLD"
-                  : s.status === "HOLD"
-                  ? "AVAILABLE"
-                  : s.status,
-            }
-          : s
-      )
-    );
-
+  // ✅ Toggle chọn ghế (chỉ ghế trống mới chọn được)
+  const toggleSeat = (seat: Seat) => {
+    if (seat.status === "SOLD" || seat.status === "HOLD") return; // không cho chọn
     setSelectedSeats((prev) => {
-      const seat = seatState.find((s) => s.id === id);
-      if (!seat) return prev;
-
-      if (seat.status === "AVAILABLE") {
-        return [...prev, seat];
-      } else {
-        return prev.filter((s) => s.id !== id);
-      }
+      const exists = prev.some((s) => s.id === seat.id);
+      return exists
+        ? prev.filter((s) => s.id !== seat.id) // bỏ chọn
+        : [...prev, seat]; // thêm
     });
   };
 
-  const getIcon = (status: string) => {
-    switch (status) {
-      case "AVAILABLE":
-        return SeatAvailable;
-      case "HOLD":
-        return SeatSelected;
-      case "SOLD":
-        return SeatSold;
-      default:
-        return SeatAvailable;
-    }
+  // ✅ icon hiển thị
+  const getIcon = (seat: Seat) => {
+    if (selectedSeats.some((s) => s.id === seat.id)) return SeatSelected;
+    if (seat.status === "SOLD" || seat.status === "HOLD") return SeatSold;
+    return SeatAvailable;
   };
 
-  // ✅ Lấy giá vé từ trip.price
+  // ✅ class theo trạng thái
+  const getSeatClass = (seat: Seat) => {
+    if (selectedSeats.some((s) => s.id === seat.id))
+      return "thirtysix-seat-selected";
+    if (seat.status === "SOLD" || seat.status === "HOLD")
+      return "thirtysix-seat-sold";
+    return "thirtysix-seat-available";
+  };
+
+  // ✅ Giá vé
   const unitPrice = trip?.price?.priceTrip ? Number(trip.price.priceTrip) : 0;
+  const total = selectedSeats.length * unitPrice;
 
-  const seatCount = selectedSeats.length;
-  const total = seatCount * unitPrice;
-
-  // render một tầng (18 ghế: 6 hàng × 3 cột)
+  // ✅ render tầng
   const renderFloor = (floor: number) => {
-    const floorSeats = seatState.filter((s) => s.floor === floor);
+    const floorSeats = seats.filter((s) => s.floor === floor);
     const rows = Array.from({ length: 6 }, (_, i) => [
       floorSeats[i * 3],
       floorSeats[i * 3 + 1],
@@ -92,10 +74,10 @@ export default function DoubleDeckSeats36({
                   seat && (
                     <td
                       key={seat.id}
-                      className={`thirtysix-seat thirtysix-seat-${seat.status}`}
-                      onClick={() => toggleSeat(seat.id)}
+                      className={`thirtysix-seat ${getSeatClass(seat)}`}
+                      onClick={() => toggleSeat(seat)}
                     >
-                      <img src={getIcon(seat.status)} alt="seat" />
+                      <img src={getIcon(seat)} alt="seat" />
                       <p>{seat.name.replace(/\D/g, "")}</p>
                     </td>
                   )
@@ -133,7 +115,7 @@ export default function DoubleDeckSeats36({
           </div>
 
           {/* 💸 Box giá ghế */}
-          {seatCount > 0 && (
+          {selectedSeats.length > 0 && (
             <div className="thirtysix-seat-price-box">
               <h4>Giá ghế:</h4>
               <div className="price-row">
@@ -177,8 +159,6 @@ export default function DoubleDeckSeats36({
           <h2 className="thirtysix-seat-title">
             {trip?.vehicle?.name || "Hương Dương"}
           </h2>
-
-          {/* legend */}
           <div className="thirtysix-seat-legend">
             <div className="thirtysix-seat-legend-item">
               <img src={SeatAvailable} alt="available" /> Ghế trống
@@ -187,7 +167,7 @@ export default function DoubleDeckSeats36({
               <img src={SeatSelected} alt="selected" /> Đang chọn
             </div>
             <div className="thirtysix-seat-legend-item">
-              <img src={SeatSold} alt="sold" /> Đã bán
+              <img src={SeatSold} alt="sold" /> Đã đặt / giữ
             </div>
           </div>
 
@@ -210,9 +190,7 @@ export default function DoubleDeckSeats36({
         className="thirtysix-seat-btn"
         disabled={!trip || selectedSeats.length === 0}
         onClick={() => {
-          if (trip && onConfirm) {
-            onConfirm(trip, selectedSeats);
-          }
+          if (trip && onConfirm) onConfirm(trip, selectedSeats);
           onClose?.();
         }}
       >

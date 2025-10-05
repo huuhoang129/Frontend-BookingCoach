@@ -4,7 +4,10 @@ import { useNavigate } from "react-router-dom";
 import "./CheckoutPage.scss";
 import QRCode from "react-qr-code";
 import { createBooking } from "../../services/bookingServices/bookingServices.ts";
-import { createPaymentQR } from "../../services/paymentServices/paymentService.ts";
+import {
+  createPaymentQR,
+  createPayment,
+} from "../../services/paymentServices/paymentService.ts";
 
 const { Step } = Steps;
 
@@ -16,6 +19,7 @@ export default function CheckoutPage() {
 
   const [formData, setFormData] = useState({
     fullName: "",
+    email: "",
     phone: "",
     note: "",
     pickup: "",
@@ -29,6 +33,13 @@ export default function CheckoutPage() {
       setBooking(JSON.parse(data));
     }
   }, []);
+
+  // ✅ Auto download invoice khi sang Step 3
+  useEffect(() => {
+    if (step === 3 && booking?.id) {
+      downloadInvoice(booking.id);
+    }
+  }, [step, booking]);
 
   if (!booking) {
     return <p>Không có dữ liệu đặt xe!</p>;
@@ -48,9 +59,6 @@ export default function CheckoutPage() {
       const unitPrice = booking.trip?.price?.priceTrip
         ? Number(booking.trip.price.priceTrip)
         : 0;
-
-      console.log("💰 Unit price (Step1):", unitPrice);
-
       const requestData = {
         coachTripId: booking.trip?.id,
         totalAmount: booking.seats.length * unitPrice,
@@ -62,7 +70,7 @@ export default function CheckoutPage() {
           {
             fullName: formData.fullName,
             phone: formData.phone,
-            email: null,
+            email: formData.email || null,
           },
         ],
         points: [
@@ -86,13 +94,8 @@ export default function CheckoutPage() {
             : []),
         ],
       };
-
-      console.log("📦 Booking request data:", requestData);
-
+      console.log("👉 formData trước khi gửi:", formData);
       const bookingRes = await createBooking(requestData);
-
-      console.log("✅ Booking response:", bookingRes.data);
-
       if (bookingRes.data.errCode === 0) {
         const newBooking = bookingRes.data.data;
         setBooking({ ...booking, id: newBooking.id });
@@ -101,7 +104,6 @@ export default function CheckoutPage() {
         alert(bookingRes.data.errMessage);
       }
     } catch (err) {
-      console.error("❌ Error creating booking:", err);
       alert("Có lỗi khi lưu thông tin đặt vé!");
     }
   };
@@ -109,60 +111,65 @@ export default function CheckoutPage() {
   // Step 2 -> Step 3
   const handleNextStep2 = async () => {
     try {
-      if (!booking?.id) {
-        alert("Chưa có booking!");
-        return;
-      }
+      console.log("💳 Phương thức thanh toán gửi lên:", formData.paymentMethod);
 
-      if (!formData.paymentMethod) {
-        alert("Vui lòng chọn phương thức thanh toán!");
-        return;
-      }
+      if (!booking?.id) return alert("Chưa có booking!");
+      if (!formData.paymentMethod)
+        return alert("Vui lòng chọn phương thức thanh toán!");
 
-      // Nếu BANKING và đã có QR thì bấm tiếp để qua step 3
-      if (formData.paymentMethod === "BANKING" && paymentData) {
-        setStep(3);
-        return;
-      }
-
-      const unitPrice = booking.trip?.price?.priceTrip
-        ? Number(booking.trip.price.priceTrip)
-        : 0;
+      const unitPrice = Number(booking.trip?.price?.priceTrip || 0);
       const total = booking.seats.length * unitPrice;
 
-      console.log("💰 Unit price (Step2):", unitPrice);
-      console.log("🧾 Total amount gửi lên API:", total);
-
       if (formData.paymentMethod === "BANKING") {
-        // gọi API tạo QR
         const res = await createPaymentQR({
           bookingId: booking.id,
           amount: total,
         });
+        console.log("🏦 Kết quả BANKING:", res.data);
 
-        console.log("📨 Response createPaymentQR:", res.data);
-
-        if (res.data.errCode === 0) {
-          console.log("✅ QR Code nhận về:", res.data.data.qrCode);
+        if (res.data?.errCode === 0) {
           setPaymentData(res.data.data);
-          // giữ step = 2, QR sẽ hiện ra
         } else {
-          alert(res.data.errMessage);
+          alert(res.data?.errMessage || "Lỗi không xác định từ server!");
         }
-      } else {
-        // Với CARD hoặc CASH → qua luôn step 3
-        setStep(3);
+        return;
       }
-    } catch (err) {
+
+      if (formData.paymentMethod === "CASH") {
+        const res = await createPayment({
+          bookingId: booking.id,
+          method: "CASH",
+          amount: total,
+        });
+
+        console.log("💵 Kết quả API CASH:", res.data);
+
+        if (res.data?.errCode === 0) {
+          console.log("💰 Thanh toán tiền mặt thành công");
+          setStep(3);
+        } else {
+          alert(res.data?.errMessage || "Lỗi không xác định từ server!");
+        }
+        return;
+      }
+    } catch (err: any) {
       console.error("❌ Error creating payment:", err);
-      alert("Có lỗi khi tạo thanh toán!");
+      alert(err?.response?.data?.errMessage || "Có lỗi khi tạo thanh toán!");
     }
   };
 
-  // Step 3 -> Kết thúc
   const handleFinish = () => {
     localStorage.removeItem("bookingData");
     navigate("/");
+  };
+
+  const downloadInvoice = (bookingId: number) => {
+    const link = document.createElement("a");
+    link.href = `http://localhost:8080/api/v1/invoice/${bookingId}`;
+    link.setAttribute("download", `invoice-${bookingId}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   };
 
   // trước khi return JSX
@@ -363,7 +370,19 @@ export default function CheckoutPage() {
                   onChange={handleChange}
                 />
               </div>
-              <div></div>
+
+              <div className="form-group">
+                <label>
+                  Email <span className="required">*</span>
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+              </div>
+
               <div className="form-group">
                 <label>
                   Số Điện Thoại <span className="required">*</span>
@@ -380,6 +399,7 @@ export default function CheckoutPage() {
                   />
                 </div>
               </div>
+
               <div className="form-group">
                 <label>GHI CHÚ</label>
                 <input
@@ -390,6 +410,7 @@ export default function CheckoutPage() {
                   placeholder="Ghi chú"
                 />
               </div>
+
               <div className="form-group">
                 <label>NHẬP ĐIỂM ĐÓN CHI TIẾT</label>
                 <input
@@ -399,6 +420,7 @@ export default function CheckoutPage() {
                   onChange={handleChange}
                 />
               </div>
+
               <div className="form-group">
                 <label>NHẬP ĐIỂM TRẢ CHI TIẾT</label>
                 <input
@@ -409,6 +431,7 @@ export default function CheckoutPage() {
                 />
               </div>
             </div>
+
             <div className="form-actions">
               <button onClick={handleNextStep1} className="btn next-btn">
                 Tiếp tục
@@ -464,6 +487,19 @@ export default function CheckoutPage() {
                   <p>
                     <b>Nội dung:</b> {paymentData.addInfo}
                   </p>
+
+                  <button
+                    className="btn next-btn"
+                    onClick={() => setStep(3)}
+                    style={{
+                      marginTop: "16px",
+                      color: "#fff",
+                      backgroundColor: "#4d940e",
+                      border: "none",
+                    }}
+                  >
+                    Tôi đã thanh toán
+                  </button>
                 </div>
               </div>
             )}
@@ -510,9 +546,12 @@ export default function CheckoutPage() {
               <button onClick={handlePrev} className="btn prev-btn">
                 Quay lại
               </button>
-              <button onClick={handleNextStep2} className="btn next-btn">
-                Tiếp tục
-              </button>
+
+              {!(formData.paymentMethod === "BANKING" && paymentData) && (
+                <button onClick={handleNextStep2} className="btn next-btn">
+                  Tiếp tục
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -528,6 +567,12 @@ export default function CheckoutPage() {
               Chúng tôi sẽ liên hệ qua số <b>{formData.phone}</b> để xác nhận.
             </p>
             <div className="form-actions">
+              <button
+                onClick={() => downloadInvoice(booking.id)}
+                className="btn next-btn"
+              >
+                Tải hóa đơn PDF
+              </button>
               <button onClick={handleFinish} className="btn prev-btn">
                 Quay lại trang chủ
               </button>
