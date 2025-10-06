@@ -27,6 +27,9 @@ import LocationManage from "./pages/adminPages/stationManage/locationManage";
 import RoutesManage from "./pages/adminPages/stationManage/routesManage";
 import BookingPage from "./pages/clientPages/BookingPage";
 import CheckOutPage from "./pages/clientPages/CheckoutPage";
+import PaymentResultPage from "./pages/clientPages/paymentResult/paymentResultPage";
+import CheckoutSuccessPage from "./pages/clientPages/paymentResult/checkoutSuccessPage";
+import CheckoutFailedPage from "./pages/clientPages/paymentResult/checkoutFailedPage";
 import VehiclePage from "./pages/adminPages/vehicleManage/vehiclePage";
 import VehicleStatusPage from "./pages/adminPages/vehicleManage/vehicleStatusPage";
 import TicketPricingPage from "./pages/adminPages/tripManage/ticketPricingPage";
@@ -65,6 +68,9 @@ export default function App() {
 
         <Route path="/booking" element={<BookingPage />} />
         <Route path="/checkout" element={<CheckOutPage />} />
+        <Route path="/payment-result" element={<PaymentResultPage />} />
+        <Route path="/checkout-success" element={<CheckoutSuccessPage />} />
+        <Route path="/checkout-failed" element={<CheckoutFailedPage />} />
         <Route path="/test" element={<TestPage />} />
         <Route path="/profile/info" element={<InformationClientPage />} />
         <Route path="/profile/history" element={<BookingHistoryPage />} />

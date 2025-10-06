@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Steps } from "antd";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./CheckoutPage.scss";
 import QRCode from "react-qr-code";
 import {
@@ -11,6 +11,7 @@ import {
   createPaymentQR,
   createPayment,
 } from "../../services/paymentServices/paymentService.ts";
+import { createVNPayPayment } from "../../services/paymentServices/vnpayService.ts";
 
 const { Step } = Steps;
 
@@ -41,7 +42,6 @@ export default function CheckoutPage() {
       console.log("⚪ [CHECKOUT] Không có user (khách vãng lai)");
     }
 
-    // 🟡 Lấy booking từ BookingPage
     const bookingStorage = localStorage.getItem("bookingData");
     if (bookingStorage) {
       const parsedBooking = JSON.parse(bookingStorage);
@@ -51,7 +51,6 @@ export default function CheckoutPage() {
     }
   }, []);
 
-  // 🟢 Tự động fill form khi có user đăng nhập
   useEffect(() => {
     if (currentUser) {
       setFormData((prev) => ({
@@ -72,12 +71,13 @@ export default function CheckoutPage() {
     }
   }, [currentUser]);
 
-  // ✅ Auto download invoice khi sang Step 3
+  const location = useLocation();
+
   useEffect(() => {
-    if (step === 3 && booking?.id) {
-      downloadInvoice(booking.id);
+    if (location.state?.step === 3) {
+      setStep(3);
     }
-  }, [step, booking]);
+  }, [location.state]);
 
   if (!booking) {
     return <p>Không có dữ liệu đặt xe!</p>;
@@ -106,7 +106,6 @@ export default function CheckoutPage() {
     setStep(step - 1);
   };
 
-  // Step 1 -> Step 2
   // Step 1 -> Step 2
   const handleNextStep1 = async () => {
     try {
@@ -172,11 +171,9 @@ export default function CheckoutPage() {
   // Step 2 -> Step 3
   const handleNextStep2 = async () => {
     try {
-      console.log("💳 Phương thức thanh toán gửi lên:", formData.paymentMethod);
-
+      console.log("💳 Phương thức thanh toán:", formData.paymentMethod);
       if (!booking?.id) return alert("Chưa có booking!");
-      if (!formData.paymentMethod)
-        return alert("Vui lòng chọn phương thức thanh toán!");
+      if (!formData.paymentMethod) return alert("Vui lòng chọn phương thức!");
 
       const unitPrice = Number(booking.trip?.price?.priceTrip || 0);
       const total = booking.seats.length * unitPrice;
@@ -186,13 +183,9 @@ export default function CheckoutPage() {
           bookingId: booking.id,
           amount: total,
         });
-        console.log("🏦 Kết quả BANKING:", res.data);
-
         if (res.data?.errCode === 0) {
           setPaymentData(res.data.data);
-        } else {
-          alert(res.data?.errMessage || "Lỗi không xác định từ server!");
-        }
+        } else alert(res.data?.errMessage);
         return;
       }
 
@@ -202,14 +195,23 @@ export default function CheckoutPage() {
           method: "CASH",
           amount: total,
         });
+        if (res.data?.errCode === 0) setStep(3);
+        else alert(res.data?.errMessage);
+        return;
+      }
 
-        console.log("💵 Kết quả API CASH:", res.data);
+      if (formData.paymentMethod === "CARD") {
+        const res = await createVNPayPayment({
+          bookingId: booking.id,
+          amount: total,
+          bankCode: "NCB",
+        });
 
-        if (res.data?.errCode === 0) {
-          console.log("💰 Thanh toán tiền mặt thành công");
-          setStep(3);
+        if (res.data?.errCode === 0 && res.data?.paymentUrl) {
+          console.log("🔗 Redirect VNPAY URL:", res.data.paymentUrl);
+          window.location.href = res.data.paymentUrl;
         } else {
-          alert(res.data?.errMessage || "Lỗi không xác định từ server!");
+          alert(res.data?.errMessage || "Lỗi khi tạo thanh toán VNPAY!");
         }
         return;
       }
@@ -226,14 +228,13 @@ export default function CheckoutPage() {
 
   const downloadInvoice = (bookingId: number) => {
     const link = document.createElement("a");
-    link.href = `http://localhost:8080/api/v1/invoice/${bookingId}`;
+    link.href = `http://localhost:8080/api/v1/bookings/${bookingId}/invoice`;
     link.setAttribute("download", `invoice-${bookingId}.pdf`);
     document.body.appendChild(link);
     link.click();
-    link.remove();
+    document.body.removeChild(link);
   };
 
-  // trước khi return JSX
   if (formData.paymentMethod === "BANKING" && paymentData) {
     console.log("👉 QRCode value = ", paymentData.qrCode);
   }

@@ -1,0 +1,15 @@
+.payment-result-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 70vh;
+  text-align: center;
+
+  .content {
+    p {
+      margin-top: 16px;
+      font-size: 18px;
+      font-weight: 500;
+    }
+  }
+}
