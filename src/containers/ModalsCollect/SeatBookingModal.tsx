@@ -57,8 +57,8 @@ export default function SeatBookingModal({
       open={open}
       onCancel={onClose}
       footer={null}
-      width={890}
-      bodyStyle={{ height: "550px", overflowY: "auto" }}
+      width={950}
+      bodyStyle={{ height: "590px", overflowY: "auto" }}
     >
       {renderSeatLayout()}
     </Modal>

@@ -1,0 +1,96 @@
+.profile-container {
+  display: flex;
+  background: #fafafa;
+  min-height: 100vh;
+  font-family: "Lexend", sans-serif;
+}
+
+/* MAIN CONTENT */
+.main-content {
+  flex: 1;
+  padding: 60px 80px;
+  background: #fff;
+
+  /* PHẦN HEADER NGƯỜI DÙNG (ảnh + chữ trái) */
+  .user-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 40px;
+
+    .user-avatar {
+      background: #4d940e;
+      color: #fff;
+    }
+
+    .user-basic {
+      h3 {
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .user-email {
+        color: #777;
+        font-size: 14px;
+      }
+    }
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 30px;
+
+    .info-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      label {
+        font-size: 14px;
+        color: #666;
+      }
+
+      input {
+        border-radius: 8px;
+        height: 40px;
+      }
+    }
+  }
+
+  .save-btn {
+    background: #4d940e;
+    border: none;
+    border-radius: 20px;
+    padding: 0 32px;
+    height: 42px;
+    font-weight: 500;
+    transition: 0.3s;
+
+    &:hover {
+      background: #3c7e0b !important;
+    }
+  }
+
+  .trip-history {
+    h3 {
+      margin-bottom: 20px;
+      color: #000000;
+      font-weight: 600;
+    }
+
+    .ant-table {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+  }
+}
+
+.profile-empty {
+  text-align: center;
+  padding: 120px 20px;
+  font-size: 18px;
+  color: #777;
+}

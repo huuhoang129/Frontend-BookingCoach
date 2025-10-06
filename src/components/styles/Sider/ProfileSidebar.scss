@@ -1,0 +1,61 @@
+.sidebar {
+  width: 240px;
+  background: #fff;
+  border-right: 1px solid #eee;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  .sidebar-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #4d940e;
+    margin-bottom: 16px;
+  }
+
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px; /* Giữ cố định padding */
+    border-radius: 8px;
+    cursor: pointer;
+    color: #777;
+    position: relative;
+    transition: all 0.25s ease;
+    font-weight: 400;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+    /* thanh màu bên trái (ẩn mặc định) */
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      border-radius: 0 3px 3px 0;
+      background: transparent;
+      transition: all 0.25s ease;
+    }
+
+    &:hover {
+      background: #f5faf5;
+      color: #4d940e;
+    }
+
+    &.active {
+      background: #eaf7ea;
+      color: #4d940e;
+
+      &::before {
+        background: #4d940e; /* thanh xanh cố định */
+      }
+    }
+
+    span {
+      font-size: 15px;
+    }
+  }
+}

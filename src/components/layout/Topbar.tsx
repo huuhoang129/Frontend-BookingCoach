@@ -1,4 +1,7 @@
 import type { JSX } from "react/jsx-runtime";
+import { useState } from "react";
+import { Dropdown, Menu } from "antd";
+import { UserOutlined } from "@ant-design/icons";
 import "./topbar.scss";
 
 // Assets
@@ -7,10 +10,9 @@ import phoneIcon from "../../assets/icon/call-phone.svg";
 
 // Components & Hooks
 import AuthModals from "../../containers/ModalsCollect/AuthModals";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/AuthHooks/useAuth";
 
 export default function Topbar(): JSX.Element {
-  // Auth state & handlers
   const {
     currentUser,
     openLogin,
@@ -26,12 +28,61 @@ export default function Topbar(): JSX.Element {
     handlers,
   } = useAuth();
 
+  const [openMenu, setOpenMenu] = useState(false);
+
+  const handleMenuClick = ({ key }: { key: string }) => {
+    switch (key) {
+      case "profile":
+        window.location.href = "/profile/info";
+        break;
+      case "history":
+        window.location.href = "/profile/history";
+        break;
+      case "logout":
+        handlers.handleLogout();
+        break;
+      default:
+        break;
+    }
+  };
+
+  const userMenu = (
+    <Menu
+      onClick={handleMenuClick}
+      items={[
+        {
+          key: "greeting",
+          label: (
+            <div className="menu-greeting">
+              Xin chào,{" "}
+              <strong>
+                {currentUser?.firstName} {currentUser?.lastName}
+              </strong>
+            </div>
+          ),
+          disabled: true,
+        },
+        { type: "divider" },
+        {
+          key: "profile",
+          label: "Thông tin cá nhân",
+        },
+        {
+          key: "history",
+          label: "Lịch sử đặt vé",
+        },
+        { type: "divider" },
+        {
+          key: "logout",
+          label: <span style={{ color: "#ff4d4f" }}>Đăng xuất</span>,
+        },
+      ]}
+    />
+  );
+
   return (
     <div className="topbar">
       <div className="topbar-inner">
-        {/* ========================
-            Liên hệ (email & hotline)
-        ======================== */}
         <div className="topbar-contact">
           <div className="topbar-email">
             <img src={emailIcon} alt="Email" className="icon" />
@@ -46,9 +97,6 @@ export default function Topbar(): JSX.Element {
           </div>
         </div>
 
-        {/* ========================
-            Auth links 
-        ======================== */}
         <div className="auth-links">
           {!currentUser ? (
             <>
@@ -73,28 +121,21 @@ export default function Topbar(): JSX.Element {
               </a>
             </>
           ) : (
-            <>
-              <span>
-                Xin chào, {currentUser.lastName} {currentUser.firstName}
-              </span>
-              <span className="sep">|</span>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handlers.handleLogout();
-                }}
-              >
-                Đăng xuất
-              </a>
-            </>
+            <Dropdown
+              overlay={userMenu}
+              trigger={["click"]}
+              placement="bottomRight"
+              open={openMenu}
+              onOpenChange={setOpenMenu}
+            >
+              <div className="user-icon">
+                <UserOutlined style={{ fontSize: 18, cursor: "pointer" }} />
+              </div>
+            </Dropdown>
           )}
         </div>
       </div>
 
-      {/* ========================
-          Modal (Login, Register, OTP, Reset Password)
-      ======================== */}
       <AuthModals
         openLogin={openLogin}
         setOpenLogin={setOpenLogin}

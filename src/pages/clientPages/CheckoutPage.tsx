@@ -3,7 +3,10 @@ import { Steps } from "antd";
 import { useNavigate } from "react-router-dom";
 import "./CheckoutPage.scss";
 import QRCode from "react-qr-code";
-import { createBooking } from "../../services/bookingServices/bookingServices.ts";
+import {
+  createBooking,
+  deleteBooking,
+} from "../../services/bookingServices/bookingServices.ts";
 import {
   createPaymentQR,
   createPayment,
@@ -26,13 +29,48 @@ export default function CheckoutPage() {
     dropoff: "",
     paymentMethod: "",
   });
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
-    const data = localStorage.getItem("bookingData");
-    if (data) {
-      setBooking(JSON.parse(data));
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      setCurrentUser(parsedUser);
+      console.log("🧍 [CHECKOUT] user hiện tại:", parsedUser);
+    } else {
+      console.log("⚪ [CHECKOUT] Không có user (khách vãng lai)");
+    }
+
+    // 🟡 Lấy booking từ BookingPage
+    const bookingStorage = localStorage.getItem("bookingData");
+    if (bookingStorage) {
+      const parsedBooking = JSON.parse(bookingStorage);
+      setBooking(parsedBooking);
+    } else {
+      console.log("⚠️ [CHECKOUT] Không tìm thấy bookingData!");
     }
   }, []);
+
+  // 🟢 Tự động fill form khi có user đăng nhập
+  useEffect(() => {
+    if (currentUser) {
+      setFormData((prev) => ({
+        ...prev,
+        fullName: `${currentUser.firstName || ""} ${
+          currentUser.lastName || ""
+        }`.trim(),
+        email: currentUser.email || "",
+        phone: currentUser.phoneNumber || "",
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        fullName: "",
+        email: "",
+        phone: "",
+      }));
+    }
+  }, [currentUser]);
 
   // ✅ Auto download invoice khi sang Step 3
   useEffect(() => {
@@ -51,15 +89,36 @@ export default function CheckoutPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handlePrev = () => setStep(step - 1);
+  const handlePrev = async () => {
+    if (step === 2 && booking?.id) {
+      try {
+        console.log(
+          "🧹 [Checkout] Xóa booking khi quay lại Step 1:",
+          booking.id
+        );
+        await deleteBooking(booking.id);
+        setBooking({ ...booking, id: null });
+      } catch (err) {
+        console.error("❌ Lỗi khi xóa booking:", err);
+      }
+    }
 
+    setStep(step - 1);
+  };
+
+  // Step 1 -> Step 2
   // Step 1 -> Step 2
   const handleNextStep1 = async () => {
     try {
+      console.log("🧍‍♂️ [LOG] currentUser:", currentUser);
+      console.log("🧩 [LOG] userId gửi lên:", currentUser?.id || "Guest");
+
       const unitPrice = booking.trip?.price?.priceTrip
         ? Number(booking.trip.price.priceTrip)
         : 0;
+
       const requestData = {
+        userId: currentUser?.id || null, // 🟩 GỬI LÊN BACKEND
         coachTripId: booking.trip?.id,
         totalAmount: booking.seats.length * unitPrice,
         seats: booking.seats.map((s: any) => ({
@@ -94,7 +153,9 @@ export default function CheckoutPage() {
             : []),
         ],
       };
-      console.log("👉 formData trước khi gửi:", formData);
+
+      console.log("📦 [LOG] Payload gửi createBooking:", requestData);
+
       const bookingRes = await createBooking(requestData);
       if (bookingRes.data.errCode === 0) {
         const newBooking = bookingRes.data.data;

@@ -38,6 +38,8 @@ import TicketStatusPage from "./pages/adminPages/ticketManage/ticketStatusPage";
 import RevenueReportPage from "./pages/adminPages/reportManage/revenueReportPage";
 import TicketSalesPage from "./pages/adminPages/reportManage/ticketSalesPage";
 import CancellationRatePage from "./pages/adminPages/reportManage/cancellationRatePage";
+import InformationClientPage from "./pages/clientPages/AuthManage/InformationClientPage";
+import BookingHistoryPage from "./pages/clientPages/AuthManage/BookingHistoryPage";
 
 import TestPage from "./pages/clientPages/testClient";
 
@@ -64,6 +66,8 @@ export default function App() {
         <Route path="/booking" element={<BookingPage />} />
         <Route path="/checkout" element={<CheckOutPage />} />
         <Route path="/test" element={<TestPage />} />
+        <Route path="/profile/info" element={<InformationClientPage />} />
+        <Route path="/profile/history" element={<BookingHistoryPage />} />
       </Route>
 
       {/* Admin (bọc qua AdminRoute) */}

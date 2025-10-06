@@ -1,12 +1,12 @@
 import { useState } from "react";
 import "../styles/Seats/NineSeats.scss";
 
-// icon
+// icon ghế
 import SeatAvailable from "../../assets/icon/seat-1.svg";
 import SeatSelected from "../../assets/icon/seat-2.svg";
 import SeatSold from "../../assets/icon/seat-3.svg";
 
-import type { Seat, Trip, SeatStatus } from "../../types/booking";
+import type { Trip, Seat } from "../../types/booking";
 import { formatDuration, formatStartTime, calcEndTime } from "../../utils/time";
 
 interface NineSeatsProps {
@@ -22,59 +22,34 @@ export default function NineSeats({
   onConfirm,
   onClose,
 }: NineSeatsProps) {
-  const [seatState, setSeatState] = useState<Seat[]>(seats);
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
 
-  const toggleSeat = (id: number) => {
-    setSeatState((prev) => {
-      const newSeats = prev.map((s) =>
-        s.id === id
-          ? {
-              ...s,
-              status:
-                s.status === "AVAILABLE"
-                  ? ("HOLD" as const)
-                  : s.status === "HOLD"
-                  ? ("AVAILABLE" as const)
-                  : ("SOLD" as const),
-            }
-          : s
-      );
-
-      const clickedSeat = newSeats.find((s) => s.id === id);
-      if (clickedSeat) {
-        setSelectedSeats((prevSel) => {
-          if (clickedSeat.status === "HOLD") {
-            if (!prevSel.some((s) => s.id === clickedSeat.id)) {
-              return [...prevSel, clickedSeat];
-            }
-            return prevSel;
-          } else {
-            return prevSel.filter((s) => s.id !== clickedSeat.id);
-          }
-        });
-      }
-
-      return newSeats;
+  // ✅ Toggle chọn ghế (chỉ ghế trống mới chọn được)
+  const toggleSeat = (seat: Seat) => {
+    if (seat.status === "SOLD" || seat.status === "HOLD") return; // không cho chọn
+    setSelectedSeats((prev) => {
+      const exists = prev.some((s) => s.id === seat.id);
+      return exists ? prev.filter((s) => s.id !== seat.id) : [...prev, seat];
     });
   };
 
-  const getIcon = (status: SeatStatus) => {
-    switch (status) {
-      case "AVAILABLE":
-        return SeatAvailable;
-      case "HOLD":
-        return SeatSelected;
-      case "SOLD":
-        return SeatSold;
-    }
+  // ✅ Icon ghế
+  const getIcon = (seat: Seat) => {
+    if (selectedSeats.some((s) => s.id === seat.id)) return SeatSelected;
+    if (seat.status === "SOLD" || seat.status === "HOLD") return SeatSold;
+    return SeatAvailable;
   };
 
-  // 💰 Tính tiền từ trip.price
-  const unitPrice = trip?.price?.priceTrip ? Number(trip.price.priceTrip) : 0;
+  // ✅ Class CSS ghế
+  const getSeatClass = (seat: Seat) => {
+    if (selectedSeats.some((s) => s.id === seat.id)) return "seat-selected";
+    if (seat.status === "SOLD" || seat.status === "HOLD") return "seat-sold";
+    return "seat-available";
+  };
 
-  const seatCount = selectedSeats.length;
-  const total = seatCount * unitPrice;
+  // 💰 Giá vé
+  const unitPrice = trip?.price?.priceTrip ? Number(trip.price.priceTrip) : 0;
+  const total = selectedSeats.length * unitPrice;
 
   return (
     <div className="seat-layout">
@@ -82,11 +57,11 @@ export default function NineSeats({
         {/* Header */}
         <div className="seat-header">
           <div className="seat-title">
-            <h2>Xe Hương Dương</h2>
+            <h2>{trip?.vehicle?.name || "Xe Hương Dương"}</h2>
           </div>
 
           <div className="seat-type">
-            <p>LIMOUSINE</p>
+            <p>LIMOUSINE 9 CHỖ</p>
           </div>
 
           <div className="seat-route">
@@ -105,7 +80,7 @@ export default function NineSeats({
           </div>
 
           {/* 💸 Box giá ghế */}
-          {seatCount > 0 && (
+          {selectedSeats.length > 0 && (
             <div className="seat-price-box">
               <h4>Giá ghế:</h4>
               <div className="price-row">
@@ -138,15 +113,15 @@ export default function NineSeats({
             <ul>
               <li>Đón trả tận nơi</li>
               <li>Wifi</li>
-              <li>Chăn và nước uống đóng chai</li>
+              <li>Chăn và nước uống</li>
               <li>Ghế massage</li>
             </ul>
           </div>
         </div>
 
-        {/* Wrapper */}
+        {/* Layout ghế */}
         <div className="seat-wrapper">
-          <h2 className="seat-title">{trip?.vehicle.name || "Hương Dương"}</h2>
+          <h2 className="seat-title">{trip?.vehicle?.name || "Hương Dương"}</h2>
 
           {/* legend */}
           <div className="seat-legend">
@@ -157,105 +132,105 @@ export default function NineSeats({
               <img src={SeatSelected} alt="selected" /> Đang chọn
             </div>
             <div className="seat-legend-item">
-              <img src={SeatSold} alt="sold" /> Đã bán
+              <img src={SeatSold} alt="sold" /> Đã bán / giữ
             </div>
           </div>
 
-          {/* Seat layout */}
+          {/* Table layout 9 ghế */}
           <table className="seat-table">
             <tbody>
               <tr>
                 <td></td>
-                {seatState[0] && (
+                {seats[0] && (
                   <td
-                    className={`seat seat-${seatState[0].status}`}
-                    onClick={() => toggleSeat(seatState[0].id)}
+                    className={`seat ${getSeatClass(seats[0])}`}
+                    onClick={() => toggleSeat(seats[0])}
                   >
-                    <img src={getIcon(seatState[0].status)} alt="seat" />
-                    <p>{seatState[0].name.replace(/\D/g, "")}</p>
+                    <img src={getIcon(seats[0])} alt="seat" />
+                    <p>{seats[0].name.replace(/\D/g, "")}</p>
                   </td>
                 )}
-                {seatState[1] && (
+                {seats[1] && (
                   <td
-                    className={`seat seat-${seatState[1].status}`}
-                    onClick={() => toggleSeat(seatState[1].id)}
+                    className={`seat ${getSeatClass(seats[1])}`}
+                    onClick={() => toggleSeat(seats[1])}
                   >
-                    <img src={getIcon(seatState[1].status)} alt="seat" />
-                    <p>{seatState[1].name.replace(/\D/g, "")}</p>
+                    <img src={getIcon(seats[1])} alt="seat" />
+                    <p>{seats[1].name.replace(/\D/g, "")}</p>
                   </td>
                 )}
               </tr>
 
               <tr>
-                {seatState[2] && (
+                {seats[2] && (
                   <td
-                    className={`seat seat-${seatState[2].status}`}
-                    onClick={() => toggleSeat(seatState[2].id)}
+                    className={`seat ${getSeatClass(seats[2])}`}
+                    onClick={() => toggleSeat(seats[2])}
                   >
-                    <img src={getIcon(seatState[2].status)} alt="seat" />
-                    <p>{seatState[2].name.replace(/\D/g, "")}</p>
+                    <img src={getIcon(seats[2])} alt="seat" />
+                    <p>{seats[2].name.replace(/\D/g, "")}</p>
                   </td>
                 )}
                 <td></td>
-                {seatState[3] && (
+                {seats[3] && (
                   <td
-                    className={`seat seat-${seatState[3].status}`}
-                    onClick={() => toggleSeat(seatState[3].id)}
+                    className={`seat ${getSeatClass(seats[3])}`}
+                    onClick={() => toggleSeat(seats[3])}
                   >
-                    <img src={getIcon(seatState[3].status)} alt="seat" />
-                    <p>{seatState[3].name.replace(/\D/g, "")}</p>
+                    <img src={getIcon(seats[3])} alt="seat" />
+                    <p>{seats[3].name.replace(/\D/g, "")}</p>
                   </td>
                 )}
               </tr>
 
               <tr>
-                {seatState[4] && (
+                {seats[4] && (
                   <td
-                    className={`seat seat-${seatState[4].status}`}
-                    onClick={() => toggleSeat(seatState[4].id)}
+                    className={`seat ${getSeatClass(seats[4])}`}
+                    onClick={() => toggleSeat(seats[4])}
                   >
-                    <img src={getIcon(seatState[4].status)} alt="seat" />
-                    <p>{seatState[4].name.replace(/\D/g, "")}</p>
+                    <img src={getIcon(seats[4])} alt="seat" />
+                    <p>{seats[4].name.replace(/\D/g, "")}</p>
                   </td>
                 )}
                 <td></td>
-                {seatState[5] && (
+                {seats[5] && (
                   <td
-                    className={`seat seat-${seatState[5].status}`}
-                    onClick={() => toggleSeat(seatState[5].id)}
+                    className={`seat ${getSeatClass(seats[5])}`}
+                    onClick={() => toggleSeat(seats[5])}
                   >
-                    <img src={getIcon(seatState[5].status)} alt="seat" />
-                    <p>{seatState[5].name.replace(/\D/g, "")}</p>
+                    <img src={getIcon(seats[5])} alt="seat" />
+                    <p>{seats[5].name.replace(/\D/g, "")}</p>
                   </td>
                 )}
               </tr>
 
               <tr>
-                {seatState[6] && (
+                {seats[6] && (
                   <td
-                    className={`seat seat-${seatState[6].status}`}
-                    onClick={() => toggleSeat(seatState[6].id)}
+                    className={`seat ${getSeatClass(seats[6])}`}
+                    onClick={() => toggleSeat(seats[6])}
                   >
-                    <img src={getIcon(seatState[6].status)} alt="seat" />
-                    <p>{seatState[6].name.replace(/\D/g, "")}</p>
+                    <img src={getIcon(seats[6])} alt="seat" />
+                    <p>{seats[6].name.replace(/\D/g, "")}</p>
                   </td>
                 )}
-                {seatState[7] && (
+                {seats[7] && (
                   <td
-                    className={`seat seat-${seatState[7].status}`}
-                    onClick={() => toggleSeat(seatState[7].id)}
+                    className={`seat ${getSeatClass(seats[7])}`}
+                    onClick={() => toggleSeat(seats[7])}
                   >
-                    <img src={getIcon(seatState[7].status)} alt="seat" />
-                    <p>{seatState[7].name.replace(/\D/g, "")}</p>
+                    <img src={getIcon(seats[7])} alt="seat" />
+                    <p>{seats[7].name.replace(/\D/g, "")}</p>
                   </td>
                 )}
-                {seatState[8] && (
+                {seats[8] && (
                   <td
-                    className={`seat seat-${seatState[8].status}`}
-                    onClick={() => toggleSeat(seatState[8].id)}
+                    className={`seat ${getSeatClass(seats[8])}`}
+                    onClick={() => toggleSeat(seats[8])}
                   >
-                    <img src={getIcon(seatState[8].status)} alt="seat" />
-                    <p>{seatState[8].name.replace(/\D/g, "")}</p>
+                    <img src={getIcon(seats[8])} alt="seat" />
+                    <p>{seats[8].name.replace(/\D/g, "")}</p>
                   </td>
                 )}
               </tr>
@@ -264,13 +239,12 @@ export default function NineSeats({
         </div>
       </div>
 
+      {/* Button */}
       <button
         className="seat-btn"
         disabled={!trip || selectedSeats.length === 0}
         onClick={() => {
-          if (trip && onConfirm) {
-            onConfirm(trip, selectedSeats);
-          }
+          if (trip && onConfirm) onConfirm(trip, selectedSeats);
           onClose?.();
         }}
       >
