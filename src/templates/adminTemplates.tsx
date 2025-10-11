@@ -110,10 +110,10 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
             <Menu.Item key="booked-tickets">
               <Link to="/admin/booking-tickets">Danh sách vé đã đặt</Link>
             </Menu.Item>
-            <Menu.Item key="available-tickets" disabled>
+            {/* <Menu.Item key="available-tickets" disabled>
               Đang phát triển.....
-              {/* <Link to="#">Vé còn trống</Link> */}
-            </Menu.Item>
+              <Link to="#">Vé còn trống</Link>
+            </Menu.Item> */}
             <Menu.Item key="ticket-status">
               <Link to="/admin/ticket-status">Tình trạng vé</Link>
             </Menu.Item>
@@ -155,9 +155,8 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
                 Bảo dưỡng, tình trạng xe
               </Link>
             </Menu.Item>
-            <Menu.Item key="driver-schedule" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Lịch làm việc của tài xế</Link> */}
+            <Menu.Item key="driver-schedule">
+              <Link to="/admin/driver-schedule">Lịch làm việc của tài xế</Link>
             </Menu.Item>
           </SubMenu>
 

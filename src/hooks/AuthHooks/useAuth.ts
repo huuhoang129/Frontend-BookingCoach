@@ -53,8 +53,11 @@ export function useAuth() {
         localStorage.setItem("user", JSON.stringify(user));
         localStorage.setItem("token", res.data.token);
 
+        // ✅ Điều hướng theo vai trò
         if (user.role === "Admin") {
           navigate("/admin");
+        } else if (user.role === "Driver") {
+          navigate("/driver/dashboard");
         } else {
           navigate("/");
         }

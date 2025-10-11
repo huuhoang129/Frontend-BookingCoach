@@ -1,0 +1,102 @@
+.driver-layout {
+  min-height: 100vh;
+  background: #f6f8fa;
+
+  .driver-sider {
+    background: linear-gradient(180deg, #355c24, #4d940e);
+    display: flex;
+    flex-direction: column;
+
+    .driver-logo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 0;
+      gap: 8px;
+      cursor: pointer;
+
+      .logo-icon {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+      }
+
+      .logo-text {
+        color: #fff;
+        font-weight: 600;
+        font-size: 15px;
+        text-align: center;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+    }
+
+    .ant-menu {
+      background: transparent;
+      border-right: none;
+
+      .ant-menu-item {
+        margin: 6px 10px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+
+        &:hover,
+        &.ant-menu-item-selected {
+          background: rgba(255, 255, 255, 0.25);
+        }
+      }
+    }
+  }
+
+  .driver-header {
+    background: #fff;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 64px;
+    padding: 0 20px;
+    border-bottom: 1px solid #eee;
+
+    .driver-header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .driver-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        .driver-name {
+          font-weight: 500;
+          color: #333;
+        }
+
+        .driver-avatar {
+          background-color: #4d940e;
+          color: #fff;
+          cursor: pointer;
+          border: 2px solid #4d940e;
+        }
+      }
+    }
+  }
+
+  .driver-content {
+    margin: 24px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+
+    .driver-page-container {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}

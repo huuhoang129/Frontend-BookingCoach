@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import HomeTemplate from "./templates/clientTemplates";
 import AdminRoute from "./routes/AdminRoute";
+import DriverRoute from "./routes/DriverRoute";
 
 // client pages
 import HomePage from "./pages/clientPages/HomePage";
@@ -31,6 +32,7 @@ import PaymentResultPage from "./pages/clientPages/paymentResult/paymentResultPa
 import CheckoutSuccessPage from "./pages/clientPages/paymentResult/checkoutSuccessPage";
 import CheckoutFailedPage from "./pages/clientPages/paymentResult/checkoutFailedPage";
 import VehiclePage from "./pages/adminPages/vehicleManage/vehiclePage";
+import driverSchedulePage from "./pages/adminPages/vehicleManage/driverSchedulePage";
 import VehicleStatusPage from "./pages/adminPages/vehicleManage/vehicleStatusPage";
 import TicketPricingPage from "./pages/adminPages/tripManage/ticketPricingPage";
 import TicketListPage from "./pages/adminPages/tripManage/tripListPage";
@@ -43,8 +45,9 @@ import TicketSalesPage from "./pages/adminPages/reportManage/ticketSalesPage";
 import CancellationRatePage from "./pages/adminPages/reportManage/cancellationRatePage";
 import InformationClientPage from "./pages/clientPages/AuthManage/InformationClientPage";
 import BookingHistoryPage from "./pages/clientPages/AuthManage/BookingHistoryPage";
-
 import TestPage from "./pages/clientPages/testClient";
+
+import DriverDashboardPage from "./pages/driverPages/driverDashboardPage";
 
 export default function App() {
   return (
@@ -148,6 +151,13 @@ export default function App() {
         }
       />
 
+      <Route
+        path="/admin/driver-schedule"
+        element={
+          <AdminRoute allowedRoles={["Admin"]} Component={driverSchedulePage} />
+        }
+      />
+
       {/* reportManage */}
       <Route
         path="/admin/revenue-reports"
@@ -206,6 +216,16 @@ export default function App() {
         path="/admin/account-manage"
         element={
           <AdminRoute allowedRoles={["Admin"]} Component={AccountManage} />
+        }
+      />
+
+      <Route
+        path="/driver/dashboard"
+        element={
+          <DriverRoute
+            allowedRoles={["Driver"]}
+            Component={DriverDashboardPage}
+          />
         }
       />
     </Routes>
