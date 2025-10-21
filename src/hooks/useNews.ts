@@ -45,8 +45,8 @@ export function useNews() {
   const [selectedNews, setSelectedNews] = useState<any>(null);
 
   // filter
-  const [statusFilter, setStatusFilter] = useState<string>("");
-  const [typeFilter, setTypeFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [typeFilter, setTypeFilter] = useState<string | null>(null);
 
   const fetchNews = async () => {
     setLoading(true);

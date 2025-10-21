@@ -21,6 +21,7 @@ export function useAccounts() {
     setLoading(true);
     try {
       const res = await getAllAccounts();
+      console.log("📦 [useAccounts] Data from API:", res.data.data);
       const users: Account[] = res.data.data || [];
       setAccounts(users);
     } catch (err) {

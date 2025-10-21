@@ -1,130 +1,242 @@
-import BaseTable from "../../../components/ui/Table/Table";
-import DeleteButton from "../../../components/ui/Button/Delete";
-import EditButton from "../../../components/ui/Button/Edit";
-import CreateButton from "../../../components/ui/Button/Create";
-import { CustomModal } from "../../../components/ui/Modal/Modal";
-import { FormInput } from "../../../components/ui/Form/FormInput";
-import Pagination from "../../../components/ui/Pagination/Pagination";
-import { useUserManage } from "../../../hooks/useUser.ts";
+import {
+  Table,
+  Button,
+  Space,
+  Input,
+  Modal,
+  Form,
+  Popconfirm,
+  Breadcrumb,
+  Card,
+  Flex,
+  Typography,
+  Tooltip,
+} from "antd";
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  HomeOutlined,
+  UserOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
+import type { ColumnsType } from "antd/es/table";
+import { useUserManage } from "../../../hooks/userHooks/useUserManage.ts";
 
-export default function UserManage() {
+const { Title } = Typography;
+
+export default function UserManagePage() {
   const {
-    users,
+    filteredUsers,
     loading,
-    openEdit,
-    selectedUser,
-    openCreate,
-    currentPage,
-    itemsPerPage,
-    currentUsers,
-    setOpenEdit,
-    setOpenCreate,
-    setCurrentPage,
-    handleOpenEdit,
-    handleEditSubmit,
-    handleCreateSubmit,
+    searchText,
+    setSearchText,
+    isAddOpen,
+    setIsAddOpen,
+    isEditOpen,
+    setIsEditOpen,
+    setEditingUser,
+    form,
+    editForm,
+    handleAdd,
+    handleEdit,
     handleDelete,
   } = useUserManage();
 
+  const columns: ColumnsType<any> = [
+    { title: "Mã KH", dataIndex: "userCode", key: "userCode", width: 100 },
+    { title: "Email", dataIndex: "email", key: "email", width: 200 },
+    { title: "Tên đầu", dataIndex: "firstName", key: "firstName" },
+    { title: "Tên cuối", dataIndex: "lastName", key: "lastName" },
+    {
+      title: "Số điện thoại",
+      dataIndex: "phoneNumber",
+      key: "phoneNumber",
+      width: 160,
+    },
+    {
+      title: "Hành động",
+      key: "actions",
+      width: 120,
+      render: (_, record) => (
+        <Space>
+          <Tooltip title="Sửa">
+            <Button
+              shape="circle"
+              icon={<EditOutlined />}
+              style={{ border: "none", color: "#4d940e" }}
+              onClick={() => {
+                setEditingUser(record);
+                editForm.setFieldsValue(record);
+                setIsEditOpen(true);
+              }}
+            />
+          </Tooltip>
+          <Popconfirm
+            title="Xác nhận xoá"
+            description={`Bạn có chắc muốn xoá "${record.email}" không?`}
+            okText="Xoá"
+            cancelText="Hủy"
+            okButtonProps={{ danger: true }}
+            onConfirm={() => handleDelete(record.id)}
+          >
+            <Tooltip title="Xoá">
+              <Button
+                shape="circle"
+                icon={<DeleteOutlined />}
+                danger
+                style={{ border: "none" }}
+              />
+            </Tooltip>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
   return (
-    <div className="panel-user-admin">
-      <div>
-        <h2>Quản Lý Người Dùng</h2>
-        <CreateButton onClick={() => setOpenCreate(true)}>
-          + Thêm mới người dùng
-        </CreateButton>
-      </div>
+    <div style={{ padding: 24, background: "#f4f6f9", minHeight: "100vh" }}>
+      <Breadcrumb style={{ marginBottom: 16 }}>
+        <Breadcrumb.Item href="">
+          <HomeOutlined />
+          <span>Dashboard</span>
+        </Breadcrumb.Item>
+        <Breadcrumb.Item>
+          <UserOutlined />
+          <span>User Management</span>
+        </Breadcrumb.Item>
+      </Breadcrumb>
 
-      {/* Bảng users */}
-      <div>
-        <BaseTable>
-          <thead>
-            <tr>
-              <th style={{ width: "150px" }}>Mã Khách Hàng</th>
-              <th style={{ width: "250px" }}>Email</th>
-              <th>Tên đầu</th>
-              <th>Tên cuối</th>
-              <th>Số điện thoại</th>
-              <th>Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td
-                  colSpan={6}
-                  style={{ textAlign: "center", padding: "16px" }}
-                >
-                  Đang tải...
-                </td>
-              </tr>
-            ) : currentUsers.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={6}
-                  style={{ textAlign: "center", padding: "16px" }}
-                >
-                  Không có người dùng nào
-                </td>
-              </tr>
-            ) : (
-              currentUsers.map((user) => (
-                <tr key={user.id}>
-                  <td>{user.userCode}</td>
-                  <td>{user.email}</td>
-                  <td>{user.firstName}</td>
-                  <td>{user.lastName}</td>
-                  <td>{user.phoneNumber}</td>
-                  <td>
-                    <EditButton onClick={() => handleOpenEdit(user)}>
-                      Sửa
-                    </EditButton>
-                    <DeleteButton onClick={() => handleDelete(user.id)}>
-                      Xoá
-                    </DeleteButton>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </BaseTable>
-      </div>
-
-      {/* Pagination */}
-      <Pagination
-        totalItems={users.length}
-        itemsPerPage={itemsPerPage}
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
-      />
-
-      {/* Modal user */}
-      <CustomModal
-        open={openCreate}
-        title="Thêm Người Dùng"
-        onClose={() => setOpenCreate(false)}
-        onSubmit={handleCreateSubmit}
+      <Title
+        level={3}
+        style={{ marginBottom: 20, fontWeight: 700, color: "#111" }}
       >
-        <FormInput name="email" label="Email" />
-        <FormInput name="password" label="Mật khẩu" />
-        <FormInput name="firstName" label="Tên đầu" />
-        <FormInput name="lastName" label="Tên cuối" />
-        <FormInput name="phoneNumber" label="Số điện thoại" />
-      </CustomModal>
+        Quản lý người dùng
+      </Title>
 
-      {/* Modal user */}
-      <CustomModal
-        open={openEdit}
+      <Card
+        style={{
+          marginBottom: 20,
+          borderRadius: 12,
+          boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
+        }}
+      >
+        <Flex justify="space-between" align="center" gap={16} wrap="wrap">
+          <Input
+            placeholder="🔍 Tìm theo email..."
+            prefix={<SearchOutlined />}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            style={{ width: 260, borderRadius: 8 }}
+          />
+          <Button
+            icon={<PlusOutlined />}
+            onClick={() => setIsAddOpen(true)}
+            style={{
+              borderRadius: 8,
+              padding: "0 20px",
+              background: "#4d940e",
+              borderColor: "#4d940e",
+              color: "#fff",
+              fontWeight: 500,
+            }}
+          >
+            Thêm người dùng
+          </Button>
+        </Flex>
+      </Card>
+
+      <Card
+        style={{ borderRadius: 12, boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}
+      >
+        <Table
+          rowKey="id"
+          loading={loading}
+          dataSource={filteredUsers}
+          columns={columns}
+          pagination={{ pageSize: 8 }}
+          bordered={false}
+        />
+      </Card>
+
+      {/* Modal Add */}
+      <Modal
+        title="Thêm người dùng"
+        open={isAddOpen}
+        onCancel={() => setIsAddOpen(false)}
+        onOk={handleAdd}
+        okText="Lưu"
+        cancelText="Hủy"
+        okButtonProps={{
+          style: { background: "#4d940e", borderColor: "#4d940e" },
+        }}
+      >
+        <Form form={form} layout="vertical">
+          <Form.Item name="email" label="Email" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="password"
+            label="Mật khẩu"
+            rules={[{ required: true }]}
+          >
+            <Input.Password />
+          </Form.Item>
+          <Form.Item
+            name="firstName"
+            label="Tên đầu"
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="lastName"
+            label="Tên cuối"
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item name="phoneNumber" label="Số điện thoại">
+            <Input />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Modal Edit */}
+      <Modal
         title="Chỉnh sửa người dùng"
-        onClose={() => setOpenEdit(false)}
-        onSubmit={handleEditSubmit}
-        initialValues={selectedUser || {}}
+        open={isEditOpen}
+        onCancel={() => setIsEditOpen(false)}
+        onOk={handleEdit}
+        okText="Cập nhật"
+        cancelText="Hủy"
+        okButtonProps={{
+          style: { background: "#4d940e", borderColor: "#4d940e" },
+        }}
       >
-        <FormInput name="firstName" label="Tên đầu" />
-        <FormInput name="lastName" label="Tên cuối" />
-        <FormInput name="email" label="Email" />
-        <FormInput name="phoneNumber" label="Số điện thoại" />
-      </CustomModal>
+        <Form form={editForm} layout="vertical">
+          <Form.Item
+            name="firstName"
+            label="Tên đầu"
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="lastName"
+            label="Tên cuối"
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item name="email" label="Email" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="phoneNumber" label="Số điện thoại">
+            <Input />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }

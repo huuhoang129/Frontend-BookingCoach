@@ -1,16 +1,35 @@
 import { useState } from "react";
-import BaseTable from "../../../components/ui/Table/Table";
-import DeleteButton from "../../../components/ui/Button/Delete";
-import EditButton from "../../../components/ui/Button/Edit";
-import CreateButton from "../../../components/ui/Button/Create";
-import { Dropdown } from "antd";
-import { FilterOutlined } from "@ant-design/icons";
-import Pagination from "../../../components/ui/Pagination/Pagination";
+import {
+  Table,
+  Card,
+  Flex,
+  Button,
+  Space,
+  Tooltip,
+  Breadcrumb,
+  Typography,
+  Tag,
+  Popconfirm,
+  Select,
+  Input,
+} from "antd";
+import {
+  HomeOutlined,
+  ReadOutlined,
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
+import type { ColumnsType } from "antd/es/table";
 
 import { useNews } from "../../../hooks/useNews.ts";
 import NewsModals from "../../../containers/ModalsCollect/NewsModals";
 
-export default function NewManage() {
+const { Title } = Typography;
+const { Option } = Select;
+
+export default function NewsManagePage() {
   const {
     newsList,
     loading,
@@ -27,131 +46,255 @@ export default function NewManage() {
 
   const [openCreate, setOpenCreate] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
-
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
+  const [searchText, setSearchText] = useState("");
 
+  const pageSize = 6;
+
+  // Bộ lọc + tìm kiếm
   const filteredNews = newsList.filter((n) => {
     const status = n.status?.toLowerCase();
     const type = n.newsType;
+    const titleMatch = n.title
+      ?.toLowerCase()
+      .includes(searchText.toLowerCase());
+
     return (
-      (statusFilter ? status === statusFilter.toLowerCase() : true) &&
-      (typeFilter ? type === typeFilter : true)
+      (!statusFilter || status === statusFilter.toLowerCase()) &&
+      (!typeFilter || type === typeFilter) &&
+      (!searchText || titleMatch)
     );
   });
 
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentNews = filteredNews.slice(startIndex, startIndex + itemsPerPage);
+  // Cột bảng
+  const columns: ColumnsType<any> = [
+    {
+      title: "Ảnh",
+      dataIndex: "thumbnail",
+      key: "thumbnail",
+      width: 120,
+      render: (thumb, record) =>
+        thumb ? (
+          <img
+            src={thumb}
+            alt={record.title}
+            style={{
+              width: 100,
+              height: 60,
+              objectFit: "cover",
+              borderRadius: 6,
+              border: "1px solid #ddd",
+            }}
+          />
+        ) : (
+          "—"
+        ),
+    },
+    {
+      title: "Tiêu đề",
+      dataIndex: "title",
+      key: "title",
+      render: (t) => <b>{t}</b>,
+    },
+    {
+      title: "Tác giả",
+      dataIndex: "author",
+      key: "author",
+      render: (author) =>
+        author ? `${author.firstName} ${author.lastName}` : "—",
+      width: 180,
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => (
+        <Tag
+          color={
+            status === "Published"
+              ? "green"
+              : status === "Draft"
+              ? "orange"
+              : "default"
+          }
+        >
+          {status}
+        </Tag>
+      ),
+      width: 130,
+    },
+    {
+      title: "Loại tin",
+      dataIndex: "newsType",
+      key: "newsType",
+      render: (t) => (
+        <Tag color="blue">
+          {t === "News"
+            ? "Tin tức"
+            : t === "Featured"
+            ? "Nổi bật"
+            : t === "Recruitment"
+            ? "Tuyển dụng"
+            : t === "Service"
+            ? "Dịch vụ"
+            : "Khác"}
+        </Tag>
+      ),
+      width: 150,
+    },
+    {
+      title: "Hành động",
+      key: "actions",
+      width: 140,
+      render: (_, record) => (
+        <Space>
+          <Tooltip title="Sửa">
+            <Button
+              shape="circle"
+              icon={<EditOutlined />}
+              style={{ border: "none", color: "#4d940e" }}
+              onClick={() => handleGetById(record.id, () => setOpenEdit(true))}
+            />
+          </Tooltip>
 
-  const statusMenu = {
-    items: [
-      { key: "", label: "Tất cả" },
-      { key: "Draft", label: "Bản nháp" },
-      { key: "Published", label: "Đã xuất bản" },
-    ],
-    onClick: (e: any) => setStatusFilter(e.key),
-  };
-
-  const typeMenu = {
-    items: [
-      { key: "", label: "Tất cả" },
-      { key: "News", label: "Tin tức" },
-      { key: "Featured", label: "Tin nổi bật" },
-      { key: "Recruitment", label: "Tin tuyển dụng" },
-      { key: "Service", label: "Tin dịch vụ" },
-    ],
-    onClick: (e: any) => setTypeFilter(e.key),
-  };
+          <Popconfirm
+            title="Xác nhận xoá"
+            description={`Bạn có chắc muốn xoá tin "${record.title}" không?`}
+            okText="Xoá"
+            cancelText="Hủy"
+            okButtonProps={{ danger: true }}
+            onConfirm={() => handleDelete(record.id)}
+          >
+            <Tooltip title="Xoá">
+              <Button
+                shape="circle"
+                icon={<DeleteOutlined />}
+                danger
+                style={{ border: "none" }}
+              />
+            </Tooltip>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
 
   return (
-    <div className="panel-news-admin">
-      <h2>Quản Lý Tin Tức</h2>
-      <CreateButton onClick={() => setOpenCreate(true)}>
-        + Thêm mới Tin tức
-      </CreateButton>
+    <div
+      style={{
+        padding: 24,
+        background: "#f4f6f9",
+        height: "100%",
+        overflowY: "auto",
+      }}
+    >
+      {/* Breadcrumb */}
+      <Breadcrumb style={{ marginBottom: 16 }}>
+        <Breadcrumb.Item href="">
+          <HomeOutlined />
+          <span>Dashboard</span>
+        </Breadcrumb.Item>
+        <Breadcrumb.Item>
+          <ReadOutlined />
+          <span>News Management</span>
+        </Breadcrumb.Item>
+      </Breadcrumb>
 
-      <BaseTable>
-        <thead>
-          <tr>
-            <th>Ảnh</th>
-            <th>Tiêu đề</th>
-            <th>Tác giả</th>
-            <th>
-              Trạng thái{" "}
-              <Dropdown menu={statusMenu} trigger={["click"]}>
-                <FilterOutlined
-                  style={{
-                    cursor: "pointer",
-                    color: statusFilter ? "#FFFF99" : "inherit",
-                  }}
-                />
-              </Dropdown>
-            </th>
-            <th>
-              Loại Tin{" "}
-              <Dropdown menu={typeMenu} trigger={["click"]}>
-                <FilterOutlined
-                  style={{
-                    cursor: "pointer",
-                    color: typeFilter ? "#FFFF99" : "inherit",
-                  }}
-                />
-              </Dropdown>
-            </th>
-            <th>Hành động</th>
-          </tr>
-        </thead>
-        <tbody>
-          {loading ? (
-            <tr>
-              <td colSpan={6} style={{ textAlign: "center" }}>
-                Đang tải...
-              </td>
-            </tr>
-          ) : currentNews.length === 0 ? (
-            <tr>
-              <td colSpan={6} style={{ textAlign: "center" }}>
-                Không có tin tức
-              </td>
-            </tr>
-          ) : (
-            currentNews.map((news) => (
-              <tr key={news.id}>
-                <td>
-                  {news.thumbnail ? (
-                    <img src={news.thumbnail} alt={news.title} width={80} />
-                  ) : (
-                    "—"
-                  )}
-                </td>
-                <td>{news.title}</td>
-                <td>
-                  {news.author
-                    ? `${news.author.firstName} ${news.author.lastName}`
-                    : "—"}
-                </td>
-                <td>{news.status}</td>
-                <td>{news.newsType}</td>
-                <td>
-                  <EditButton
-                    onClick={() =>
-                      handleGetById(news.id, () => setOpenEdit(true))
-                    }
-                  >
-                    Sửa
-                  </EditButton>
-                  <DeleteButton onClick={() => handleDelete(news.id)}>
-                    Xoá
-                  </DeleteButton>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </BaseTable>
+      {/* Title */}
+      <Title
+        level={3}
+        style={{
+          marginBottom: 20,
+          fontWeight: 700,
+          color: "#111",
+        }}
+      >
+        Quản lý Tin tức
+      </Title>
 
-      {/* Modals */}
+      {/* Toolbar */}
+      <Card
+        style={{
+          marginBottom: 20,
+          borderRadius: 12,
+          boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
+        }}
+      >
+        <Flex justify="space-between" align="center" gap={16} wrap="wrap">
+          <Flex gap={16} wrap="wrap">
+            <Input
+              placeholder="🔍 Tìm theo tiêu đề..."
+              prefix={<SearchOutlined />}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              style={{ width: 240, borderRadius: 8 }}
+            />
+
+            <Select
+              allowClear
+              placeholder="Trạng thái"
+              style={{ width: 160 }}
+              value={statusFilter || undefined}
+              onChange={(val) => setStatusFilter(val || null)}
+            >
+              <Option value="Draft">Bản nháp</Option>
+              <Option value="Published">Đã xuất bản</Option>
+            </Select>
+
+            <Select
+              allowClear
+              placeholder="Loại tin"
+              style={{ width: 180 }}
+              value={typeFilter || undefined}
+              onChange={(val) => setTypeFilter(val || null)}
+            >
+              <Option value="News">Tin tức</Option>
+              <Option value="Featured">Tin nổi bật</Option>
+              <Option value="Recruitment">Tin tuyển dụng</Option>
+              <Option value="Service">Tin dịch vụ</Option>
+            </Select>
+          </Flex>
+
+          <Button
+            icon={<PlusOutlined />}
+            onClick={() => setOpenCreate(true)}
+            style={{
+              borderRadius: 8,
+              padding: "0 20px",
+              background: "#4d940e",
+              borderColor: "#4d940e",
+              color: "#fff",
+              fontWeight: 500,
+            }}
+          >
+            Thêm tin tức
+          </Button>
+        </Flex>
+      </Card>
+
+      {/* Table */}
+      <Card
+        style={{
+          borderRadius: 12,
+          boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+          overflowX: "auto",
+        }}
+      >
+        <Table
+          rowKey="id"
+          dataSource={filteredNews}
+          columns={columns}
+          loading={loading}
+          pagination={{
+            pageSize,
+            current: currentPage,
+            onChange: (page) => setCurrentPage(page),
+          }}
+          bordered={false}
+        />
+      </Card>
+
+      {/* Modals giữ nguyên */}
       <NewsModals
         openCreate={openCreate}
         setOpenCreate={setOpenCreate}
@@ -162,13 +305,6 @@ export default function NewManage() {
           handleCreate: handleCreateSubmit,
           handleEdit: handleEditSubmit,
         }}
-      />
-
-      <Pagination
-        totalItems={filteredNews.length}
-        itemsPerPage={itemsPerPage}
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
       />
     </div>
   );

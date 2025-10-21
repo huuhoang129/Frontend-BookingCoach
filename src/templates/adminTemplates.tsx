@@ -117,10 +117,9 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
             <Menu.Item key="ticket-status">
               <Link to="/admin/ticket-status">Tình trạng vé</Link>
             </Menu.Item>
-            <Menu.Item key="refund-cancel" disabled>
-              Đang phát triển.....
-              {/* <Link to="#">Xử lý hoàn / hủy vé</Link> */}
-            </Menu.Item>
+            {/* <Menu.Item key="refund-cancel" disabled>
+              <Link to="#">Xử lý hoàn / hủy vé</Link>
+            </Menu.Item> */}
           </SubMenu>
 
           {/* <SubMenu
@@ -253,10 +252,10 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
         <Header className="custom-admin-header">
           <div className="header-left">
             <h3>
-              <span className="greeting">Good Morning,</span>{" "}
-              <span className="username">John Doe</span>
+              <span className="greeting">Chào mừng,</span>{" "}
+              <span className="username">Quản trị viên</span>
             </h3>
-            <p className="subtitle">Your performance summary this week</p>
+            <p className="subtitle">Tóm tắt hiệu suất của bạn trong tuần này</p>
           </div>
           <div className="header-right">
             <Input
