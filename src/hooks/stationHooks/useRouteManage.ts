@@ -1,26 +1,26 @@
+//src/hooks/stationHooks/useRouteManage.ts
 import { useEffect, useState } from "react";
 import { Form } from "antd";
-import type { NotificationInstance } from "antd/es/notification/interface";
+import { AppNotification } from "../../components/Notification/AppNotification";
 import { toBase64 } from "../../utils/base64";
 import {
   getAllRoutes,
   createRoute,
   updateRoute,
   deleteRoute,
-} from "../../services/stationServices/routesServices.ts"; // lấy danh sách tuyến
-import { getAllLocations } from "../../services/stationServices/locationServices"; // lấy danh sách location
+} from "../../services/stationServices/routesServices";
+import { getAllLocations } from "../../services/stationServices/locationServices";
 
+// types
 export interface Province {
   id: number;
   nameProvince: string;
 }
-
 export interface Location {
   id: number;
   nameLocations: string;
   province: Province;
 }
-
 export interface Route {
   id: number;
   fromLocation: Location;
@@ -28,12 +28,12 @@ export interface Route {
   imageRouteCoach?: string | null;
 }
 
-export function useRouteManage(api: NotificationInstance) {
+export function useRouteManage() {
+  // state
   const [routes, setRoutes] = useState<Route[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [filterProvince, setFilterProvince] = useState<string | null>(null);
-
   const [locations, setLocations] = useState<Location[]>([]);
 
   const [isAddModal, setIsAddModal] = useState(false);
@@ -43,22 +43,31 @@ export function useRouteManage(api: NotificationInstance) {
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
 
-  // Fetch
+  const { contextHolder, notifySuccess, notifyError } = AppNotification();
+
+  // fetch data
   const fetchRoutes = async () => {
     setLoading(true);
     try {
       const res = await getAllRoutes();
       if (res.data.errCode === 0) setRoutes(res.data.data);
+      else notifyError("Không thể tải danh sách tuyến", res.data.errMessage);
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể tải danh sách tuyến.");
     } finally {
       setLoading(false);
     }
   };
 
+  // fetch địa điểm
   const fetchLocations = async () => {
     try {
       const res = await getAllLocations();
       if (res.data.errCode === 0) setLocations(res.data.data);
-    } catch {}
+      else notifyError("Không thể tải danh sách địa điểm", res.data.errMessage);
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể tải danh sách địa điểm.");
+    }
   };
 
   useEffect(() => {
@@ -66,9 +75,9 @@ export function useRouteManage(api: NotificationInstance) {
     fetchLocations();
   }, []);
 
-  // Helper xử lý ảnh
+  // xử lý ảnh
   const processImage = async (fileList: any[], oldImage?: string | null) => {
-    if (fileList && fileList.length > 0) {
+    if (fileList?.length > 0) {
       const fileObj = fileList[0].originFileObj;
       if (fileObj) {
         const base64 = await toBase64(fileObj as File);
@@ -83,23 +92,21 @@ export function useRouteManage(api: NotificationInstance) {
     return null;
   };
 
-  // CRUD
+  // ===== CRUD ROUTE =====
+  // thêm chuyến
   const handleAddRoute = async () => {
     try {
       const values = await form.validateFields();
-
-      // Check trùng tuyến
       const duplicate = routes.find(
         (r) =>
           r.fromLocation.id === values.fromLocationId &&
           r.toLocation.id === values.toLocationId
       );
       if (duplicate) {
-        api.error({
-          message: "Trùng tuyến đường",
-          description: `Tuyến từ ${duplicate.fromLocation.nameLocations} ➝ ${duplicate.toLocation.nameLocations} đã tồn tại.`,
-          placement: "topRight",
-        });
+        notifyError(
+          "Trùng tuyến đường",
+          `Tuyến từ ${duplicate.fromLocation.nameLocations} ➝ ${duplicate.toLocation.nameLocations} đã tồn tại.`
+        );
         return;
       }
 
@@ -112,32 +119,27 @@ export function useRouteManage(api: NotificationInstance) {
 
       const res = await createRoute(payload);
       if (res.data.errCode === 0) {
-        api.success({
-          message: "Thành công",
-          description: "Thêm tuyến đường thành công.",
-          placement: "topRight",
-        });
+        notifySuccess(
+          "Thêm mới thành công",
+          "Tuyến đường đã được thêm vào hệ thống."
+        );
         setIsAddModal(false);
         form.resetFields();
         fetchRoutes();
       } else {
-        api.error({
-          message: "Lỗi",
-          description: res.data.errMessage || "Không thể thêm tuyến",
-          placement: "topRight",
-        });
+        notifyError("Không thể thêm tuyến đường", res.data.errMessage);
       }
-    } catch (err) {
-      console.error("❌ Add route error:", err);
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể thêm tuyến đường.");
     }
   };
 
+  // cập nhật tuyến
   const handleEditRoute = async () => {
     try {
       const values = await editForm.validateFields();
       if (!editingRoute) return;
 
-      // Check trùng tuyến (trừ chính nó)
       const duplicate = routes.find(
         (r) =>
           r.id !== editingRoute.id &&
@@ -145,11 +147,10 @@ export function useRouteManage(api: NotificationInstance) {
           r.toLocation.id === values.toLocationId
       );
       if (duplicate) {
-        api.error({
-          message: "Trùng tuyến đường",
-          description: `Tuyến từ ${duplicate.fromLocation.nameLocations} ➝ ${duplicate.toLocation.nameLocations} đã tồn tại.`,
-          placement: "topRight",
-        });
+        notifyError(
+          "Trùng tuyến đường",
+          `Tuyến từ ${duplicate.fromLocation.nameLocations} ➝ ${duplicate.toLocation.nameLocations} đã tồn tại.`
+        );
         return;
       }
 
@@ -159,84 +160,92 @@ export function useRouteManage(api: NotificationInstance) {
       );
 
       const payload = {
+        id: editingRoute.id,
         fromLocationId: values.fromLocationId,
         toLocationId: values.toLocationId,
         imageRouteCoach: base64Image,
       };
 
       const res = await updateRoute(editingRoute.id, payload);
-
       if (res.data.errCode === 0) {
-        api.success({
-          message: "Thành công",
-          description: "Cập nhật tuyến đường thành công.",
-          placement: "topRight",
-        });
+        notifySuccess(
+          "Cập nhật thành công",
+          "Thông tin tuyến đường đã được cập nhật."
+        );
         setIsEditModal(false);
         editForm.resetFields();
         setEditingRoute(null);
         fetchRoutes();
       } else {
-        api.error({
-          message: "Lỗi",
-          description: res.data.errMessage || "Không thể cập nhật tuyến",
-          placement: "topRight",
-        });
+        notifyError("Không thể cập nhật tuyến đường", res.data.errMessage);
       }
-    } catch (err) {
-      console.error("❌ Edit route error:", err);
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể cập nhật tuyến đường.");
     }
   };
 
+  // xoá tuyến
   const handleDeleteRoute = async (id: number) => {
     try {
       const res = await deleteRoute(id);
       if (res.data.errCode === 0) {
-        api.success({
-          message: "Đã xoá",
-          description: "Tuyến đường đã được xoá thành công.",
-          placement: "topRight",
-        });
+        notifySuccess(
+          "Xoá thành công",
+          "Tuyến đường đã được xoá khỏi hệ thống."
+        );
         fetchRoutes();
       } else {
-        api.error({
-          message: "Lỗi",
-          description: res.data.errMessage,
-          placement: "topRight",
-        });
+        notifyError("Không thể xoá tuyến đường", res.data.errMessage);
       }
-    } catch (err) {
-      console.error("❌ Delete route error:", err);
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể xoá tuyến đường.");
     }
   };
 
-  // Filtered data
+  // xoá nhiều tuyến
+  const handleBulkDelete = async (ids: number[]) => {
+    if (!ids.length) return;
+    try {
+      setLoading(true);
+      await Promise.all(ids.map((id) => deleteRoute(id)));
+      notifySuccess(
+        "Xoá thành công",
+        "Các tuyến đã chọn đã được xoá khỏi hệ thống."
+      );
+      fetchRoutes();
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể xoá các tuyến đã chọn.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // filter
   const filteredData = routes
     .sort((a, b) => a.id - b.id)
     .map((r, idx) => ({ ...r, index: idx + 1 }))
     .filter((r) => {
       let match = true;
+
       if (
         searchText &&
         !(
-          r.fromLocation?.nameLocations
+          r.fromLocation.nameLocations
             .toLowerCase()
             .includes(searchText.toLowerCase()) ||
-          r.toLocation?.nameLocations
+          r.toLocation.nameLocations
             .toLowerCase()
             .includes(searchText.toLowerCase())
         )
-      ) {
+      )
         match = false;
-      }
 
       if (
         filterProvince &&
-        r.fromLocation?.province?.nameProvince !== filterProvince &&
-        r.toLocation?.province?.nameProvince !== filterProvince
-      ) {
+        r.fromLocation.province.nameProvince !== filterProvince &&
+        r.toLocation.province.nameProvince !== filterProvince
+      )
         match = false;
-      }
 
       return match;
     });
@@ -260,6 +269,8 @@ export function useRouteManage(api: NotificationInstance) {
     handleAddRoute,
     handleEditRoute,
     handleDeleteRoute,
+    handleBulkDelete,
     filteredData,
+    contextHolder,
   };
 }

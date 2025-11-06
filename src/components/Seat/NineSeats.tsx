@@ -8,6 +8,7 @@ import SeatSold from "../../assets/icon/seat-3.svg";
 
 import type { Trip, Seat } from "../../types/booking";
 import { formatDuration, formatStartTime, calcEndTime } from "../../utils/time";
+import { getSeatNumber } from "../../utils/seat"; // import hàm tiện ích
 
 interface NineSeatsProps {
   seats: Seat[];
@@ -24,7 +25,7 @@ export default function NineSeats({
 }: NineSeatsProps) {
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
 
-  // ✅ Toggle chọn ghế (chỉ ghế trống mới chọn được)
+  // Toggle chọn ghế (chỉ ghế trống mới chọn được)
   const toggleSeat = (seat: Seat) => {
     if (seat.status === "SOLD" || seat.status === "HOLD") return; // không cho chọn
     setSelectedSeats((prev) => {
@@ -33,14 +34,14 @@ export default function NineSeats({
     });
   };
 
-  // ✅ Icon ghế
+  // Icon ghế
   const getIcon = (seat: Seat) => {
     if (selectedSeats.some((s) => s.id === seat.id)) return SeatSelected;
     if (seat.status === "SOLD" || seat.status === "HOLD") return SeatSold;
     return SeatAvailable;
   };
 
-  // ✅ Class CSS ghế
+  // Class CSS ghế
   const getSeatClass = (seat: Seat) => {
     if (selectedSeats.some((s) => s.id === seat.id)) return "seat-selected";
     if (seat.status === "SOLD" || seat.status === "HOLD") return "seat-sold";
@@ -86,9 +87,7 @@ export default function NineSeats({
               <div className="price-row">
                 <span>Ghế:</span>
                 <span>
-                  {selectedSeats
-                    .map((s) => s.name.replace(/\D/g, ""))
-                    .join(", ")}
+                  {selectedSeats.map((s) => getSeatNumber(s.name)).join(", ")}
                 </span>
               </div>
               <hr className="divider" />
@@ -147,7 +146,7 @@ export default function NineSeats({
                     onClick={() => toggleSeat(seats[0])}
                   >
                     <img src={getIcon(seats[0])} alt="seat" />
-                    <p>{seats[0].name.replace(/\D/g, "")}</p>
+                    <p>{getSeatNumber(seats[0].name)}</p>
                   </td>
                 )}
                 {seats[1] && (
@@ -156,7 +155,7 @@ export default function NineSeats({
                     onClick={() => toggleSeat(seats[1])}
                   >
                     <img src={getIcon(seats[1])} alt="seat" />
-                    <p>{seats[1].name.replace(/\D/g, "")}</p>
+                    <p>{getSeatNumber(seats[1].name)}</p>
                   </td>
                 )}
               </tr>
@@ -168,7 +167,7 @@ export default function NineSeats({
                     onClick={() => toggleSeat(seats[2])}
                   >
                     <img src={getIcon(seats[2])} alt="seat" />
-                    <p>{seats[2].name.replace(/\D/g, "")}</p>
+                    <p>{getSeatNumber(seats[2].name)}</p>
                   </td>
                 )}
                 <td></td>
@@ -178,7 +177,7 @@ export default function NineSeats({
                     onClick={() => toggleSeat(seats[3])}
                   >
                     <img src={getIcon(seats[3])} alt="seat" />
-                    <p>{seats[3].name.replace(/\D/g, "")}</p>
+                    <p>{getSeatNumber(seats[3].name)}</p>
                   </td>
                 )}
               </tr>
@@ -190,7 +189,7 @@ export default function NineSeats({
                     onClick={() => toggleSeat(seats[4])}
                   >
                     <img src={getIcon(seats[4])} alt="seat" />
-                    <p>{seats[4].name.replace(/\D/g, "")}</p>
+                    <p>{getSeatNumber(seats[4].name)}</p>
                   </td>
                 )}
                 <td></td>
@@ -200,7 +199,7 @@ export default function NineSeats({
                     onClick={() => toggleSeat(seats[5])}
                   >
                     <img src={getIcon(seats[5])} alt="seat" />
-                    <p>{seats[5].name.replace(/\D/g, "")}</p>
+                    <p>{getSeatNumber(seats[5].name)}</p>
                   </td>
                 )}
               </tr>
@@ -212,7 +211,7 @@ export default function NineSeats({
                     onClick={() => toggleSeat(seats[6])}
                   >
                     <img src={getIcon(seats[6])} alt="seat" />
-                    <p>{seats[6].name.replace(/\D/g, "")}</p>
+                    <p>{getSeatNumber(seats[6].name)}</p>
                   </td>
                 )}
                 {seats[7] && (
@@ -221,7 +220,7 @@ export default function NineSeats({
                     onClick={() => toggleSeat(seats[7])}
                   >
                     <img src={getIcon(seats[7])} alt="seat" />
-                    <p>{seats[7].name.replace(/\D/g, "")}</p>
+                    <p>{getSeatNumber(seats[7].name)}</p>
                   </td>
                 )}
                 {seats[8] && (
@@ -230,7 +229,7 @@ export default function NineSeats({
                     onClick={() => toggleSeat(seats[8])}
                   >
                     <img src={getIcon(seats[8])} alt="seat" />
-                    <p>{seats[8].name.replace(/\D/g, "")}</p>
+                    <p>{getSeatNumber(seats[8].name)}</p>
                   </td>
                 )}
               </tr>

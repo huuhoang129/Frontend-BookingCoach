@@ -7,6 +7,7 @@ import SeatSelected from "../../assets/icon/seat-2.svg";
 import SeatSold from "../../assets/icon/seat-3.svg";
 
 import { formatDuration, formatStartTime, calcEndTime } from "../../utils/time";
+import { getSeatNumber } from "../../utils/seat";
 import type { Trip, Seat } from "../../types/booking";
 
 interface DoubleDeckSeats36Props {
@@ -24,25 +25,23 @@ export default function DoubleDeckSeats36({
 }: DoubleDeckSeats36Props) {
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
 
-  // ✅ Toggle chọn ghế (chỉ ghế trống mới chọn được)
+  // Toggle chọn ghế
   const toggleSeat = (seat: Seat) => {
-    if (seat.status === "SOLD" || seat.status === "HOLD") return; // không cho chọn
+    if (seat.status === "SOLD" || seat.status === "HOLD") return;
     setSelectedSeats((prev) => {
       const exists = prev.some((s) => s.id === seat.id);
-      return exists
-        ? prev.filter((s) => s.id !== seat.id) // bỏ chọn
-        : [...prev, seat]; // thêm
+      return exists ? prev.filter((s) => s.id !== seat.id) : [...prev, seat];
     });
   };
 
-  // ✅ icon hiển thị
+  // icon hiển thị
   const getIcon = (seat: Seat) => {
     if (selectedSeats.some((s) => s.id === seat.id)) return SeatSelected;
     if (seat.status === "SOLD" || seat.status === "HOLD") return SeatSold;
     return SeatAvailable;
   };
 
-  // ✅ class theo trạng thái
+  // class theo trạng thái
   const getSeatClass = (seat: Seat) => {
     if (selectedSeats.some((s) => s.id === seat.id))
       return "thirtysix-seat-selected";
@@ -51,11 +50,11 @@ export default function DoubleDeckSeats36({
     return "thirtysix-seat-available";
   };
 
-  // ✅ Giá vé
+  // 💰 Giá vé
   const unitPrice = trip?.price?.priceTrip ? Number(trip.price.priceTrip) : 0;
   const total = selectedSeats.length * unitPrice;
 
-  // ✅ render tầng
+  // Render tầng
   const renderFloor = (floor: number) => {
     const floorSeats = seats.filter((s) => s.floor === floor);
     const rows = Array.from({ length: 6 }, (_, i) => [
@@ -78,7 +77,7 @@ export default function DoubleDeckSeats36({
                       onClick={() => toggleSeat(seat)}
                     >
                       <img src={getIcon(seat)} alt="seat" />
-                      <p>{seat.name.replace(/\D/g, "")}</p>
+                      <p>{getSeatNumber(seat.name)}</p>
                     </td>
                   )
               )}
@@ -97,13 +96,16 @@ export default function DoubleDeckSeats36({
           <div className="thirtysix-seat-title">
             <h2>{trip?.vehicle?.name || "Xe Hương Dương"}</h2>
           </div>
+
           <div className="thirtysix-seat-type">
-            <p>XE GIƯỜNG NẰM</p>
+            <p>XE GIƯỜNG NẰM 36 CHỖ</p>
           </div>
+
           <div className="thirtysix-seat-route">
             <span>{trip?.route?.fromLocation?.nameLocations || "?"}</span> -{" "}
             <span>{trip?.route?.toLocation?.nameLocations || "?"}</span>
           </div>
+
           <div className="thirtysix-seat-time">
             <span>{formatStartTime(trip?.startTime || "")}</span> →{" "}
             <span>
@@ -121,9 +123,7 @@ export default function DoubleDeckSeats36({
               <div className="price-row">
                 <span>Ghế:</span>
                 <span>
-                  {selectedSeats
-                    .map((s) => s.name.replace(/\D/g, ""))
-                    .join(", ")}
+                  {selectedSeats.map((s) => getSeatNumber(s.name)).join(", ")}
                 </span>
               </div>
               <hr className="divider" />
@@ -147,7 +147,7 @@ export default function DoubleDeckSeats36({
             <h4>Dịch vụ kèm theo</h4>
             <ul>
               <li>Đón trả tận nơi</li>
-              <li>Wifi</li>
+              <li>Wifi miễn phí</li>
               <li>Chăn và nước uống đóng chai</li>
               <li>Ghế massage</li>
             </ul>
@@ -159,6 +159,7 @@ export default function DoubleDeckSeats36({
           <h2 className="thirtysix-seat-title">
             {trip?.vehicle?.name || "Hương Dương"}
           </h2>
+
           <div className="thirtysix-seat-legend">
             <div className="thirtysix-seat-legend-item">
               <img src={SeatAvailable} alt="available" /> Ghế trống
@@ -167,7 +168,7 @@ export default function DoubleDeckSeats36({
               <img src={SeatSelected} alt="selected" /> Đang chọn
             </div>
             <div className="thirtysix-seat-legend-item">
-              <img src={SeatSold} alt="sold" /> Đã đặt / giữ
+              <img src={SeatSold} alt="sold" /> Đã bán / giữ
             </div>
           </div>
 

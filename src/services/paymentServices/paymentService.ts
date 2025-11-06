@@ -1,11 +1,11 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/api/v1"; // sửa lại nếu BE khác port
+const BASE_URL = "http://localhost:8080/api/v1";
 
 export const createPaymentQR = (data: any) => {
-  return axios.post(`${API_URL}/payments/create-banking-qr`, data);
+  return axios.post(`${BASE_URL}/payments/create-banking-qr`, data);
 };
 
 export const createPayment = (data: any) => {
-  return axios.post(`http://localhost:8080/api/v1/bookings/payments`, data);
+  return axios.post(`${BASE_URL}/bookings/payments`, data);
 };

@@ -10,12 +10,10 @@ export default function CheckoutSuccessPage() {
 
   useEffect(() => {
     if (bookingId) {
-      console.log(
-        "✅ [CheckoutSuccessPage] Tải hóa đơn cho booking:",
-        bookingId
-      );
+      console.log("[CheckoutSuccessPage] Tải hóa đơn cho booking:", bookingId);
       const link = document.createElement("a");
       link.href = `http://localhost:8080/api/v1/bookings/${bookingId}/invoice`;
+
       link.setAttribute("download", `invoice-${bookingId}.pdf`);
       document.body.appendChild(link);
       link.click();

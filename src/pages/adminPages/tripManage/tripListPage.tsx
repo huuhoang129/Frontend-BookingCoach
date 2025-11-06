@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   Table,
   Input,
@@ -9,12 +8,9 @@ import {
   Typography,
   Tooltip,
   Breadcrumb,
-  Modal,
-  Form,
-  message,
   Select,
   DatePicker,
-  TimePicker,
+  Popconfirm,
 } from "antd";
 import {
   SearchOutlined,
@@ -24,171 +20,47 @@ import {
   HomeOutlined,
   CarOutlined,
 } from "@ant-design/icons";
-import axios from "axios";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
+import { useState } from "react";
+import { useTrips } from "../../../hooks/routerListHooks/useTripList";
+import TripModal from "../../../containers/ModalsCollect/RouteListModal/TripListModal";
 
+dayjs.extend(isBetween);
 const { Title } = Typography;
 const { Option } = Select;
-
-interface Province {
-  id: number;
-  nameProvince: string;
-}
-
-interface Location {
-  id: number;
-  nameLocations: string;
-  province?: Province;
-}
-
-interface Route {
-  id: number;
-  fromLocation: Location;
-  toLocation: Location;
-}
-
-interface Vehicle {
-  id: number;
-  name: string;
-  type: string;
-  licensePlate: string;
-}
-
-interface TripPrice {
-  id: number;
-  seatType: string;
-  priceTrip: number;
-  typeTrip: string;
-  coachRouteId: number;
-}
-
-interface Trip {
-  id: number;
-  route: Route;
-  vehicle: Vehicle;
-  price: TripPrice;
-  startDate: string;
-  startTime: string;
-  totalTime?: string;
-  status: "OPEN" | "FULL" | "CANCELLED";
-}
+const { RangePicker } = DatePicker;
 
 export default function TripPage() {
-  const [trips, setTrips] = useState<Trip[]>([]);
-  const [loading, setLoading] = useState(false);
+  const {
+    trips,
+    routes,
+    vehicles,
+    vehicleStatuses,
+    prices,
+    loading,
+    isModalOpen,
+    setIsModalOpen,
+    isEdit,
+    setIsEdit,
+    setEditingTrip,
+    form,
+    handleSubmit,
+    handleDelete,
+    handleBulkDelete,
+    contextHolder,
+  } = useTrips();
+
   const [searchText, setSearchText] = useState("");
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
   const [filterVehicle, setFilterVehicle] = useState<number | null>(null);
+  const [filterDateRange, setFilterDateRange] = useState<
+    [dayjs.Dayjs, dayjs.Dayjs] | null
+  >(null);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
-  // modal
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEdit, setIsEdit] = useState(false);
-  const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
-  const [form] = Form.useForm();
-
-  const [routes, setRoutes] = useState<Route[]>([]);
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [prices, setPrices] = useState<TripPrice[]>([]);
-
-  // fetch data
-  const fetchTrips = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get("http://localhost:8080/api/v1/trips");
-      if (res.data.errCode === 0) setTrips(res.data.data);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchRoutes = async () => {
-    const res = await axios.get("http://localhost:8080/api/v1/routes");
-    if (res.data.errCode === 0) setRoutes(res.data.data);
-  };
-
-  const fetchVehicles = async () => {
-    const res = await axios.get("http://localhost:8080/api/v1/vehicles");
-    if (res.data.errCode === 0) setVehicles(res.data.data);
-  };
-
-  const fetchPrices = async () => {
-    const res = await axios.get("http://localhost:8080/api/v1/trip-prices");
-    if (res.data.errCode === 0) setPrices(res.data.data);
-  };
-
-  useEffect(() => {
-    fetchTrips();
-    fetchRoutes();
-    fetchVehicles();
-    fetchPrices();
-  }, []);
-
-  // submit
-  const handleSubmit = async () => {
-    try {
-      const values = await form.validateFields();
-      const payload = {
-        coachRouteId: values.coachRouteId,
-        vehicleId: values.vehicleId,
-        tripPriceId: values.tripPriceId,
-        startDate: values.startDate.format("YYYY-MM-DD"),
-        startTime: values.startTime.format("HH:mm:ss"),
-        totalTime: values.totalTime
-          ? values.totalTime.format("HH:mm:ss")
-          : null,
-        status: values.status,
-      };
-
-      if (isEdit && editingTrip) {
-        const res = await axios.put(
-          `http://localhost:8080/api/v1/trips/${editingTrip.id}`,
-          { id: editingTrip.id, ...payload }
-        );
-        if (res.data.errCode === 0) {
-          message.success("Cập nhật chuyến thành công");
-          fetchTrips();
-          setIsModalOpen(false);
-        } else message.error(res.data.errMessage);
-      } else {
-        const res = await axios.post(
-          "http://localhost:8080/api/v1/trips",
-          payload
-        );
-        if (res.data.errCode === 0) {
-          message.success("Thêm chuyến thành công");
-          fetchTrips();
-          setIsModalOpen(false);
-        } else message.error(res.data.errMessage);
-      }
-    } catch {}
-  };
-
-  const handleDelete = async (id: number) => {
-    const res = await axios.delete(`http://localhost:8080/api/v1/trips/${id}`);
-    if (res.data.errCode === 0) {
-      message.success("Xóa chuyến thành công");
-      fetchTrips();
-    } else message.error(res.data.errMessage);
-  };
-
-  // cập nhật trạng thái inline
-  const handleStatusChange = async (id: number, status: string) => {
-    try {
-      const res = await axios.put(`http://localhost:8080/api/v1/trips/${id}`, {
-        id,
-        status,
-      });
-      if (res.data.errCode === 0) {
-        message.success("Cập nhật trạng thái thành công");
-        fetchTrips();
-      } else message.error(res.data.errMessage);
-    } catch {
-      message.error("Lỗi khi cập nhật trạng thái");
-    }
-  };
-
-  // filter data
+  // 🔍 Lọc dữ liệu
   const filteredData = trips.filter((t) => {
     let match = true;
     if (
@@ -202,37 +74,35 @@ export default function TripPage() {
           .includes(searchText.toLowerCase()) ||
         t.vehicle?.name.toLowerCase().includes(searchText.toLowerCase())
       )
-    ) {
+    )
       match = false;
-    }
-    if (filterStatus && t.status !== filterStatus) match = false;
     if (filterVehicle && t.vehicle?.id !== filterVehicle) match = false;
+    if (filterStatus && t.status !== filterStatus) match = false;
+    if (filterDateRange && filterDateRange.length === 2) {
+      const start = dayjs(t.startDate);
+      const from = filterDateRange[0].startOf("day");
+      const to = filterDateRange[1].endOf("day");
+      if (!start.isBetween(from, to, "day", "[]")) match = false;
+    }
     return match;
   });
 
-  // watch modal
-  const selectedRoute = Form.useWatch("coachRouteId", form);
-  const selectedVehicleId = Form.useWatch("vehicleId", form);
-  const selectedVehicle = vehicles.find((v) => v.id === selectedVehicleId);
-
-  // columns
-  const columns: ColumnsType<Trip> = [
+  // 🧱 Cột bảng
+  const columns: ColumnsType<any> = [
     {
       title: "Tuyến",
-      key: "route",
       render: (_, r) =>
         r.route ? (
-          <div style={{ whiteSpace: "pre-line" }}>
-            {r.route.fromLocation?.nameLocations} ➡️{" "}
+          <span style={{ fontWeight: 600 }}>
+            {r.route.fromLocation?.nameLocations} →{" "}
             {r.route.toLocation?.nameLocations}
-          </div>
+          </span>
         ) : (
           "—"
         ),
     },
     {
       title: "Xe",
-      key: "vehicle",
       render: (_, r) =>
         r.vehicle ? `${r.vehicle.licensePlate} (${r.vehicle.type})` : "—",
     },
@@ -245,84 +115,98 @@ export default function TripPage() {
     { title: "Thời gian", dataIndex: "totalTime" },
     {
       title: "Giá vé",
-      key: "price",
       render: (_, r) =>
-        r.price ? `${r.price.priceTrip.toLocaleString()} đ` : "—",
+        r.price ? (
+          <span style={{ fontWeight: 600, color: "#4d940e" }}>
+            {r.price.priceTrip.toLocaleString()} đ
+          </span>
+        ) : (
+          "—"
+        ),
     },
     {
-      title: "Trạng thái",
-      dataIndex: "status",
-      render: (s, r) => (
-        <Select
-          value={s}
-          style={{ width: 120 }}
-          onChange={(val) => handleStatusChange(r.id, val)}
-        >
-          <Option value="OPEN">Còn vé</Option>
-          <Option value="FULL">Hết vé</Option>
-          <Option value="CANCELLED">Đã hủy</Option>
-        </Select>
-      ),
-    },
-    {
-      title: "Actions",
+      title: "Hành động",
       key: "actions",
-      render: (_, r) => (
+      render: (_, record) => (
         <Space>
           <Tooltip title="Sửa">
             <Button
               shape="circle"
               icon={<EditOutlined />}
+              style={{ border: "none", color: "#4d940e" }}
               onClick={() => {
-                setIsEdit(true);
-                setEditingTrip(r);
+                setEditingTrip(record);
                 form.setFieldsValue({
-                  coachRouteId: r.route?.id,
-                  vehicleId: r.vehicle?.id,
-                  tripPriceId: r.price?.id,
-                  startDate: dayjs(r.startDate),
-                  startTime: dayjs(r.startTime, "HH:mm:ss"),
-                  totalTime: r.totalTime
-                    ? dayjs(r.totalTime, "HH:mm:ss")
+                  coachRouteId: record.route?.id,
+                  vehicleId: record.vehicle?.id,
+                  tripPriceId: record.price?.id,
+                  startDate: dayjs(record.startDate),
+                  startTime: dayjs(record.startTime, "HH:mm:ss"),
+                  totalTime: record.totalTime
+                    ? dayjs(record.totalTime, "HH:mm:ss")
                     : null,
-                  status: r.status,
+                  status: record.status,
                 });
+                setIsEdit(true);
                 setIsModalOpen(true);
               }}
             />
           </Tooltip>
-          <Tooltip title="Xóa">
-            <Button
-              shape="circle"
-              icon={<DeleteOutlined />}
-              danger
-              onClick={() => handleDelete(r.id)}
-            />
-          </Tooltip>
+
+          <Popconfirm
+            title="Xác nhận xoá"
+            description={`Bạn có chắc muốn xoá chuyến từ "${record.route?.fromLocation?.nameLocations}" không?`}
+            okText="Xoá"
+            cancelText="Hủy"
+            okButtonProps={{ danger: true }}
+            onConfirm={() => handleDelete(record.id)}
+          >
+            <Tooltip title="Xoá">
+              <Button
+                shape="circle"
+                icon={<DeleteOutlined />}
+                danger
+                style={{ border: "none" }}
+              />
+            </Tooltip>
+          </Popconfirm>
         </Space>
       ),
     },
   ];
 
+  // checkbox
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (keys: React.Key[]) => setSelectedRowKeys(keys),
+  };
+
+  // =================== RENDER ===================
   return (
     <div style={{ padding: 24, background: "#f4f6f9", minHeight: "100vh" }}>
+      {contextHolder}
+
+      {/* breadcrumb */}
       <Breadcrumb style={{ marginBottom: 16 }}>
         <Breadcrumb.Item>
-          <HomeOutlined />
-          <span>Dashboard</span>
+          <HomeOutlined /> Dashboard
         </Breadcrumb.Item>
         <Breadcrumb.Item>
-          <CarOutlined />
-          <span>Trips</span>
+          <CarOutlined /> Quản lý chuyến xe
         </Breadcrumb.Item>
       </Breadcrumb>
 
-      <Title level={3} style={{ marginBottom: 20, fontWeight: 700 }}>
-        Quản lý chuyến
-      </Title>
+      {/* title */}
+      <Flex justify="space-between" align="center" style={{ marginBottom: 20 }}>
+        <Title level={3} style={{ fontWeight: 700, margin: 0 }}>
+          Quản lý chuyến xe
+        </Title>
+      </Flex>
 
+      {/* filter + actions */}
       <Card style={{ marginBottom: 20 }}>
-        <Flex justify="space-between" align="center" gap={16} wrap="wrap">
+        <Flex justify="space-between" align="center" wrap="wrap" gap={16}>
+          {/* Bộ lọc bên trái */}
           <Flex gap={16} wrap="wrap">
             <Input
               placeholder="🔍 Tìm tuyến, xe..."
@@ -334,7 +218,8 @@ export default function TripPage() {
             <Select
               allowClear
               placeholder="Chọn xe"
-              style={{ width: 200 }}
+              style={{ width: 160 }}
+              value={filterVehicle || undefined}
               onChange={(val) => setFilterVehicle(val || null)}
             >
               {vehicles.map((v) => (
@@ -346,7 +231,7 @@ export default function TripPage() {
             <Select
               allowClear
               placeholder="Trạng thái"
-              style={{ width: 160 }}
+              style={{ width: 140 }}
               value={filterStatus || undefined}
               onChange={(val) => setFilterStatus(val || null)}
             >
@@ -354,22 +239,69 @@ export default function TripPage() {
               <Option value="FULL">Hết vé</Option>
               <Option value="CANCELLED">Đã hủy</Option>
             </Select>
+            <RangePicker
+              allowClear
+              placeholder={["Từ ngày", "Đến ngày"]}
+              format="DD/MM/YYYY"
+              value={filterDateRange as any}
+              onChange={(dates) => setFilterDateRange(dates as any)}
+            />
           </Flex>
 
-          <Button
-            icon={<PlusOutlined />}
-            type="primary"
-            onClick={() => {
-              setIsEdit(false);
-              form.resetFields();
-              setIsModalOpen(true);
-            }}
-          >
-            Thêm chuyến
-          </Button>
+          {/* Nút hành động bên phải */}
+          <Flex gap={12} align="center">
+            {selectedRowKeys.length > 0 ? (
+              <Popconfirm
+                title="Xác nhận xoá"
+                description="Bạn có chắc muốn xoá các chuyến đã chọn không?"
+                okText="Xoá"
+                cancelText="Hủy"
+                okButtonProps={{ danger: true }}
+                onConfirm={() => {
+                  handleBulkDelete(selectedRowKeys as number[]);
+                  setSelectedRowKeys([]);
+                }}
+              >
+                <Button
+                  danger
+                  icon={<DeleteOutlined />}
+                  style={{
+                    height: 40,
+                    borderRadius: 8,
+                    padding: "0 20px",
+                    fontWeight: 500,
+                  }}
+                >
+                  Xoá đã chọn
+                </Button>
+              </Popconfirm>
+            ) : (
+              <Button
+                icon={<PlusOutlined />}
+                style={{
+                  borderRadius: 8,
+                  padding: "0 20px",
+                  background: "#4d940e",
+                  borderColor: "#4d940e",
+                  color: "#fff",
+                  fontWeight: 500,
+                  height: 40,
+                }}
+                type="primary"
+                onClick={() => {
+                  setIsEdit(false);
+                  form.resetFields();
+                  setIsModalOpen(true);
+                }}
+              >
+                Thêm chuyến
+              </Button>
+            )}
+          </Flex>
         </Flex>
       </Card>
 
+      {/* Bảng */}
       <Card>
         <Table
           rowKey="id"
@@ -377,94 +309,22 @@ export default function TripPage() {
           dataSource={filteredData}
           columns={columns}
           pagination={{ pageSize: 8 }}
+          rowSelection={rowSelection}
         />
       </Card>
 
-      {/* Modal Add/Edit */}
-      <Modal
-        title={isEdit ? "Sửa chuyến" : "Thêm chuyến"}
+      {/* Modal thêm/sửa */}
+      <TripModal
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
-        onOk={handleSubmit}
-        okText={isEdit ? "Cập nhật" : "Lưu"}
-        cancelText="Hủy"
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="coachRouteId"
-            label="Tuyến"
-            rules={[{ required: true }]}
-          >
-            <Select>
-              {routes.map((r) => (
-                <Option key={r.id} value={r.id}>
-                  {r.fromLocation?.nameLocations} ➡️{" "}
-                  {r.toLocation?.nameLocations}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item name="vehicleId" label="Xe" rules={[{ required: true }]}>
-            <Select>
-              {vehicles.map((v) => (
-                <Option key={v.id} value={v.id}>
-                  {v.licensePlate} - {v.type}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item
-            name="tripPriceId"
-            label="Giá vé"
-            rules={[{ required: true }]}
-          >
-            <Select placeholder="Chọn giá vé">
-              {prices
-                .filter((p) => {
-                  if (!selectedRoute || !selectedVehicle) return false;
-                  return (
-                    p.coachRouteId === selectedRoute &&
-                    p.seatType?.toLowerCase() ===
-                      selectedVehicle.type?.toLowerCase()
-                  );
-                })
-                .map((p) => (
-                  <Option key={p.id} value={p.id}>
-                    {p.priceTrip.toLocaleString()} đ ({p.typeTrip})
-                  </Option>
-                ))}
-            </Select>
-          </Form.Item>
-          <Form.Item
-            name="startDate"
-            label="Ngày đi"
-            rules={[{ required: true }]}
-          >
-            <DatePicker style={{ width: "100%" }} />
-          </Form.Item>
-          <Form.Item
-            name="startTime"
-            label="Giờ đi"
-            rules={[{ required: true }]}
-          >
-            <TimePicker style={{ width: "100%" }} format="HH:mm" />
-          </Form.Item>
-          <Form.Item name="totalTime" label="Thời gian">
-            <TimePicker style={{ width: "100%" }} format="HH:mm" />
-          </Form.Item>
-          <Form.Item
-            name="status"
-            label="Trạng thái"
-            rules={[{ required: true }]}
-          >
-            <Select>
-              <Option value="OPEN">Còn vé</Option>
-              <Option value="FULL">Hết vé</Option>
-              <Option value="CANCELLED">Đã hủy</Option>
-            </Select>
-          </Form.Item>
-        </Form>
-      </Modal>
+        onSubmit={handleSubmit}
+        isEdit={isEdit}
+        form={form}
+        routes={routes}
+        vehicles={vehicles}
+        vehicleStatuses={vehicleStatuses}
+        prices={prices}
+      />
     </div>
   );
 }

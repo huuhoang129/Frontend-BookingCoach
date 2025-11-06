@@ -229,6 +229,7 @@ export default function CheckoutPage() {
   const downloadInvoice = (bookingId: number) => {
     const link = document.createElement("a");
     link.href = `http://localhost:8080/api/v1/bookings/${bookingId}/invoice`;
+
     link.setAttribute("download", `invoice-${bookingId}.pdf`);
     document.body.appendChild(link);
     link.click();

@@ -1,35 +1,40 @@
-// src/hooks/AdminHooks/useUserManage.ts
+// src/hooks/userHooks/useUserManage.ts
 import { useEffect, useState } from "react";
-import { Form, message } from "antd";
+import { Form } from "antd";
 import {
   getAllUsers,
+  createUser,
   editUser,
   deleteUser,
-  createUser,
 } from "../../services/userServices/userService";
+import { AppNotification } from "../../components/Notification/AppNotification.tsx";
 
 export function useUserManage() {
+  // state
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchText, setSearchText] = useState("");
 
-  const [isAddOpen, setIsAddOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isAddModal, setIsAddModal] = useState(false);
+  const [isEditModal, setIsEditModal] = useState(false);
   const [editingUser, setEditingUser] = useState<any | null>(null);
 
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
 
-  // Fetch users
+  const { contextHolder, notifySuccess, notifyError } = AppNotification();
+
+  // fetch
   const fetchUsers = async () => {
     setLoading(true);
     try {
       const res = await getAllUsers();
       if (res.data.errCode === 0) {
         setUsers(res.data.data || []);
+      } else {
+        notifyError("Không thể tải danh sách", res.data.errMessage);
       }
-    } catch (err) {
-      console.error("❌ Fetch users error:", err);
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể tải danh sách người dùng.");
     } finally {
       setLoading(false);
     }
@@ -39,73 +44,97 @@ export function useUserManage() {
     fetchUsers();
   }, []);
 
-  // Add user
+  // ===== CRUD =====
+  // thêm mới
   const handleAdd = async () => {
     try {
       const values = await form.validateFields();
       const res = await createUser(values);
       if (res.data.errCode === 0) {
-        message.success("Thêm người dùng thành công!");
-        setIsAddOpen(false);
+        notifySuccess(
+          "Thêm mới thành công",
+          "Người dùng đã được thêm vào hệ thống."
+        );
+        setIsAddModal(false);
         form.resetFields();
         fetchUsers();
       } else {
-        message.error(res.data.errMessage || "Lỗi khi thêm người dùng");
+        notifyError("Không thể thêm người dùng", res.data.errMessage);
       }
-    } catch (err) {
-      console.error("❌ Add user error:", err);
+    } catch {
+      notifyError(
+        "Lỗi hệ thống",
+        "Không thể thêm người dùng, vui lòng thử lại."
+      );
     }
   };
 
-  // Edit user
+  // cập nhật
   const handleEdit = async () => {
     if (!editingUser) return;
     try {
       const values = await editForm.validateFields();
       const res = await editUser({ id: editingUser.id, ...values });
       if (res.data.errCode === 0) {
-        message.success("Cập nhật thành công!");
-        setIsEditOpen(false);
+        notifySuccess(
+          "Cập nhật thành công",
+          "Thông tin người dùng đã được cập nhật."
+        );
+        setIsEditModal(false);
         setEditingUser(null);
         fetchUsers();
       } else {
-        message.error(res.data.errMessage || "Cập nhật thất bại!");
+        notifyError("Không thể cập nhật người dùng", res.data.errMessage);
       }
-    } catch (err) {
-      console.error("❌ Edit error:", err);
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể cập nhật người dùng.");
     }
   };
 
-  // Delete user
+  // xoá
   const handleDelete = async (id: number) => {
     try {
       const res = await deleteUser(id);
       if (res.data.errCode === 0) {
-        message.success("Xoá người dùng thành công!");
+        notifySuccess(
+          "Xoá thành công",
+          "Người dùng đã được xoá khỏi hệ thống."
+        );
         fetchUsers();
       } else {
-        message.error(res.data.errMessage || "Xoá thất bại!");
+        notifyError("Không thể xoá người dùng", res.data.errMessage);
       }
-    } catch (err) {
-      console.error("❌ Delete error:", err);
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể xoá người dùng.");
     }
   };
 
-  // Search
-  const filteredUsers = users.filter((u) =>
-    u.email?.toLowerCase().includes(searchText.toLowerCase())
-  );
+  // xoá nhiều
+  const handleBulkDelete = async (ids: number[]) => {
+    if (!ids.length) return;
+    try {
+      setLoading(true);
+      await Promise.all(ids.map((id) => deleteUser(id)));
+      notifySuccess(
+        "Xoá thành công",
+        "Các người dùng đã chọn đã được xoá khỏi hệ thống."
+      );
+      fetchUsers();
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể xoá các người dùng đã chọn.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // return
   return {
     users,
     loading,
-    searchText,
-    setSearchText,
-    filteredUsers,
-    isAddOpen,
-    setIsAddOpen,
-    isEditOpen,
-    setIsEditOpen,
+    isAddModal,
+    setIsAddModal,
+    isEditModal,
+    setIsEditModal,
     editingUser,
     setEditingUser,
     form,
@@ -113,6 +142,7 @@ export function useUserManage() {
     handleAdd,
     handleEdit,
     handleDelete,
-    fetchUsers,
+    handleBulkDelete,
+    contextHolder,
   };
 }

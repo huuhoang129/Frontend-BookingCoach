@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+//src/pages/adminPages/vehicleManage/vehiclePage.tsx
 import {
   Table,
   Input,
@@ -11,9 +11,6 @@ import {
   Select,
   Tooltip,
   Breadcrumb,
-  Modal,
-  Form,
-  message,
   Popconfirm,
 } from "antd";
 import {
@@ -25,165 +22,69 @@ import {
   CarOutlined,
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
-import axios from "axios";
+import { useState } from "react";
+import { useVehicles } from "../../../hooks/vehicleHooks/useVehicles";
+import type { Vehicle } from "../../../hooks/vehicleHooks/useVehicles";
+import VehicleModal from "../../../containers/ModalsCollect/VehicleModal/VehicleModal";
 
 const { Title } = Typography;
 const { Option } = Select;
 
-interface Vehicle {
-  id: number;
-  name: string;
-  licensePlate: string;
-  type: string;
-  numberFloors: number;
-  seatCount: number;
-  description?: string;
-}
-
 export default function VehiclePage() {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [loading, setLoading] = useState(false);
+  // Hooks
+  const {
+    vehicles,
+    loading,
+    isAddModal,
+    setIsAddModal,
+    isEditModal,
+    setIsEditModal,
+    editingVehicle,
+    setEditingVehicle,
+    form,
+    editForm,
+    handleAdd,
+    handleEdit,
+    handleDelete,
+    handleBulkDelete,
+    contextHolder,
+  } = useVehicles();
 
-  // search & filter state
+  // state
   const [searchText, setSearchText] = useState("");
   const [filterType, setFilterType] = useState<string | null>(null);
-  const [filterFloor, setFilterFloor] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<string | null>(null);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
-  // modal states
-  const [isAddOpen, setIsAddOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
+  // lọc dữ liệu
+  const filteredData = vehicles.filter((v) => {
+    let match = true;
+    if (
+      searchText &&
+      !(
+        v.name.toLowerCase().includes(searchText.toLowerCase()) ||
+        (v.licensePlate || "").toLowerCase().includes(searchText.toLowerCase())
+      )
+    )
+      match = false;
+    if (filterType && v.type !== filterType) match = false;
+    return match;
+  });
 
-  const [form] = Form.useForm();
-  const [editForm] = Form.useForm();
-
-  // Fetch vehicles
-  const fetchVehicles = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get("http://localhost:8080/api/v1/vehicles");
-      if (res.data.errCode === 0) {
-        setVehicles(res.data.data || []);
-      }
-    } catch (error) {
-      console.error("Fetch vehicles error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchVehicles();
-  }, []);
-
-  // Handle Add
-  const handleAdd = async () => {
-    try {
-      const values = await form.validateFields();
-      const res = await axios.post(
-        "http://localhost:8080/api/v1/vehicles",
-        values
-      );
-      if (res.data.errCode === 0) {
-        message.success("Thêm xe thành công!");
-        setIsAddOpen(false);
-        form.resetFields();
-        fetchVehicles();
-      } else {
-        message.error(res.data.errMessage || "Lỗi khi thêm xe");
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  // Handle Edit
-  const handleEdit = async () => {
-    try {
-      const values = await editForm.validateFields();
-      if (!editingVehicle) return;
-      const res = await axios.put(
-        `http://localhost:8080/api/v1/vehicles/${editingVehicle.id}`,
-        values
-      );
-      if (res.data.errCode === 0) {
-        message.success("Cập nhật xe thành công!");
-        setIsEditOpen(false);
-        setEditingVehicle(null);
-        fetchVehicles();
-      } else {
-        message.error(res.data.errMessage || "Lỗi khi cập nhật xe");
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  // Handle Delete
-  const handleDelete = async (id: number) => {
-    try {
-      const res = await axios.delete(
-        `http://localhost:8080/api/v1/vehicles/${id}`
-      );
-      if (res.data.errCode === 0) {
-        message.success("Xoá xe thành công!");
-        fetchVehicles();
-      } else {
-        message.error(res.data.errMessage || "Lỗi khi xoá xe");
-      }
-    } catch (err) {
-      console.error("Delete error:", err);
-      message.error(
-        "Không thể xoá xe. Kiểm tra kết nối hoặc dữ liệu liên quan."
-      );
-    }
-  };
-
-  // Filter + Sort logic
-  const filteredData = vehicles
-    .filter((v) => {
-      let match = true;
-
-      if (
-        searchText &&
-        !(
-          v.name.toLowerCase().includes(searchText.toLowerCase()) ||
-          (v.licensePlate || "")
-            .toLowerCase()
-            .includes(searchText.toLowerCase())
-        )
-      ) {
-        match = false;
-      }
-
-      if (filterType && v.type !== filterType) match = false;
-      if (filterFloor && v.numberFloors.toString() !== filterFloor)
-        match = false;
-
-      return match;
-    })
-    .sort((a, b) => {
-      if (sortBy === "name") return a.name.localeCompare(b.name);
-      if (sortBy === "seats") return a.seatCount - b.seatCount;
-      return 0;
-    });
-
+  // Maping màu
   const typeColors: Record<string, string> = {
-    Normal: "blue",
-    Sleeper: "orange",
-    DoubleSleeper: "purple",
-    Limousine: "green",
+    NORMAL: "blue",
+    SLEEPER: "orange",
+    DOUBLESLEEPER: "purple",
+    LIMOUSINE: "green",
   };
-
   const typeIcons: Record<string, string> = {
-    Normal: "🚍",
-    Sleeper: "🚌",
-    DoubleSleeper: "🛏️",
-    Limousine: "🚐",
+    NORMAL: "🚍",
+    SLEEPER: "🚌",
+    DOUBLESLEEPER: "🛏️",
+    LIMOUSINE: "🚐",
   };
 
-  // Table columns
+  // cấu hình bảng
   const columns: ColumnsType<Vehicle> = [
     {
       title: "Tên xe",
@@ -200,7 +101,15 @@ export default function VehiclePage() {
       title: "Loại xe",
       dataIndex: "type",
       key: "type",
-      render: (type) => <Tag color={typeColors[type]}>{type}</Tag>,
+      render: (type) => {
+        const typeLabels: Record<string, string> = {
+          NORMAL: "Xe Thường",
+          SLEEPER: "Xe Giường Nằm",
+          DOUBLESLEEPER: "Xe Giường Nằm Đôi",
+          LIMOUSINE: "Xe Limousine",
+        };
+        return <Tag color={typeColors[type]}>{typeLabels[type]}</Tag>;
+      },
     },
     {
       title: "Tầng",
@@ -208,13 +117,19 @@ export default function VehiclePage() {
       key: "numberFloors",
       width: 90,
     },
-    { title: "Số ghế", dataIndex: "seatCount", key: "seatCount", width: 90 },
     {
-      title: "Actions",
+      title: "Số ghế",
+      dataIndex: "seatCount",
+      key: "seatCount",
+      width: 90,
+    },
+    {
+      title: "Hành động",
       key: "actions",
+      width: 120,
       render: (_, record) => (
         <Space>
-          <Tooltip title="Chỉnh sửa">
+          <Tooltip title="Sửa">
             <Button
               shape="circle"
               icon={<EditOutlined />}
@@ -222,10 +137,11 @@ export default function VehiclePage() {
               onClick={() => {
                 setEditingVehicle(record);
                 editForm.setFieldsValue(record);
-                setIsEditOpen(true);
+                setIsEditModal(true);
               }}
             />
           </Tooltip>
+
           <Popconfirm
             title="Xác nhận xoá"
             description={`Bạn có chắc muốn xoá xe "${record.name}" không?`}
@@ -245,214 +161,133 @@ export default function VehiclePage() {
           </Popconfirm>
         </Space>
       ),
-      width: 120,
     },
   ];
 
+  // checkbox
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (keys: React.Key[]) => setSelectedRowKeys(keys),
+  };
+
   return (
     <div style={{ padding: 24, background: "#f4f6f9", minHeight: "100vh" }}>
-      {/* Breadcrumb */}
+      {contextHolder}
+
+      {/* breadcrumb */}
       <Breadcrumb style={{ marginBottom: 16 }}>
-        <Breadcrumb.Item href="">
-          <HomeOutlined />
-          <span>Dashboard</span>
+        <Breadcrumb.Item>
+          <HomeOutlined /> Dashboard
         </Breadcrumb.Item>
         <Breadcrumb.Item>
-          <CarOutlined />
-          <span>Vehicle Management</span>
+          <CarOutlined /> Quản lý xe
         </Breadcrumb.Item>
       </Breadcrumb>
 
-      {/* Title */}
-      <Title
-        level={3}
-        style={{
-          marginBottom: 20,
-          fontWeight: 700,
-          color: "#111",
-          textAlign: "left",
-        }}
-      >
-        Quản lý xe
-      </Title>
+      <Flex justify="space-between" align="center" style={{ marginBottom: 20 }}>
+        <Title level={3} style={{ fontWeight: 700, margin: 0 }}>
+          Quản lý Xe
+        </Title>
+      </Flex>
 
-      {/* Toolbar */}
-      <Card
-        style={{
-          marginBottom: 20,
-          borderRadius: 12,
-          boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
-        }}
-      >
-        <Flex justify="space-between" align="center" gap={16} wrap="wrap">
+      <Card style={{ marginBottom: 20 }}>
+        <Flex justify="space-between" align="center" wrap="wrap" gap={16}>
+          {/* Bộ lọc bên trái */}
           <Flex gap={16} wrap="wrap">
             <Input
               placeholder="🔍 Tìm theo tên hoặc biển số..."
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              style={{ width: 240, borderRadius: 8 }}
+              style={{ width: 260 }}
             />
-
             <Select
               allowClear
               placeholder="Loại xe"
-              style={{ width: 160 }}
+              style={{ width: 180 }}
               value={filterType || undefined}
               onChange={(val) => setFilterType(val || null)}
             >
-              <Option value="Normal">Normal</Option>
-              <Option value="Sleeper">Sleeper</Option>
-              <Option value="DoubleSleeper">DoubleSleeper</Option>
-              <Option value="Limousine">Limousine</Option>
-            </Select>
-
-            <Select
-              allowClear
-              placeholder="Số tầng"
-              style={{ width: 140 }}
-              value={filterFloor || undefined}
-              onChange={(val) => setFilterFloor(val || null)}
-            >
-              <Option value="1">1 tầng</Option>
-              <Option value="2">2 tầng</Option>
-            </Select>
-
-            <Select
-              allowClear
-              placeholder="Sắp xếp"
-              style={{ width: 180 }}
-              value={sortBy || undefined}
-              onChange={(val) => setSortBy(val || null)}
-            >
-              <Option value="name">Tên xe (A → Z)</Option>
-              <Option value="seats">Số ghế ↑</Option>
+              <Option value="NORMAL">Xe Thường</Option>
+              <Option value="SLEEPER">Xe Giường Nằm</Option>
+              <Option value="DOUBLESLEEPER">Xe Giường Nằm Đôi</Option>
+              <Option value="LIMOUSINE">Xe Limousine</Option>
             </Select>
           </Flex>
 
-          <Button
-            icon={<PlusOutlined />}
-            style={{
-              borderRadius: 8,
-              padding: "0 20px",
-              background: "#4d940e",
-              borderColor: "#4d940e",
-              color: "#fff",
-              fontWeight: 500,
-            }}
-            onClick={() => setIsAddOpen(true)}
-          >
-            Thêm xe
-          </Button>
+          {/* Nút hành động bên phải */}
+          <Flex gap={12} align="center">
+            {selectedRowKeys.length > 0 ? (
+              <Popconfirm
+                title="Xác nhận xoá"
+                description="Bạn có chắc muốn xoá các xe đã chọn không?"
+                okText="Xoá"
+                cancelText="Hủy"
+                okButtonProps={{ danger: true }}
+                onConfirm={() => {
+                  handleBulkDelete(selectedRowKeys as number[]);
+                  setSelectedRowKeys([]);
+                }}
+              >
+                <Button
+                  danger
+                  icon={<DeleteOutlined />}
+                  style={{
+                    height: 40,
+                    borderRadius: 8,
+                    padding: "0 20px",
+                    fontWeight: 500,
+                  }}
+                >
+                  Xoá đã chọn
+                </Button>
+              </Popconfirm>
+            ) : (
+              <Button
+                icon={<PlusOutlined />}
+                style={{
+                  borderRadius: 8,
+                  padding: "0 20px",
+                  background: "#4d940e",
+                  borderColor: "#4d940e",
+                  color: "#fff",
+                  fontWeight: 500,
+                  height: 40,
+                }}
+                type="primary"
+                onClick={() => setIsAddModal(true)}
+              >
+                Thêm xe
+              </Button>
+            )}
+          </Flex>
         </Flex>
       </Card>
 
-      {/* Table */}
-      <Card
-        style={{ borderRadius: 12, boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}
-      >
+      {/* bảng */}
+      <Card>
         <Table
           rowKey="id"
           loading={loading}
           dataSource={filteredData}
           columns={columns}
           pagination={{ pageSize: 8 }}
-          bordered={false}
-          style={{ borderRadius: 8 }}
+          rowSelection={rowSelection}
         />
       </Card>
 
-      {/* Modal Add */}
-      <Modal
-        title="Thêm xe mới"
-        open={isAddOpen}
-        onCancel={() => setIsAddOpen(false)}
-        onOk={handleAdd}
-        okText="Lưu"
-        cancelText="Hủy"
-        okButtonProps={{
-          style: { background: "#4d940e", borderColor: "#4d940e" },
-        }}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item name="name" label="Tên xe" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="licensePlate" label="Biển số">
-            <Input />
-          </Form.Item>
-          <Form.Item name="description" label="Mô tả">
-            <Input.TextArea rows={2} />
-          </Form.Item>
-          <Form.Item name="type" label="Loại xe" rules={[{ required: true }]}>
-            <Select>
-              <Option value="Normal">Normal</Option>
-              <Option value="Sleeper">Sleeper</Option>
-              <Option value="DoubleSleeper">DoubleSleeper</Option>
-              <Option value="Limousine">Limousine</Option>
-            </Select>
-          </Form.Item>
-          <Form.Item name="numberFloors" label="Số tầng" initialValue={1}>
-            <Select>
-              <Option value={1}>1</Option>
-              <Option value={2}>2</Option>
-            </Select>
-          </Form.Item>
-          <Form.Item
-            name="seatCount"
-            label="Số ghế"
-            rules={[{ required: true }]}
-          >
-            <Input type="number" min={1} />
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      {/* Modal Edit */}
-      <Modal
-        title="Chỉnh sửa xe"
-        open={isEditOpen}
-        onCancel={() => setIsEditOpen(false)}
-        onOk={handleEdit}
-        okText="Cập nhật"
-        cancelText="Hủy"
-        okButtonProps={{
-          style: { background: "#4d940e", borderColor: "#4d940e" },
-        }}
-      >
-        <Form form={editForm} layout="vertical">
-          <Form.Item name="name" label="Tên xe" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="licensePlate" label="Biển số">
-            <Input />
-          </Form.Item>
-          <Form.Item name="description" label="Mô tả">
-            <Input.TextArea rows={2} />
-          </Form.Item>
-          <Form.Item name="type" label="Loại xe" rules={[{ required: true }]}>
-            <Select>
-              <Option value="Normal">Normal</Option>
-              <Option value="Sleeper">Sleeper</Option>
-              <Option value="DoubleSleeper">DoubleSleeper</Option>
-              <Option value="Limousine">Limousine</Option>
-            </Select>
-          </Form.Item>
-          <Form.Item name="numberFloors" label="Số tầng">
-            <Select>
-              <Option value={1}>1</Option>
-              <Option value={2}>2</Option>
-            </Select>
-          </Form.Item>
-          <Form.Item
-            name="seatCount"
-            label="Số ghế"
-            rules={[{ required: true }]}
-          >
-            <Input type="number" min={1} />
-          </Form.Item>
-        </Form>
-      </Modal>
+      {/* modal thêm sửa */}
+      <VehicleModal
+        openAdd={isAddModal}
+        setOpenAdd={setIsAddModal}
+        openEdit={isEditModal}
+        setOpenEdit={setIsEditModal}
+        formAdd={form}
+        formEdit={editForm}
+        handleAdd={handleAdd}
+        handleEdit={handleEdit}
+        editingVehicle={editingVehicle}
+      />
     </div>
   );
 }

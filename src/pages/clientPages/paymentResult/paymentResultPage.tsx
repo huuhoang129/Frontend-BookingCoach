@@ -16,7 +16,7 @@ export default function PaymentResultPage() {
       return;
     }
     if (code === "00") {
-      setMessage("✅ Thanh toán thành công! Đang chuyển hướng...");
+      setMessage("Thanh toán thành công! Đang chuyển hướng...");
       setTimeout(() => {
         navigate("/checkout-success", { state: { bookingId } });
       }, 1500);

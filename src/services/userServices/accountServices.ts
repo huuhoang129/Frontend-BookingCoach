@@ -1,7 +1,6 @@
-// src/services/accountServices/accountService.ts
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/api/v1"; // đổi đúng port backend
+const API_URL = "http://localhost:8080/api/v1";
 
 // Lấy toàn bộ tài khoản
 export const getAllAccounts = () => {

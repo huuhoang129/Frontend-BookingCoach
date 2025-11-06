@@ -30,7 +30,7 @@ interface DriverSchedule {
     id: number;
     startDate: string;
     startTime: string;
-    totalTime: string; // ✅ có totalTime thay cho endTime
+    totalTime: string; // có totalTime thay cho endTime
     route?: {
       fromLocation?: { nameLocations: string };
       toLocation?: { nameLocations: string };
@@ -81,7 +81,7 @@ export default function DriverDashboardPage() {
     groupedTrips[dateKey].push(s);
   });
 
-  // ✅ Tách nhóm ngày
+  // Tách nhóm ngày
   const futureDates: string[] = [];
   const todayDates: string[] = [];
   const pastDates: string[] = [];
@@ -92,12 +92,12 @@ export default function DriverDashboardPage() {
     else pastDates.push(date);
   });
 
-  // ✅ Thứ tự hiển thị
+  // Thứ tự hiển thị
   futureDates.sort((a, b) => dayjs(a).valueOf() - dayjs(b).valueOf());
   pastDates.sort((a, b) => dayjs(b).valueOf() - dayjs(a).valueOf());
   const sortedDates = [...futureDates, ...todayDates, ...pastDates];
 
-  // ✅ Thống kê hôm nay
+  // Thống kê hôm nay
   const todayTrips = groupedTrips[today] || [];
   const assignedVehicle =
     todayTrips.length > 0 ? todayTrips[0].trip?.vehicle?.licensePlate : "—";
@@ -211,7 +211,7 @@ export default function DriverDashboardPage() {
                             s.trip?.route?.toLocation?.nameLocations || "?"
                           }`;
 
-                          // ✅ Tính start & end time dựa vào totalTime
+                          // Tính start & end time dựa vào totalTime
                           const startDateTime = dayjs(
                             `${s.trip?.startDate} ${s.trip?.startTime}`
                           );
@@ -223,7 +223,7 @@ export default function DriverDashboardPage() {
                             .add(m, "minute")
                             .add(sec, "second");
 
-                          // ✅ Tính trạng thái thực tế
+                          // Tính trạng thái thực tế
                           let status = s.trip?.status || "Chờ khởi hành";
                           if (endDateTime.isBefore(now))
                             status = "Đã hoàn thành";

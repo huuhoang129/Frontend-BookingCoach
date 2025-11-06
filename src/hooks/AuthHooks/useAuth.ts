@@ -53,7 +53,7 @@ export function useAuth() {
         localStorage.setItem("user", JSON.stringify(user));
         localStorage.setItem("token", res.data.token);
 
-        // ✅ Điều hướng theo vai trò
+        // Điều hướng theo vai trò
         if (user.role === "Admin") {
           navigate("/admin");
         } else if (user.role === "Driver") {
@@ -146,7 +146,7 @@ export function useAuth() {
       clearSessionTimeout();
       setCurrentUser(null);
 
-      console.log("✅ Sau khi xóa:", { ...localStorage });
+      console.log("Sau khi xóa:", { ...localStorage });
       console.log("🔁 Reload về trang chủ...");
 
       window.location.replace("/");

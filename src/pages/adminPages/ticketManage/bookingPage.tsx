@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   Table,
   Input,
@@ -12,7 +11,7 @@ import {
   Modal,
   Tag,
   Select,
-  message,
+  DatePicker,
 } from "antd";
 import {
   SearchOutlined,
@@ -21,138 +20,51 @@ import {
   HomeOutlined,
   FileTextOutlined,
 } from "@ant-design/icons";
-import axios from "axios";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
+import { useState, useMemo } from "react";
+import { useBookingManage } from "../../../hooks/ticketHooks/useBookingManage";
+import type {
+  Booking,
+  Customer,
+  Seat,
+  Payment,
+  Point,
+} from "../../../types/bookingTypes";
 
 const { Title } = Typography;
 const { Option } = Select;
 
-interface Customer {
-  id: number;
-  fullName: string;
-  phone: string;
-  email?: string;
-}
-
-interface Point {
-  id: number;
-  type: "PICKUP" | "DROPOFF";
-  locationId: number;
-  time?: string;
-  note?: string;
-  Location?: {
-    id: number;
-    nameLocations: string;
-  };
-}
-
-interface Seat {
-  id: number;
-  seatId: number;
-  price: number;
-}
-
-interface Payment {
-  id: number;
-  method: string;
-  amount: number;
-  status: string;
-}
-
-interface Trip {
-  id: number;
-  startDate: string;
-  startTime: string;
-  route?: {
-    fromLocation: { nameLocations: string };
-    toLocation: { nameLocations: string };
-  };
-}
-
-interface Booking {
-  id: number;
-  userId?: number;
-  coachTripId: number;
-  status: "PENDING" | "CONFIRMED" | "CANCELLED";
-  totalAmount: number;
-  createdAt: string;
-  updatedAt: string;
-  customers?: Customer[];
-  points?: Point[];
-  seats?: Seat[];
-  payment?: Payment[];
-  trip?: Trip;
-}
-
 export default function BookingPage() {
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [searchText, setSearchText] = useState("");
+  const {
+    filteredData,
+    loading,
+    searchText,
+    setSearchText,
+    isModalOpen,
+    setIsModalOpen,
+    selectedBooking,
+    setSelectedBooking,
+    handleDelete,
+    handleStatusChange,
+  } = useBookingManage();
 
-  // modal
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  // ✅ Thêm state cho bộ lọc
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  const fetchBookings = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get("http://localhost:8080/api/v1/bookings");
-      if (res.data.errCode === 0) setBookings(res.data.data);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // ✅ Dữ liệu sau khi lọc theo ngày và trạng thái
+  const filteredBookings = useMemo(() => {
+    return filteredData.filter((b: Booking) => {
+      const matchStatus = !selectedStatus || b.status === selectedStatus;
+      const matchDate =
+        !selectedDate ||
+        (b.trip && dayjs(b.trip.startDate).isSame(dayjs(selectedDate), "day"));
+      return matchStatus && matchDate;
+    });
+  }, [filteredData, selectedStatus, selectedDate]);
 
-  useEffect(() => {
-    fetchBookings();
-  }, []);
-
-  const handleDelete = async (id: number) => {
-    try {
-      const res = await axios.delete(
-        `http://localhost:8080/api/v1/bookings/${id}`
-      );
-      if (res.data.errCode === 0) {
-        message.success("Xóa booking thành công");
-        fetchBookings();
-      } else {
-        message.error(res.data.errMessage);
-      }
-    } catch {
-      message.error("Lỗi khi xóa booking");
-    }
-  };
-
-  const handleStatusChange = async (id: number, status: string) => {
-    try {
-      const res = await axios.put(
-        `http://localhost:8080/api/v1/bookings/${id}`,
-        { status }
-      );
-      if (res.data.errCode === 0) {
-        message.success("Cập nhật trạng thái thành công");
-        fetchBookings();
-      } else {
-        message.error(res.data.errMessage);
-      }
-    } catch {
-      message.error("Lỗi khi cập nhật trạng thái");
-    }
-  };
-
-  // filter
-  const filteredData = bookings.filter((b) => {
-    if (!searchText) return true;
-    return (
-      b.customers?.some((c) =>
-        c.fullName.toLowerCase().includes(searchText.toLowerCase())
-      ) ||
-      String(b.id).includes(searchText) ||
-      String(b.totalAmount).includes(searchText)
-    );
-  });
-
+  // ✅ Cột bảng
   const columns: ColumnsType<Booking> = [
     {
       title: "Mã",
@@ -165,7 +77,7 @@ export default function BookingPage() {
       render: (_, r) =>
         r.trip?.route ? (
           <div>
-            {r.trip.route.fromLocation?.nameLocations} ➡️{" "}
+            {r.trip.route.fromLocation?.nameLocations} →{" "}
             {r.trip.route.toLocation?.nameLocations}
           </div>
         ) : (
@@ -183,18 +95,18 @@ export default function BookingPage() {
       key: "customers",
       render: (_, r) =>
         r.customers && r.customers.length > 0
-          ? r.customers.map((c) => c.fullName).join(", ")
+          ? r.customers.map((c: Customer) => c.fullName).join(", ")
           : "—",
     },
     {
       title: "Tổng tiền",
       dataIndex: "totalAmount",
-      render: (v) => `${Number(v).toLocaleString()} đ`,
+      render: (v: number) => `${Number(v).toLocaleString()} đ`,
     },
     {
       title: "Trạng thái",
       dataIndex: "status",
-      render: (s, r) => (
+      render: (s: string, r) => (
         <Select
           value={s}
           style={{ width: 140 }}
@@ -236,6 +148,7 @@ export default function BookingPage() {
 
   return (
     <div style={{ padding: 24, background: "#f4f6f9", minHeight: "100vh" }}>
+      {/* Breadcrumb */}
       <Breadcrumb style={{ marginBottom: 16 }}>
         <Breadcrumb.Item>
           <HomeOutlined />
@@ -251,29 +164,60 @@ export default function BookingPage() {
         Quản lý đặt vé
       </Title>
 
+      {/* Bộ lọc */}
+      {/* Toolbar */}
       <Card style={{ marginBottom: 20 }}>
-        <Flex justify="space-between" align="center" gap={16} wrap="wrap">
-          <Input
-            placeholder="🔍 Tìm theo mã, tên KH, số tiền..."
-            prefix={<SearchOutlined />}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            style={{ width: 280 }}
-          />
+        <Flex justify="space-between" align="center" wrap="wrap" gap={16}>
+          {/* Nhóm bộ lọc bên trái */}
+          <Flex gap={16} wrap="wrap">
+            {/* 🔍 Tìm kiếm */}
+            <Input
+              placeholder="🔍 Tìm theo mã, tên KH, số tiền..."
+              prefix={<SearchOutlined />}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              style={{ width: 260 }}
+            />
+
+            {/* 📅 Lọc theo ngày */}
+            <DatePicker
+              placeholder="Chọn ngày đi"
+              format="DD/MM/YYYY"
+              allowClear
+              value={selectedDate ? dayjs(selectedDate) : null}
+              onChange={(date) =>
+                setSelectedDate(date ? date.format("YYYY-MM-DD") : null)
+              }
+            />
+
+            {/* 📌 Lọc theo trạng thái */}
+            <Select
+              placeholder="Lọc theo trạng thái"
+              allowClear
+              style={{ width: 180 }}
+              value={selectedStatus || undefined}
+              onChange={(val) => setSelectedStatus(val || null)}
+            >
+              <Option value="PENDING">Chờ xử lý</Option>
+              <Option value="CONFIRMED">Đã xác nhận</Option>
+              <Option value="CANCELLED">Đã hủy</Option>
+            </Select>
+          </Flex>
         </Flex>
       </Card>
 
+      {/* Bảng dữ liệu */}
       <Card>
         <Table
           rowKey="id"
           loading={loading}
-          dataSource={filteredData}
+          dataSource={filteredBookings}
           columns={columns}
           pagination={{ pageSize: 8 }}
         />
       </Card>
 
-      {/* Modal xem chi tiết */}
+      {/* Modal chi tiết */}
       <Modal
         title={`Chi tiết Booking #${selectedBooking?.id}`}
         open={isModalOpen}
@@ -281,126 +225,124 @@ export default function BookingPage() {
         footer={null}
         width={800}
       >
-        {selectedBooking && (
-          <div style={{ lineHeight: 1.8 }}>
-            {/* Thông tin chuyến */}
-            <Card
-              size="small"
-              title="🚌 Thông tin chuyến"
-              style={{ marginBottom: 16 }}
-            >
-              <p>
-                <b>Tuyến:</b>{" "}
-                {selectedBooking.trip?.route
-                  ? `${selectedBooking.trip.route.fromLocation?.nameLocations} ➡️ ${selectedBooking.trip.route.toLocation?.nameLocations}`
-                  : "—"}
-              </p>
-              <p>
-                <b>Ngày giờ đi:</b>{" "}
-                {selectedBooking.trip
-                  ? `${dayjs(selectedBooking.trip.startDate).format(
-                      "DD/MM/YYYY"
-                    )} ${selectedBooking.trip.startTime}`
-                  : "—"}
-              </p>
-              <p>
-                <b>Ghế:</b>{" "}
-                {selectedBooking.seats?.map((s) => `#${s.seatId}`).join(", ") ||
-                  "—"}
-              </p>
-              <p>
-                <b>Tổng tiền:</b>{" "}
-                {Number(selectedBooking.totalAmount).toLocaleString()} đ
-              </p>
-            </Card>
-
-            {/* Khách hàng */}
-            <Card
-              size="small"
-              title="👤 Khách hàng"
-              style={{ marginBottom: 16 }}
-            >
-              {selectedBooking.customers &&
-              selectedBooking.customers.length > 0 ? (
-                selectedBooking.customers.map((c) => (
-                  <div key={c.id} style={{ marginBottom: 8 }}>
-                    <b>{c.fullName}</b> - {c.phone}{" "}
-                    {c.email ? `(${c.email})` : ""}
-                  </div>
-                ))
-              ) : (
-                <p>—</p>
-              )}
-            </Card>
-
-            {/* Điểm đón / trả */}
-            <Card
-              size="small"
-              title="📍 Điểm đón / trả"
-              style={{ marginBottom: 16 }}
-            >
-              {selectedBooking.points && selectedBooking.points.length > 0 ? (
-                selectedBooking.points.map((p) => (
-                  <div key={p.id} style={{ marginBottom: 8 }}>
-                    <Tag color={p.type === "PICKUP" ? "blue" : "volcano"}>
-                      {p.type === "PICKUP" ? "Đón" : "Trả"}
-                    </Tag>{" "}
-                    {p.Location?.nameLocations || p.locationId}{" "}
-                    {p.time ? `(${p.time})` : ""} {p.note ? `- ${p.note}` : ""}
-                  </div>
-                ))
-              ) : (
-                <p>—</p>
-              )}
-            </Card>
-
-            {/* Thanh toán */}
-            <Card
-              size="small"
-              title="💳 Thanh toán"
-              style={{ marginBottom: 16 }}
-            >
-              {selectedBooking.payment && selectedBooking.payment.length > 0 ? (
-                selectedBooking.payment.map((p) => (
-                  <div key={p.id} style={{ marginBottom: 8 }}>
-                    <Tag color="purple">{p.method}</Tag>{" "}
-                    {Number(p.amount).toLocaleString()} đ -{" "}
-                    <Tag
-                      color={
-                        p.status === "SUCCESS"
-                          ? "green"
-                          : p.status === "FAILED"
-                          ? "red"
-                          : "orange"
-                      }
-                    >
-                      {p.status}
-                    </Tag>
-                  </div>
-                ))
-              ) : (
-                <p>—</p>
-              )}
-            </Card>
-
-            {/* Trạng thái Booking */}
-            <Card size="small" title="📌 Trạng thái">
-              <Tag
-                color={
-                  selectedBooking.status === "CONFIRMED"
-                    ? "green"
-                    : selectedBooking.status === "CANCELLED"
-                    ? "red"
-                    : "orange"
-                }
-                style={{ fontSize: 14, padding: "4px 12px" }}
-              >
-                {selectedBooking.status}
-              </Tag>
-            </Card>
-          </div>
-        )}
+        {selectedBooking && <BookingDetail booking={selectedBooking} />}
       </Modal>
+    </div>
+  );
+}
+
+/* -------- Component nhỏ hiển thị chi tiết Booking -------- */
+import { Card as InfoCard } from "antd";
+
+function BookingDetail({ booking }: { booking: Booking }) {
+  const statusLabel: Record<string, string> = {
+    SUCCESS: "Thành công",
+    FAILED: "Thất bại",
+    PENDING: "Đang xử lý",
+    CONFIRMED: "Đã xác nhận",
+    CANCELLED: "Đã hủy",
+  };
+
+  const methodLabel: Record<string, string> = {
+    CASH: "Tiền mặt",
+    BANKING: "Chuyển khoản",
+    VNPAY: "VNPay",
+  };
+
+  return (
+    <div style={{ lineHeight: 1.8 }}>
+      <InfoCard
+        size="small"
+        title="🚌 Thông tin chuyến"
+        style={{ marginBottom: 16 }}
+      >
+        <p>
+          <b>Tuyến:</b>{" "}
+          {booking.trip?.route
+            ? `${booking.trip.route.fromLocation?.nameLocations} → ${booking.trip.route.toLocation?.nameLocations}`
+            : "—"}
+        </p>
+        <p>
+          <b>Ngày giờ đi:</b>{" "}
+          {booking.trip
+            ? `${dayjs(booking.trip.startDate).format("DD/MM/YYYY")} ${
+                booking.trip.startTime
+              }`
+            : "—"}
+        </p>
+        <p>
+          <b>Ghế:</b>{" "}
+          {booking.seats?.map((s: Seat) => `#${s.seatId}`).join(", ") || "—"}
+        </p>
+        <p>
+          <b>Tổng tiền:</b> {Number(booking.totalAmount).toLocaleString()} đ
+        </p>
+      </InfoCard>
+
+      <InfoCard size="small" title="👤 Khách hàng" style={{ marginBottom: 16 }}>
+        {booking.customers?.length
+          ? booking.customers.map((c: Customer) => (
+              <div key={c.id}>
+                <b>{c.fullName}</b> - {c.phone} {c.email ? `(${c.email})` : ""}
+              </div>
+            ))
+          : "—"}
+      </InfoCard>
+
+      <InfoCard
+        size="small"
+        title="📍 Điểm đón / trả"
+        style={{ marginBottom: 16 }}
+      >
+        {booking.points?.length
+          ? booking.points.map((p: Point) => (
+              <div key={p.id}>
+                <Tag color={p.type === "PICKUP" ? "blue" : "volcano"}>
+                  {p.type === "PICKUP" ? "Điểm đón" : "Điểm trả"}
+                </Tag>{" "}
+                {p.Location?.nameLocations} {p.time ? `(${p.time})` : ""}{" "}
+                {p.note ? `- ${p.note}` : ""}
+              </div>
+            ))
+          : "—"}
+      </InfoCard>
+
+      <InfoCard size="small" title="💳 Thanh toán" style={{ marginBottom: 16 }}>
+        {booking.payment?.length
+          ? booking.payment.map((p: Payment) => (
+              <div key={p.id}>
+                <Tag color="purple">{methodLabel[p.method] || p.method}</Tag>{" "}
+                {Number(p.amount).toLocaleString()} đ -{" "}
+                <Tag
+                  color={
+                    p.status === "SUCCESS"
+                      ? "green"
+                      : p.status === "FAILED"
+                      ? "red"
+                      : "orange"
+                  }
+                >
+                  {statusLabel[p.status] || p.status}
+                </Tag>
+              </div>
+            ))
+          : "—"}
+      </InfoCard>
+
+      <InfoCard size="small" title="📌 Trạng thái">
+        <Tag
+          color={
+            booking.status === "CONFIRMED"
+              ? "green"
+              : booking.status === "CANCELLED"
+              ? "red"
+              : "orange"
+          }
+          style={{ fontSize: 14, padding: "4px 12px" }}
+        >
+          {statusLabel[booking.status] || booking.status}
+        </Tag>
+      </InfoCard>
     </div>
   );
 }

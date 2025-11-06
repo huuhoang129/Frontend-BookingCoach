@@ -1,5 +1,3 @@
-// src/types/booking.ts
-
 // Trạng thái ghế trong 1 chuyến cụ thể
 export type SeatStatus = "HOLD" | "SOLD" | "CANCELLED" | undefined;
 
@@ -8,7 +6,6 @@ export interface Seat {
   id: number;
   name: string;
   floor: number;
-  // status có thể đến từ BookingSeats (khi fetch theo trip)
   status?: SeatStatus;
 }
 
@@ -62,10 +59,10 @@ export interface Trip {
   price?: TripPrice;
   totalSeats: number;
   availableSeats: number;
-  seats: Seat[]; // Bao gồm status ghế theo từng chuyến
+  seats: Seat[];
 }
 
-// Thông tin tạm thời của booking (frontend)
+// Thông tin tạm thời của booking
 export interface BookingDraft {
   goTrip?: Trip;
   returnTrip?: Trip;

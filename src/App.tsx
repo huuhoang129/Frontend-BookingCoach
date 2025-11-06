@@ -18,14 +18,14 @@ import NewsDetailPage from "./pages/clientPages/NewsDetailPage";
 
 // admin pages
 import DashboardPage from "./pages/adminPages/DashboardPage";
-import BannerManage from "./pages/adminPages/systemManage/bannerManage";
-import HomepageManage from "./pages/adminPages/systemManage/homePageManage";
-import UserManage from "./pages/adminPages/usersManage/userManage";
-import EmployeeManage from "./pages/adminPages/usersManage/employeeManage";
-import AccountManage from "./pages/adminPages/usersManage/accountManage";
-import NewsManage from "./pages/adminPages/systemManage/newsManage";
-import LocationManage from "./pages/adminPages/stationManage/locationManage";
-import RoutesManage from "./pages/adminPages/stationManage/routesManage";
+import BannerManagePage from "./pages/adminPages/systemManage/bannerManagePage";
+import HomepageManagePage from "./pages/adminPages/systemManage/homePageManagePage";
+import UserManagePage from "./pages/adminPages/usersManage/userManagePage";
+import DriverManagePage from "./pages/adminPages/usersManage/driverManagePage";
+import AccountManagePage from "./pages/adminPages/usersManage/accountManagePage";
+import NewsManagePage from "./pages/adminPages/systemManage/newsManagePage";
+import LocationManagePage from "./pages/adminPages/stationManage/locationManagePage";
+import RoutesManagePage from "./pages/adminPages/stationManage/routesManagePage";
 import BookingPage from "./pages/clientPages/BookingPage";
 import CheckOutPage from "./pages/clientPages/CheckoutPage";
 import PaymentResultPage from "./pages/clientPages/paymentResult/paymentResultPage";
@@ -38,7 +38,7 @@ import TicketPricingPage from "./pages/adminPages/tripManage/ticketPricingPage";
 import TicketListPage from "./pages/adminPages/tripManage/tripListPage";
 import SchedulePage from "./pages/adminPages/tripManage/schedulePage";
 import BookingPageAdmin from "./pages/adminPages/ticketManage/bookingPage";
-import TicketStatusPage from "./pages/adminPages/ticketManage/ticketStatusPage";
+import PaymentPage from "./pages/adminPages/ticketManage/paymentPage";
 
 import RevenueReportPage from "./pages/adminPages/reportManage/revenueReportPage";
 import TicketSalesPage from "./pages/adminPages/reportManage/ticketSalesPage";
@@ -48,8 +48,9 @@ import BookingHistoryPage from "./pages/clientPages/AuthManage/BookingHistoryPag
 import TestPage from "./pages/clientPages/testClient";
 
 import DriverDashboardPage from "./pages/driverPages/driverDashboardPage";
-
+import useDynamicTitle from "./hooks/useDynamicTitle";
 export default function App() {
+  useDynamicTitle();
   return (
     <Routes>
       {/* Client */}
@@ -91,14 +92,14 @@ export default function App() {
       <Route
         path="/admin/location-list"
         element={
-          <AdminRoute allowedRoles={["Admin"]} Component={LocationManage} />
+          <AdminRoute allowedRoles={["Admin"]} Component={LocationManagePage} />
         }
       />
 
       <Route
         path="/admin/route-list"
         element={
-          <AdminRoute allowedRoles={["Admin"]} Component={RoutesManage} />
+          <AdminRoute allowedRoles={["Admin"]} Component={RoutesManagePage} />
         }
       />
 
@@ -113,7 +114,7 @@ export default function App() {
       <Route
         path="/admin/ticket-status"
         element={
-          <AdminRoute allowedRoles={["Admin"]} Component={TicketStatusPage} />
+          <AdminRoute allowedRoles={["Admin"]} Component={PaymentPage} />
         }
       />
 
@@ -187,35 +188,39 @@ export default function App() {
       <Route
         path="/admin/banner-manage"
         element={
-          <AdminRoute allowedRoles={["Admin"]} Component={BannerManage} />
+          <AdminRoute allowedRoles={["Admin"]} Component={BannerManagePage} />
         }
       />
       <Route
         path="/admin/homepage-manage"
         element={
-          <AdminRoute allowedRoles={["Admin"]} Component={HomepageManage} />
+          <AdminRoute allowedRoles={["Admin"]} Component={HomepageManagePage} />
         }
       />
       <Route
         path="/admin/news-manage"
-        element={<AdminRoute allowedRoles={["Admin"]} Component={NewsManage} />}
+        element={
+          <AdminRoute allowedRoles={["Admin"]} Component={NewsManagePage} />
+        }
       />
 
       {/* userManage */}
       <Route
         path="/admin/user-manage"
-        element={<AdminRoute allowedRoles={["Admin"]} Component={UserManage} />}
+        element={
+          <AdminRoute allowedRoles={["Admin"]} Component={UserManagePage} />
+        }
       />
       <Route
         path="/admin/employee-manage"
         element={
-          <AdminRoute allowedRoles={["Admin"]} Component={EmployeeManage} />
+          <AdminRoute allowedRoles={["Admin"]} Component={DriverManagePage} />
         }
       />
       <Route
         path="/admin/account-manage"
         element={
-          <AdminRoute allowedRoles={["Admin"]} Component={AccountManage} />
+          <AdminRoute allowedRoles={["Admin"]} Component={AccountManagePage} />
         }
       />
 

@@ -139,7 +139,7 @@ export default function PopularRoutesSection() {
       try {
         const res = await getAllRoutes();
         if (res && res.data && Array.isArray(res.data.data)) {
-          console.log("✅ Routes fetched:", res.data.data);
+          console.log("Routes fetched:", res.data.data);
           setRoutes(res.data.data);
         }
       } catch (err) {

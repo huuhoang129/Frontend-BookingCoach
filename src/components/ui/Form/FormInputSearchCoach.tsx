@@ -1,12 +1,13 @@
+// src/components/ui/Form/BookingForm.tsx
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { DatePicker, Radio, Button, TreeSelect } from "antd";
-import { DownOutlined } from "@ant-design/icons";
 import {
   SearchOutlined,
   SendOutlined,
   EnvironmentOutlined,
   CalendarOutlined,
+  DownOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import "../../styles/Form/FormInputSearchCoach.scss";
@@ -21,17 +22,10 @@ export default function BookingForm() {
   const qpFrom = searchParams.get("fromLocationId");
   const qpTo = searchParams.get("toLocationId");
   const qpStart = searchParams.get("tripDateStart");
-  const qpEnd = searchParams.get("tripDateEnd");
-  const qpRound = searchParams.get("roundTrip");
 
-  const [tripType, setTripType] = useState(
-    qpRound === "both" ? "round" : "oneway"
-  );
+  const [tripType] = useState("oneway"); // ✅ chỉ hiển thị Một chiều
   const [departureDate, setDepartureDate] = useState(
     qpStart ? dayjs(qpStart) : dayjs()
-  );
-  const [returnDate, setReturnDate] = useState(
-    qpEnd ? dayjs(qpEnd) : dayjs().add(1, "day")
   );
   const [from, setFrom] = useState<
     { value: string; label: string } | undefined
@@ -47,15 +41,9 @@ export default function BookingForm() {
   const handleSearch = () => {
     if (!from || !to || !departureDate) return;
 
-    let url = `/booking?fromLocationId=${from.value}&toLocationId=${
+    const url = `/booking?fromLocationId=${from.value}&toLocationId=${
       to.value
-    }&tripDateStart=${departureDate.format("YYYY-MM-DD")}`;
-
-    if (tripType === "round" && returnDate) {
-      url += `&tripDateEnd=${returnDate.format("YYYY-MM-DD")}`;
-    }
-    url += `&roundTrip=${tripType === "round" ? "both" : "one"}`;
-
+    }&tripDateStart=${departureDate.format("YYYY-MM-DD")}&roundTrip=one`;
     navigate(url);
   };
 
@@ -93,7 +81,7 @@ export default function BookingForm() {
         }));
         setTreeData(mapped);
 
-        // gán lại label cho from/to
+        // gán lại label cho from/to nếu có từ query param
         if (qpFrom) {
           const found = mapped
             .flatMap((p: any) => p.children)
@@ -110,6 +98,7 @@ export default function BookingForm() {
     });
   }, []);
 
+  // lọc cây tìm kiếm
   type TreeNode = NonNullable<TreeSelectProps["treeData"]>[number];
   const filterTree = (data: TreeNode[], keyword: string): TreeNode[] => {
     if (!keyword) return data;
@@ -134,13 +123,9 @@ export default function BookingForm() {
   return (
     <div className="booking-form">
       <div className="booking-form__trip-type">
-        <Radio.Group
-          value={tripType}
-          onChange={(e) => setTripType(e.target.value)}
-          className="booking-form__radio-group"
-        >
+        {/* ✅ Chỉ còn “Một chiều” */}
+        <Radio.Group value={tripType} className="booking-form__radio-group">
           <Radio value="oneway">Một chiều</Radio>
-          <Radio value="round">Khứ hồi</Radio>
         </Radio.Group>
       </div>
 
@@ -278,25 +263,7 @@ export default function BookingForm() {
           </div>
         </div>
 
-        {/* Ngày về */}
-        {tripType === "round" && (
-          <div className="booking-form__field">
-            <div className="booking-form__icon">
-              <CalendarOutlined />
-            </div>
-            <div className="booking-form__content">
-              <label className="booking-form__field-label">Ngày về</label>
-              <DatePicker
-                value={returnDate}
-                onChange={(date) => setReturnDate(date!)}
-                format="DD/MM/YYYY"
-                className="booking-form__field-input"
-                suffixIcon={null}
-              />
-            </div>
-          </div>
-        )}
-
+        {/* Nút tìm kiếm */}
         <Button
           type="primary"
           icon={<SearchOutlined />}

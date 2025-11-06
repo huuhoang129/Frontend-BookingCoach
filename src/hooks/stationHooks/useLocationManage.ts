@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { message, Form } from "antd";
+import { Form } from "antd";
 import {
   getAllProvinces,
   createProvince,
@@ -10,7 +10,9 @@ import {
   updateLocation,
   deleteLocation,
 } from "../../services/stationServices/locationServices.ts";
+import { AppNotification } from "../../components/Notification/AppNotification.tsx";
 
+// types
 export interface Province {
   id: number;
   nameProvince: string;
@@ -26,137 +28,195 @@ export interface Location {
 }
 
 export function useLocationManage() {
-  // province state
+  // danh sách tỉnh
   const [provinces, setProvinces] = useState<Province[]>([]);
   const [loadingProvinces, setLoadingProvinces] = useState(false);
-
-  // location state
+  // danh sách địa điểm
   const [locations, setLocations] = useState<Location[]>([]);
   const [loadingLocations, setLoadingLocations] = useState(false);
-
-  // search + filter
+  // filter search
   const [searchProvince, setSearchProvince] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
   const [filterProvince, setFilterProvince] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<string | null>(null);
-
-  // modal state
+  // modal province
   const [isAddProvince, setIsAddProvince] = useState(false);
   const [isEditProvince, setIsEditProvince] = useState(false);
   const [editingProvince, setEditingProvince] = useState<Province | null>(null);
-
+  // modal location
   const [isAddLocation, setIsAddLocation] = useState(false);
   const [isEditLocation, setIsEditLocation] = useState(false);
   const [editingLocation, setEditingLocation] = useState<Location | null>(null);
-
-  // forms
+  // form
   const [provinceForm] = Form.useForm();
   const [provinceEditForm] = Form.useForm();
   const [locationForm] = Form.useForm();
   const [locationEditForm] = Form.useForm();
 
-  // fetch provinces
+  const { contextHolder, notifySuccess, notifyError } = AppNotification();
+
+  // fetch date tỉnh/thành phố
   const fetchProvinces = async () => {
     setLoadingProvinces(true);
     try {
       const res = await getAllProvinces();
       if (res.data.errCode === 0) setProvinces(res.data.data);
+      else notifyError("Không thể tải danh sách tỉnh", res.data.errMessage);
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể tải danh sách tỉnh.");
     } finally {
       setLoadingProvinces(false);
     }
   };
 
-  // fetch locations
+  // fetch data địa điểm
   const fetchLocations = async () => {
     setLoadingLocations(true);
     try {
       const res = await getAllLocations();
       if (res.data.errCode === 0) setLocations(res.data.data);
+      else notifyError("Không thể tải danh sách địa điểm", res.data.errMessage);
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể tải danh sách địa điểm.");
     } finally {
       setLoadingLocations(false);
     }
   };
 
+  // Gọi fetch ban đầu
   useEffect(() => {
     fetchProvinces();
     fetchLocations();
   }, []);
 
-  // CRUD Province
+  /* ===== CRUD PROVINCE ===== */
+  // thêm mới tỉnh/thành phố
   const handleAddProvince = async () => {
     try {
       const values = await provinceForm.validateFields();
       const res = await createProvince(values);
+
       if (res.data.errCode === 0) {
-        message.success("Thêm tỉnh thành công");
+        notifySuccess("Thêm mới thành công", "Tỉnh đã được thêm vào hệ thống.");
         setIsAddProvince(false);
         provinceForm.resetFields();
         fetchProvinces();
-      }
-    } catch {}
+      } else notifyError("Không thể thêm tỉnh", res.data.errMessage);
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể thêm tỉnh.");
+    }
   };
 
+  // cập nhật tỉnh/thành phố
   const handleEditProvince = async () => {
     try {
       const values = await provinceEditForm.validateFields();
       if (!editingProvince) return;
+
       const res = await updateProvince(editingProvince.id, values);
+
       if (res.data.errCode === 0) {
-        message.success("Cập nhật tỉnh thành công");
+        notifySuccess(
+          "Cập nhật thành công",
+          "Thông tin tỉnh đã được cập nhật."
+        );
         setIsEditProvince(false);
         fetchProvinces();
-      } else {
-        message.error(res.data.errMessage || "Cập nhật tỉnh thất bại");
-      }
-    } catch (e) {
-      console.error("❌ Error update Province:", e);
+      } else notifyError("Không thể cập nhật tỉnh", res.data.errMessage);
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể cập nhật tỉnh.");
     }
   };
 
+  // xóa tỉnh/thành phố
   const handleDeleteProvince = async (id: number) => {
-    await deleteProvince(id);
-    message.success("Xoá tỉnh thành công");
-    fetchProvinces();
+    try {
+      await deleteProvince(id);
+      notifySuccess("Xoá thành công", "Tỉnh đã được xoá khỏi hệ thống.");
+      fetchProvinces();
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể xoá tỉnh.");
+    }
   };
 
-  // CRUD Location
+  // xóa nhiểu tỉnh/thành phố
+  const handleBulkDeleteProvince = async (ids: number[]) => {
+    if (!ids.length) return;
+    try {
+      setLoadingProvinces(true);
+      await Promise.all(ids.map((id) => deleteProvince(id)));
+      notifySuccess("Xoá thành công", "Các tỉnh đã chọn đã được xoá.");
+      fetchProvinces();
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể xoá các tỉnh đã chọn.");
+    } finally {
+      setLoadingProvinces(false);
+    }
+  };
+
+  /* ===== CRUD LOCATION ===== */
+  // thêm mới địa điểm
   const handleAddLocation = async () => {
     try {
       const values = await locationForm.validateFields();
       const res = await createLocation(values);
+
       if (res.data.errCode === 0) {
-        message.success("Thêm địa điểm thành công");
+        notifySuccess("Thêm mới thành công", "Địa điểm đã được thêm.");
         setIsAddLocation(false);
         locationForm.resetFields();
         fetchLocations();
-      }
-    } catch {}
+      } else notifyError("Không thể thêm địa điểm", res.data.errMessage);
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể thêm địa điểm.");
+    }
   };
 
+  // cập nhật địa điểm
   const handleEditLocation = async () => {
     try {
       const values = await locationEditForm.validateFields();
       if (!editingLocation) return;
+
       const res = await updateLocation(editingLocation.id, values);
+
       if (res.data.errCode === 0) {
-        message.success("Cập nhật địa điểm thành công");
+        notifySuccess("Cập nhật thành công", "Địa điểm đã được cập nhật.");
         setIsEditLocation(false);
         fetchLocations();
-      } else {
-        message.error(res.data.errMessage || "Cập nhật địa điểm thất bại");
-      }
-    } catch (e) {
-      console.error("❌ Error update Location:", e);
+      } else notifyError("Không thể cập nhật địa điểm", res.data.errMessage);
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể cập nhật địa điểm.");
     }
   };
 
+  // xóa địa điểm
   const handleDeleteLocation = async (id: number) => {
-    await deleteLocation(id);
-    message.success("Xoá địa điểm thành công");
-    fetchLocations();
+    try {
+      await deleteLocation(id);
+      notifySuccess("Xoá thành công", "Địa điểm đã được xoá.");
+      fetchLocations();
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể xoá địa điểm.");
+    }
   };
 
-  // filters
+  // xóa nhiểu địa điểm
+  const handleBulkDeleteLocation = async (ids: number[]) => {
+    if (!ids.length) return;
+    try {
+      setLoadingLocations(true);
+      await Promise.all(ids.map((id) => deleteLocation(id)));
+      notifySuccess("Xoá thành công", "Các địa điểm đã chọn đã được xoá.");
+      fetchLocations();
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể xoá các địa điểm đã chọn.");
+    } finally {
+      setLoadingLocations(false);
+    }
+  };
+
+  // filter kết quả
   const filteredProvinces = provinces
     .filter((p) =>
       p.nameProvince.toLowerCase().includes(searchProvince.toLowerCase())
@@ -170,22 +230,18 @@ export function useLocationManage() {
       if (
         searchLocation &&
         !l.nameLocations.toLowerCase().includes(searchLocation.toLowerCase())
-      ) {
+      )
         match = false;
-      }
-      if (filterProvince && l.provinceId.toString() !== filterProvince) {
+      if (filterProvince && l.provinceId.toString() !== filterProvince)
         match = false;
-      }
-      if (filterType && l.type !== filterType) {
-        match = false;
-      }
+      if (filterType && l.type !== filterType) match = false;
       return match;
     })
     .sort((a, b) => a.id - b.id)
     .map((item, idx) => ({ ...item, index: idx + 1 }));
 
+  // return
   return {
-    // states
     provinces,
     loadingProvinces,
     locations,
@@ -214,15 +270,16 @@ export function useLocationManage() {
     provinceEditForm,
     locationForm,
     locationEditForm,
-    // handlers
     handleAddProvince,
     handleEditProvince,
     handleDeleteProvince,
+    handleBulkDeleteProvince,
     handleAddLocation,
     handleEditLocation,
     handleDeleteLocation,
-    // data filtered
+    handleBulkDeleteLocation,
     filteredProvinces,
     filteredLocations,
+    contextHolder,
   };
 }

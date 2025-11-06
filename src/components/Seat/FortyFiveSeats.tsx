@@ -8,6 +8,7 @@ import SeatSold from "../../assets/icon/seat-3.svg";
 
 import type { Seat, Trip } from "../../types/booking";
 import { formatDuration, formatStartTime, calcEndTime } from "../../utils/time";
+import { getSeatNumber } from "../../utils/seat";
 
 interface FortyFiveSeatsProps {
   seats: Seat[];
@@ -24,7 +25,7 @@ export default function FortyFiveSeats({
 }: FortyFiveSeatsProps) {
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
 
-  // ✅ Toggle chọn ghế (không thay đổi status gốc)
+  // Toggle chọn ghế (không thay đổi status gốc)
   const toggleSeat = (seat: Seat) => {
     if (seat.status === "SOLD" || seat.status === "HOLD") return;
     setSelectedSeats((prev) => {
@@ -33,14 +34,13 @@ export default function FortyFiveSeats({
     });
   };
 
-  // ✅ Icon ghế
+  // Icon ghế
   const getIcon = (seat: Seat) => {
     if (selectedSeats.some((s) => s.id === seat.id)) return SeatSelected;
     if (seat.status === "SOLD" || seat.status === "HOLD") return SeatSold;
     return SeatAvailable;
   };
 
-  // ✅ Class ghế
   const getSeatClass = (seat: Seat) => {
     if (selectedSeats.some((s) => s.id === seat.id))
       return "fortyfive-seat-selected";
@@ -53,11 +53,10 @@ export default function FortyFiveSeats({
   const unitPrice = trip?.price?.priceTrip ? Number(trip.price.priceTrip) : 0;
   const total = selectedSeats.length * unitPrice;
 
-  // ✅ Render thân xe (40 ghế)
+  // Render thân xe (40 ghế đầu)
   const renderBody = () => {
-    // chia 10 hàng, mỗi hàng: 2 ghế trái + lối đi + 2 ghế phải
     const rows = Array.from({ length: 10 }, (_, i) => [
-      seats[i * 2], // hàng bên trái
+      seats[i * 2], // cột bên trái
       seats[i * 2 + 1],
       seats[i * 2 + 20],
       seats[i * 2 + 21],
@@ -71,6 +70,7 @@ export default function FortyFiveSeats({
               {row.map((seat, index) =>
                 index === 2 ? (
                   <>
+                    {/* lối đi giữa */}
                     <td className="aisle" key={`aisle-${idx}`}></td>
                     {seat && (
                       <td
@@ -79,7 +79,7 @@ export default function FortyFiveSeats({
                         onClick={() => toggleSeat(seat)}
                       >
                         <img src={getIcon(seat)} alt="seat" />
-                        <p>{seat.name.replace(/\D/g, "")}</p>
+                        <p>{getSeatNumber(seat.name)}</p>
                       </td>
                     )}
                   </>
@@ -90,7 +90,7 @@ export default function FortyFiveSeats({
                     onClick={() => toggleSeat(seat)}
                   >
                     <img src={getIcon(seat)} alt="seat" />
-                    <p>{seat.name.replace(/\D/g, "")}</p>
+                    <p>{getSeatNumber(seat.name)}</p>
                   </td>
                 ) : (
                   index !== 2 && <td key={`empty-${idx}-${index}`}></td>
@@ -103,7 +103,7 @@ export default function FortyFiveSeats({
     );
   };
 
-  // ✅ Render hàng ghế cuối (41–45)
+  // Render hàng cuối (41–45)
   const renderBack = () => {
     const backSeats = seats.slice(40, 45);
     return (
@@ -117,7 +117,7 @@ export default function FortyFiveSeats({
                 onClick={() => toggleSeat(seat)}
               >
                 <img src={getIcon(seat)} alt="seat" />
-                <p>{seat.name.replace(/\D/g, "")}</p>
+                <p>{getSeatNumber(seat.name)}</p>
               </td>
             ))}
           </tr>
@@ -161,9 +161,7 @@ export default function FortyFiveSeats({
               <div className="price-row">
                 <span>Ghế:</span>
                 <span>
-                  {selectedSeats
-                    .map((s) => s.name.replace(/\D/g, ""))
-                    .join(", ")}
+                  {selectedSeats.map((s) => getSeatNumber(s.name)).join(", ")}
                 </span>
               </div>
               <hr className="divider" />

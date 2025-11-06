@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/api/v1"; // đổi đúng port backend
+const API_URL = "http://localhost:8080/api/v1";
 
 // Đăng nhập
 const login = (data: { email: string; password: string }) => {

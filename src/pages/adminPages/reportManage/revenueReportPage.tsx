@@ -13,7 +13,6 @@ import {
   Tag,
 } from "antd";
 import {
-  LineChart,
   Line,
   XAxis,
   YAxis,
@@ -22,6 +21,8 @@ import {
   ResponsiveContainer,
   ReferenceLine,
   Legend,
+  BarChart,
+  Bar,
 } from "recharts";
 import {
   ReloadOutlined,
@@ -355,8 +356,28 @@ export default function RevenueReportPage() {
         ) : data.length === 0 ? (
           <Empty description="Không có dữ liệu" />
         ) : (
-          <ResponsiveContainer width="100%" height={340}>
-            <LineChart data={dataWithMA}>
+          <ResponsiveContainer width="100%" height={360}>
+            <BarChart
+              data={dataWithMA}
+              margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+            >
+              <defs>
+                <linearGradient
+                  id="revenueGradient"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop offset="0%" stopColor="#4d940e" stopOpacity={0.9} />
+                  <stop offset="100%" stopColor="#4d940e" stopOpacity={0.2} />
+                </linearGradient>
+                <linearGradient id="maGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#52c41a" stopOpacity={0.9} />
+                  <stop offset="100%" stopColor="#52c41a" stopOpacity={0.2} />
+                </linearGradient>
+              </defs>
+
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="label" />
               <YAxis />
@@ -368,32 +389,39 @@ export default function RevenueReportPage() {
                 }
               />
               <Legend />
-              <Line
-                type="monotone"
-                dataKey="totalRevenue"
-                stroke="#4d940e"
-                strokeWidth={2}
-                dot={false}
-                name="Doanh thu"
+              <ReferenceLine
+                y={avgPerPeriod}
+                stroke="#bfbfbf"
+                strokeDasharray="4 4"
+                label={{
+                  value: "Trung bình",
+                  position: "insideTopRight",
+                  fill: "#888",
+                  fontSize: 12,
+                }}
               />
+
+              {/* Cột doanh thu chính */}
+              <Bar
+                dataKey="totalRevenue"
+                name="Doanh thu"
+                fill="url(#revenueGradient)"
+                radius={[6, 6, 0, 0]}
+                barSize={40}
+              />
+
+              {/* Nếu có MA7 thì thêm đường biểu diễn xu hướng */}
               {chartMA && groupBy === "day" && (
                 <Line
                   type="monotone"
                   dataKey="ma7"
-                  stroke="#52c41a"
+                  stroke="url(#maGradient)"
                   strokeWidth={2}
                   dot={false}
                   name="MA(7)"
                 />
               )}
-              <ReferenceLine
-                y={avgPerPeriod}
-                stroke="#bfbfbf"
-                strokeDasharray="4 4"
-                ifOverflow="extendDomain"
-                label="Trung bình"
-              />
-            </LineChart>
+            </BarChart>
           </ResponsiveContainer>
         )}
       </Card>

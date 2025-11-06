@@ -1,4 +1,3 @@
-// src/containers/ModalsCollect/SeatBookingModal.tsx
 import { Modal } from "antd";
 import FortyFiveSeats from "../../components/Seat/FortyFiveSeats";
 import NineSeats from "../../components/Seat/NineSeats";
@@ -24,7 +23,6 @@ export default function SeatBookingModal({
   seats,
   trip,
 }: SeatBookingModalProps) {
-  // Lọc ghế không thể chọn (đã bán hoặc đang giữ)
   const disabledSeats = seats
     .filter((s) => s.status === "SOLD" || s.status === "HOLD")
     .map((s) => s.id);
@@ -38,14 +36,14 @@ export default function SeatBookingModal({
   };
 
   const renderSeatLayout = () => {
-    switch (vehicleType) {
-      case "Normal":
+    switch (vehicleType.toUpperCase()) {
+      case "NORMAL":
         return <FortyFiveSeats {...commonProps} />;
-      case "Limousine":
+      case "LIMOUSINE":
         return <NineSeats {...commonProps} />;
-      case "Sleeper":
+      case "SLEEPER":
         return <DoubleDeckSeats36 {...commonProps} />;
-      case "DoubleSleeper":
+      case "DOUBLESLEEPER":
         return <DoubleDeckSeats22 {...commonProps} />;
       default:
         return <p>Chưa có sơ đồ ghế cho loại xe này</p>;

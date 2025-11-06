@@ -30,7 +30,7 @@ export default function TripHistoryPage() {
           `http://localhost:8080/api/v1/bookings?userId=${currentUser.id}`
         );
         if (res.data.errCode === 0) {
-          console.log("✅ API bookings:", res.data.data);
+          console.log("API bookings:", res.data.data);
           setBookings(res.data.data || []);
         } else {
           console.warn("⚠️ API trả về errCode khác 0:", res.data);

@@ -8,6 +8,7 @@ import SeatSold from "../../assets/icon/seat-3.svg";
 
 import type { Seat, Trip } from "../../types/booking";
 import { formatDuration, formatStartTime, calcEndTime } from "../../utils/time";
+import { getSeatNumber } from "../../utils/seat"; //
 
 interface DoubleDeckSeats22Props {
   seats: Seat[];
@@ -24,7 +25,7 @@ export default function DoubleDeckSeats22({
 }: DoubleDeckSeats22Props) {
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
 
-  // ✅ Toggle chọn ghế
+  // Toggle chọn ghế
   const toggleSeat = (seat: Seat) => {
     if (seat.status === "SOLD" || seat.status === "HOLD") return;
     setSelectedSeats((prev) => {
@@ -33,14 +34,14 @@ export default function DoubleDeckSeats22({
     });
   };
 
-  // ✅ Icon ghế
+  // Icon ghế
   const getIcon = (seat: Seat) => {
     if (selectedSeats.some((s) => s.id === seat.id)) return SeatSelected;
     if (seat.status === "SOLD" || seat.status === "HOLD") return SeatSold;
     return SeatAvailable;
   };
 
-  // ✅ Class ghế
+  // Class ghế
   const getSeatClass = (seat: Seat) => {
     if (selectedSeats.some((s) => s.id === seat.id))
       return "twentytwo-seat-selected";
@@ -53,7 +54,7 @@ export default function DoubleDeckSeats22({
   const unitPrice = trip?.price?.priceTrip ? Number(trip.price.priceTrip) : 0;
   const total = selectedSeats.length * unitPrice;
 
-  // ✅ Render từng tầng
+  // Render từng tầng
   const renderFloor = (floor: number) => {
     const floorSeats = seats.filter((s) => s.floor === floor);
 
@@ -63,7 +64,7 @@ export default function DoubleDeckSeats22({
       [floorSeats[4], floorSeats[5]],
       [floorSeats[6], floorSeats[7]],
       [floorSeats[8], floorSeats[9]],
-      [floorSeats[10]], // ghế cuối
+      [floorSeats[10]], // hàng cuối chỉ 1 ghế
     ];
 
     return (
@@ -77,7 +78,7 @@ export default function DoubleDeckSeats22({
                   onClick={() => toggleSeat(row[0])}
                 >
                   <img src={getIcon(row[0])} alt="seat" />
-                  <p>{row[0].name.replace(/\D/g, "")}</p>
+                  <p>{getSeatNumber(row[0].name)}</p>
                 </td>
               )}
               {row[1] ? (
@@ -88,7 +89,7 @@ export default function DoubleDeckSeats22({
                     onClick={() => toggleSeat(row[1])}
                   >
                     <img src={getIcon(row[1])} alt="seat" />
-                    <p>{row[1].name.replace(/\D/g, "")}</p>
+                    <p>{getSeatNumber(row[1].name)}</p>
                   </td>
                 </>
               ) : (
@@ -139,9 +140,7 @@ export default function DoubleDeckSeats22({
               <div className="price-row">
                 <span>Ghế:</span>
                 <span>
-                  {selectedSeats
-                    .map((s) => s.name.replace(/\D/g, ""))
-                    .join(", ")}
+                  {selectedSeats.map((s) => getSeatNumber(s.name)).join(", ")}
                 </span>
               </div>
               <hr className="divider" />
