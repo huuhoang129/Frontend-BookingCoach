@@ -1,3 +1,4 @@
+// src/pages/adminPages/bookingManage/BookingPage.tsx
 import {
   Table,
   Input,
@@ -39,8 +40,6 @@ export default function BookingPage() {
   const {
     filteredData,
     loading,
-    searchText,
-    setSearchText,
     isModalOpen,
     setIsModalOpen,
     selectedBooking,
@@ -49,28 +48,79 @@ export default function BookingPage() {
     handleStatusChange,
   } = useBookingManage();
 
-  // ✅ Thêm state cho bộ lọc
+  // 🟢 local state (giống VehiclePage)
+  const [searchText, setSearchText] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedRoute, setSelectedRoute] = useState<string | null>(null);
+  const [selectedPriceRange, setSelectedPriceRange] = useState<string | null>(
+    null
+  );
 
-  // ✅ Dữ liệu sau khi lọc theo ngày và trạng thái
+  // 🔎 Lọc dữ liệu
   const filteredBookings = useMemo(() => {
-    return filteredData.filter((b: Booking) => {
-      const matchStatus = !selectedStatus || b.status === selectedStatus;
-      const matchDate =
-        !selectedDate ||
-        (b.trip && dayjs(b.trip.startDate).isSame(dayjs(selectedDate), "day"));
-      return matchStatus && matchDate;
-    });
-  }, [filteredData, selectedStatus, selectedDate]);
+    return filteredData
+      .filter((b: Booking) => {
+        const matchStatus = !selectedStatus || b.status === selectedStatus;
+        const matchDate =
+          !selectedDate ||
+          (b.trip &&
+            dayjs(b.trip.startDate).isSame(dayjs(selectedDate), "day"));
 
-  // ✅ Cột bảng
+        const keyword = searchText.toLowerCase().trim();
+        const matchKeyword =
+          !keyword ||
+          (b.bookingCode && b.bookingCode.toLowerCase().includes(keyword)) ||
+          (b.customers &&
+            b.customers.some((c) =>
+              c.fullName.toLowerCase().includes(keyword)
+            ));
+
+        // 🛣️ Lọc theo tuyến
+        const routeName = b.trip
+          ? `${b.trip.route?.fromLocation?.nameLocations} → ${b.trip.route?.toLocation?.nameLocations}`
+          : "";
+        const matchRoute = !selectedRoute || routeName === selectedRoute;
+
+        // 💰 Lọc theo khoảng tiền
+        let matchPrice = true;
+        if (selectedPriceRange) {
+          const [min, max] = selectedPriceRange.split("-").map(Number);
+          matchPrice =
+            b.totalAmount >= min * 1000 && b.totalAmount < max * 1000;
+        }
+
+        return (
+          matchStatus && matchDate && matchKeyword && matchRoute && matchPrice
+        );
+      })
+      .sort((a, b) => b.id - a.id);
+  }, [
+    filteredData,
+    selectedStatus,
+    selectedDate,
+    searchText,
+    selectedRoute,
+    selectedPriceRange,
+  ]);
+
+  // Lấy danh sách tuyến duy nhất
+  const uniqueRoutes = Array.from(
+    new Set(
+      filteredData
+        .filter((b) => b.trip?.route)
+        .map(
+          (b) =>
+            `${b.trip!.route!.fromLocation!.nameLocations} → ${
+              b.trip!.route!.toLocation!.nameLocations
+            }`
+        )
+    )
+  );
+
+  // 🧱 Cấu hình bảng
   const columns: ColumnsType<Booking> = [
-    {
-      title: "Mã",
-      dataIndex: "id",
-      width: 80,
-    },
+    { title: "Mã đặt vé", dataIndex: "bookingCode", key: "bookingCode" },
     {
       title: "Tuyến",
       key: "trip",
@@ -106,17 +156,22 @@ export default function BookingPage() {
     {
       title: "Trạng thái",
       dataIndex: "status",
-      render: (s: string, r) => (
-        <Select
-          value={s}
-          style={{ width: 140 }}
-          onChange={(val) => handleStatusChange(r.id, val)}
-        >
-          <Option value="PENDING">Chờ xử lý</Option>
-          <Option value="CONFIRMED">Đã xác nhận</Option>
-          <Option value="CANCELLED">Đã hủy</Option>
-        </Select>
-      ),
+      render: (s: string, r) => {
+        return (
+          <Select
+            value={s}
+            style={{ width: 150 }}
+            onChange={(val) => handleStatusChange(r.id, val)}
+          >
+            <Option value="PENDING">Chờ xử lý</Option>
+            <Option value="CONFIRMED">Đã xác nhận</Option>
+            <Option value="CANCELLED">Đã hủy</Option>
+            <Option value="EXPIRED" disabled>
+              Hết hạn
+            </Option>
+          </Select>
+        );
+      },
     },
     {
       title: "Hành động",
@@ -148,7 +203,6 @@ export default function BookingPage() {
 
   return (
     <div style={{ padding: 24, background: "#f4f6f9", minHeight: "100vh" }}>
-      {/* Breadcrumb */}
       <Breadcrumb style={{ marginBottom: 16 }}>
         <Breadcrumb.Item>
           <HomeOutlined />
@@ -165,21 +219,17 @@ export default function BookingPage() {
       </Title>
 
       {/* Bộ lọc */}
-      {/* Toolbar */}
       <Card style={{ marginBottom: 20 }}>
         <Flex justify="space-between" align="center" wrap="wrap" gap={16}>
-          {/* Nhóm bộ lọc bên trái */}
           <Flex gap={16} wrap="wrap">
-            {/* 🔍 Tìm kiếm */}
             <Input
-              placeholder="🔍 Tìm theo mã, tên KH, số tiền..."
+              placeholder="🔍 Tìm theo mã hoặc tên khách hàng..."
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               style={{ width: 260 }}
             />
 
-            {/* 📅 Lọc theo ngày */}
             <DatePicker
               placeholder="Chọn ngày đi"
               format="DD/MM/YYYY"
@@ -190,7 +240,6 @@ export default function BookingPage() {
               }
             />
 
-            {/* 📌 Lọc theo trạng thái */}
             <Select
               placeholder="Lọc theo trạng thái"
               allowClear
@@ -201,12 +250,39 @@ export default function BookingPage() {
               <Option value="PENDING">Chờ xử lý</Option>
               <Option value="CONFIRMED">Đã xác nhận</Option>
               <Option value="CANCELLED">Đã hủy</Option>
+              <Option value="EXPIRED">Hết hạn</Option>
+            </Select>
+
+            <Select
+              placeholder="Lọc theo tuyến"
+              allowClear
+              style={{ width: 240 }}
+              value={selectedRoute || undefined}
+              onChange={(val) => setSelectedRoute(val || null)}
+            >
+              {uniqueRoutes.map((route) => (
+                <Option key={route} value={route}>
+                  {route}
+                </Option>
+              ))}
+            </Select>
+
+            <Select
+              placeholder="Khoảng giá (nghìn)"
+              allowClear
+              style={{ width: 180 }}
+              value={selectedPriceRange || undefined}
+              onChange={(val) => setSelectedPriceRange(val || null)}
+            >
+              <Option value="100-200">100k – 200k</Option>
+              <Option value="200-400">200k – 400k</Option>
+              <Option value="400-600">400k – 600k</Option>
+              <Option value="600-1000">600k – 1.000k</Option>
             </Select>
           </Flex>
         </Flex>
       </Card>
 
-      {/* Bảng dữ liệu */}
       <Card>
         <Table
           rowKey="id"
@@ -217,7 +293,6 @@ export default function BookingPage() {
         />
       </Card>
 
-      {/* Modal chi tiết */}
       <Modal
         title={`Chi tiết Booking #${selectedBooking?.id}`}
         open={isModalOpen}
@@ -231,7 +306,7 @@ export default function BookingPage() {
   );
 }
 
-/* -------- Component nhỏ hiển thị chi tiết Booking -------- */
+/* -------- Component chi tiết Booking -------- */
 import { Card as InfoCard } from "antd";
 
 function BookingDetail({ booking }: { booking: Booking }) {
@@ -241,6 +316,7 @@ function BookingDetail({ booking }: { booking: Booking }) {
     PENDING: "Đang xử lý",
     CONFIRMED: "Đã xác nhận",
     CANCELLED: "Đã hủy",
+    EXPIRED: "Hết hạn",
   };
 
   const methodLabel: Record<string, string> = {
@@ -336,6 +412,8 @@ function BookingDetail({ booking }: { booking: Booking }) {
               ? "green"
               : booking.status === "CANCELLED"
               ? "red"
+              : booking.status === "EXPIRED"
+              ? "gray"
               : "orange"
           }
           style={{ fontSize: 14, padding: "4px 12px" }}

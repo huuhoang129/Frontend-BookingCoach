@@ -56,26 +56,33 @@ export function useTripPrices() {
   const { contextHolder, notifySuccess, notifyError, notifyWarning } =
     AppNotification();
 
-  // fetch data
+  // fetch danh sách giá vé
   const fetchTripPrices = async () => {
     setLoading(true);
     try {
       const res = await getAllTripPrices();
-      if (res.data.errCode === 0) setTripPrices(res.data.data);
-      else notifyError("Không thể tải dữ liệu", res.data.errMessage);
+      if (res.data.errCode === 0) {
+        setTripPrices(res.data.data);
+      } else {
+        notifyError("Lỗi hệ thống", res.data.errMessage);
+      }
     } catch {
+      // lỗi hệ thống: message cố định
       notifyError("Lỗi hệ thống", "Không thể tải danh sách giá vé.");
     } finally {
       setLoading(false);
     }
   };
 
-  // fetch data chuyến đi
+  // fetch danh sách tuyến đường
   const fetchRoutes = async () => {
     try {
       const res = await getAllRoutes();
-      if (res.data.errCode === 0) setRoutes(res.data.data);
-      else notifyWarning("Không thể tải tuyến đường", res.data.errMessage);
+      if (res.data.errCode === 0) {
+        setRoutes(res.data.data);
+      } else {
+        notifyWarning("Lỗi hệ thống", res.data.errMessage);
+      }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể tải danh sách tuyến đường.");
     }
@@ -97,17 +104,15 @@ export function useTripPrices() {
         priceTrip: Number(values.priceTrip),
         typeTrip: values.typeTrip,
       };
+
       const res = await createTripPrice(payload);
       if (res.data.errCode === 0) {
-        notifySuccess(
-          "Thêm mới thành công",
-          "Giá vé đã được thêm vào hệ thống."
-        );
+        notifySuccess("Thành công", res.data.errMessage);
         setIsAddModal(false);
         form.resetFields();
         fetchTripPrices();
       } else {
-        notifyError("Không thể thêm giá vé", res.data.errMessage);
+        notifyError("Lỗi hệ thống", res.data.errMessage);
       }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể thêm giá vé, vui lòng thử lại.");
@@ -130,15 +135,12 @@ export function useTripPrices() {
 
       const res = await updateTripPrice(editingTripPrice.id, payload);
       if (res.data.errCode === 0) {
-        notifySuccess(
-          "Cập nhật thành công",
-          "Giá vé đã được cập nhật trong hệ thống."
-        );
+        notifySuccess("Thành công", res.data.errMessage);
         setIsEditModal(false);
         editForm.resetFields();
         fetchTripPrices();
       } else {
-        notifyError("Không thể cập nhật giá vé", res.data.errMessage);
+        notifyError("Lỗi hệ thống", res.data.errMessage);
       }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể cập nhật giá vé.");
@@ -150,10 +152,10 @@ export function useTripPrices() {
     try {
       const res = await deleteTripPrice(id);
       if (res.data.errCode === 0) {
-        notifySuccess("Xoá thành công", "Giá vé đã được xoá khỏi hệ thống.");
+        notifySuccess("Thành công", res.data.errMessage);
         fetchTripPrices();
       } else {
-        notifyError("Không thể xoá giá vé", res.data.errMessage);
+        notifyError("Lỗi hệ thống", res.data.errMessage);
       }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể xoá giá vé.");
@@ -167,7 +169,7 @@ export function useTripPrices() {
       setLoading(true);
       await Promise.all(ids.map((id) => deleteTripPrice(id)));
       notifySuccess(
-        "Xoá thành công",
+        "Thành công",
         "Các giá vé đã chọn đã được xoá khỏi hệ thống."
       );
       fetchTripPrices();

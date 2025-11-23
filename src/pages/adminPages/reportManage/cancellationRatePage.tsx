@@ -31,7 +31,6 @@ import {
   BarChartOutlined,
   AreaChartOutlined,
   FundOutlined,
-  FileExcelOutlined,
 } from "@ant-design/icons";
 import type { PieLabelRenderProps } from "recharts";
 import { useCancellationRate } from "../../../hooks/reportHooks/useCancellationRate.ts";
@@ -53,7 +52,6 @@ export default function CancellationRatePage() {
     setGroupBy,
     fetchData,
     setPreset,
-    handleExportCSV,
   } = useCancellationRate();
 
   const chartData = data
@@ -145,14 +143,6 @@ export default function CancellationRatePage() {
           <Space>
             <Button onClick={fetchData} icon={<ReloadOutlined />}>
               Tải lại
-            </Button>
-            <Button
-              type="primary"
-              onClick={handleExportCSV}
-              icon={<FileExcelOutlined />}
-              style={{ backgroundColor: "#4d940e", borderColor: "#4d940e" }}
-            >
-              Xuất CSV
             </Button>
           </Space>
         </Space>

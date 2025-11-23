@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+// src/hooks/routerListHooks/useSchedules.ts
+import { useState, useEffect } from "react";
 import { Form } from "antd";
 import {
   getAllSchedules,
@@ -9,46 +10,41 @@ import {
 } from "../../services/routeListServices/scheduleServices";
 import { getAllRoutes } from "../../services/stationServices/routesServices";
 import { getAllVehicles } from "../../services/vehicleServices/vehicleServices";
+import { getAllVehicleStatus } from "../../services/vehicleServices/vehicleStatusServices";
 import { getAllTripPrices } from "../../services/routeListServices/tripPriceServices";
 import { AppNotification } from "../../components/Notification/AppNotification.tsx";
 
-export interface Schedule {
-  id: number;
-  route: any;
-  vehicle: any;
-  price: any;
-  startTime: string;
-  totalTime?: string;
-  status: "ACTIVE" | "INACTIVE";
-}
-
 export function useSchedules() {
-  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [schedules, setSchedules] = useState<any[]>([]);
   const [routes, setRoutes] = useState<any[]>([]);
   const [vehicles, setVehicles] = useState<any[]>([]);
+  const [vehicleStatuses, setVehicleStatuses] = useState<any[]>([]);
   const [prices, setPrices] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-  const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
+  const [editingSchedule, setEditingSchedule] = useState<any | null>(null);
   const [form] = Form.useForm();
 
   const { contextHolder, notifySuccess, notifyError } = AppNotification();
 
-  // ===== FETCH ALL =====
+  // fetch data
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [sRes, rRes, vRes, pRes] = await Promise.all([
+      const [sRes, rRes, vRes, vsRes, pRes] = await Promise.all([
         getAllSchedules(),
         getAllRoutes(),
         getAllVehicles(),
+        getAllVehicleStatus(),
         getAllTripPrices(),
       ]);
+
       if (sRes.data.errCode === 0) setSchedules(sRes.data.data);
       if (rRes.data.errCode === 0) setRoutes(rRes.data.data);
       if (vRes.data.errCode === 0) setVehicles(vRes.data.data);
+      if (vsRes.data.errCode === 0) setVehicleStatuses(vsRes.data.data);
       if (pRes.data.errCode === 0) setPrices(pRes.data.data);
     } catch {
       notifyError("Lỗi hệ thống", "Không thể tải dữ liệu lịch trình.");
@@ -61,7 +57,7 @@ export function useSchedules() {
     fetchAll();
   }, []);
 
-  // ===== ADD / EDIT =====
+  // xóa và cập nhập lịch trình
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
@@ -74,52 +70,49 @@ export function useSchedules() {
         status: values.status,
       };
 
+      let res;
       if (isEdit && editingSchedule) {
-        const res = await updateSchedule(editingSchedule.id, payload);
-        if (res.data.errCode === 0) {
-          notifySuccess("Cập nhật thành công", "Lịch trình đã được cập nhật.");
-          setIsModalOpen(false);
-          fetchAll();
-        } else notifyError("Không thể cập nhật", res.data.errMessage);
+        res = await updateSchedule(editingSchedule.id, payload);
       } else {
-        const res = await createSchedule(payload);
-        if (res.data.errCode === 0) {
-          notifySuccess(
-            "Thêm mới thành công",
-            "Lịch trình đã được thêm vào hệ thống."
-          );
-          setIsModalOpen(false);
-          fetchAll();
-        } else notifyError("Không thể thêm lịch trình", res.data.errMessage);
+        res = await createSchedule(payload);
+      }
+
+      if (res.data.errCode === 0) {
+        notifySuccess("Thành công", res.data.errMessage);
+        setIsModalOpen(false);
+        fetchAll();
+      } else {
+        notifyError("Thao tác thất bại", res.data.errMessage);
       }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể xử lý lịch trình.");
     }
   };
 
-  // ===== DELETE =====
+  // xóa lịch trình
   const handleDelete = async (id: number) => {
     try {
       const res = await deleteSchedule(id);
       if (res.data.errCode === 0) {
-        notifySuccess("Xoá thành công", "Lịch trình đã bị xoá khỏi hệ thống.");
+        notifySuccess("Thành công", res.data.errMessage);
         fetchAll();
-      } else notifyError("Không thể xoá lịch trình", res.data.errMessage);
+      } else {
+        notifyError("Không thể xoá lịch trình", res.data.errMessage);
+      }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể xoá lịch trình.");
     }
   };
 
-  // ===== GENERATE =====
+  // sinh chuyến từ lịch trình
   const handleGenerateTrips = async () => {
     try {
       const res = await generateTripsFromSchedules();
-      if (res.data.errCode === 0)
-        notifySuccess(
-          "Sinh chuyến thành công",
-          "Các chuyến đã được tạo tự động."
-        );
-      else notifyError("Không thể sinh chuyến", res.data.errMessage);
+      if (res.data.errCode === 0) {
+        notifySuccess("Thành công", res.data.errMessage);
+      } else {
+        notifyError("Không thể sinh chuyến", res.data.errMessage);
+      }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể sinh chuyến.");
     }
@@ -129,6 +122,7 @@ export function useSchedules() {
     schedules,
     routes,
     vehicles,
+    vehicleStatuses,
     prices,
     loading,
     isModalOpen,

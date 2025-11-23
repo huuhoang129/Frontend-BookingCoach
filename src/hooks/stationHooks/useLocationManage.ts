@@ -1,3 +1,4 @@
+//src/hooks/stationHooks/useLocationManage.ts
 import { useState, useEffect } from "react";
 import { Form } from "antd";
 import {
@@ -55,13 +56,16 @@ export function useLocationManage() {
 
   const { contextHolder, notifySuccess, notifyError } = AppNotification();
 
-  // fetch date tỉnh/thành phố
+  // fetch data tỉnh/thành phố
   const fetchProvinces = async () => {
     setLoadingProvinces(true);
     try {
       const res = await getAllProvinces();
-      if (res.data.errCode === 0) setProvinces(res.data.data);
-      else notifyError("Không thể tải danh sách tỉnh", res.data.errMessage);
+      if (res.data.errCode === 0) {
+        setProvinces(res.data.data);
+      } else {
+        notifyError("Không thể tải danh sách tỉnh", res.data.errMessage);
+      }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể tải danh sách tỉnh.");
     } finally {
@@ -74,8 +78,11 @@ export function useLocationManage() {
     setLoadingLocations(true);
     try {
       const res = await getAllLocations();
-      if (res.data.errCode === 0) setLocations(res.data.data);
-      else notifyError("Không thể tải danh sách địa điểm", res.data.errMessage);
+      if (res.data.errCode === 0) {
+        setLocations(res.data.data);
+      } else {
+        notifyError("Không thể tải danh sách địa điểm", res.data.errMessage);
+      }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể tải danh sách địa điểm.");
     } finally {
@@ -89,7 +96,6 @@ export function useLocationManage() {
     fetchLocations();
   }, []);
 
-  /* ===== CRUD PROVINCE ===== */
   // thêm mới tỉnh/thành phố
   const handleAddProvince = async () => {
     try {
@@ -97,11 +103,13 @@ export function useLocationManage() {
       const res = await createProvince(values);
 
       if (res.data.errCode === 0) {
-        notifySuccess("Thêm mới thành công", "Tỉnh đã được thêm vào hệ thống.");
+        notifySuccess("Thành công", res.data.errMessage);
         setIsAddProvince(false);
         provinceForm.resetFields();
         fetchProvinces();
-      } else notifyError("Không thể thêm tỉnh", res.data.errMessage);
+      } else {
+        notifyError("Không thể thêm tỉnh", res.data.errMessage);
+      }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể thêm tỉnh.");
     }
@@ -116,13 +124,12 @@ export function useLocationManage() {
       const res = await updateProvince(editingProvince.id, values);
 
       if (res.data.errCode === 0) {
-        notifySuccess(
-          "Cập nhật thành công",
-          "Thông tin tỉnh đã được cập nhật."
-        );
+        notifySuccess("Thành công", res.data.errMessage);
         setIsEditProvince(false);
         fetchProvinces();
-      } else notifyError("Không thể cập nhật tỉnh", res.data.errMessage);
+      } else {
+        notifyError("Không thể cập nhật tỉnh", res.data.errMessage);
+      }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể cập nhật tỉnh.");
     }
@@ -131,22 +138,37 @@ export function useLocationManage() {
   // xóa tỉnh/thành phố
   const handleDeleteProvince = async (id: number) => {
     try {
-      await deleteProvince(id);
-      notifySuccess("Xoá thành công", "Tỉnh đã được xoá khỏi hệ thống.");
-      fetchProvinces();
+      const res = await deleteProvince(id);
+      if (res.data.errCode === 0) {
+        notifySuccess("Thành công", res.data.errMessage);
+        fetchProvinces();
+      } else {
+        notifyError("Không thể xoá tỉnh", res.data.errMessage);
+      }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể xoá tỉnh.");
     }
   };
 
-  // xóa nhiểu tỉnh/thành phố
+  // xóa nhiều tỉnh/thành phố
   const handleBulkDeleteProvince = async (ids: number[]) => {
     if (!ids.length) return;
     try {
       setLoadingProvinces(true);
-      await Promise.all(ids.map((id) => deleteProvince(id)));
-      notifySuccess("Xoá thành công", "Các tỉnh đã chọn đã được xoá.");
-      fetchProvinces();
+      const results = await Promise.all(ids.map((id) => deleteProvince(id)));
+
+      const hasError = results.some((res) => res.data.errCode !== 0);
+
+      if (!hasError) {
+        notifySuccess("Thành công", "Các tỉnh đã chọn đã được xoá.");
+        fetchProvinces();
+      } else {
+        notifyError(
+          "Không thể xoá các tỉnh đã chọn",
+          "Một số tỉnh không thể xoá, vui lòng thử lại."
+        );
+        fetchProvinces();
+      }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể xoá các tỉnh đã chọn.");
     } finally {
@@ -162,11 +184,13 @@ export function useLocationManage() {
       const res = await createLocation(values);
 
       if (res.data.errCode === 0) {
-        notifySuccess("Thêm mới thành công", "Địa điểm đã được thêm.");
+        notifySuccess("Thành công", res.data.errMessage);
         setIsAddLocation(false);
         locationForm.resetFields();
         fetchLocations();
-      } else notifyError("Không thể thêm địa điểm", res.data.errMessage);
+      } else {
+        notifyError("Không thể thêm địa điểm", res.data.errMessage);
+      }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể thêm địa điểm.");
     }
@@ -181,10 +205,12 @@ export function useLocationManage() {
       const res = await updateLocation(editingLocation.id, values);
 
       if (res.data.errCode === 0) {
-        notifySuccess("Cập nhật thành công", "Địa điểm đã được cập nhật.");
+        notifySuccess("Thành công", res.data.errMessage);
         setIsEditLocation(false);
         fetchLocations();
-      } else notifyError("Không thể cập nhật địa điểm", res.data.errMessage);
+      } else {
+        notifyError("Không thể cập nhật địa điểm", res.data.errMessage);
+      }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể cập nhật địa điểm.");
     }
@@ -193,22 +219,37 @@ export function useLocationManage() {
   // xóa địa điểm
   const handleDeleteLocation = async (id: number) => {
     try {
-      await deleteLocation(id);
-      notifySuccess("Xoá thành công", "Địa điểm đã được xoá.");
-      fetchLocations();
+      const res = await deleteLocation(id);
+      if (res.data.errCode === 0) {
+        notifySuccess("Thành công", res.data.errMessage);
+        fetchLocations();
+      } else {
+        notifyError("Không thể xoá địa điểm", res.data.errMessage);
+      }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể xoá địa điểm.");
     }
   };
 
-  // xóa nhiểu địa điểm
+  // xóa nhiều địa điểm
   const handleBulkDeleteLocation = async (ids: number[]) => {
     if (!ids.length) return;
     try {
       setLoadingLocations(true);
-      await Promise.all(ids.map((id) => deleteLocation(id)));
-      notifySuccess("Xoá thành công", "Các địa điểm đã chọn đã được xoá.");
-      fetchLocations();
+      const results = await Promise.all(ids.map((id) => deleteLocation(id)));
+
+      const hasError = results.some((res) => res.data.errCode !== 0);
+
+      if (!hasError) {
+        notifySuccess("Thành công", "Các địa điểm đã chọn đã được xoá.");
+        fetchLocations();
+      } else {
+        notifyError(
+          "Không thể xoá các địa điểm đã chọn",
+          "Một số địa điểm không thể xoá, vui lòng thử lại."
+        );
+        fetchLocations();
+      }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể xoá các địa điểm đã chọn.");
     } finally {

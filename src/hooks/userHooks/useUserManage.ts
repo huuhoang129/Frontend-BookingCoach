@@ -10,12 +10,15 @@ import {
 import { AppNotification } from "../../components/Notification/AppNotification.tsx";
 
 export function useUserManage() {
-  // state
+  // Danh sách người dùng
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // Trạng thái modal
   const [isAddModal, setIsAddModal] = useState(false);
   const [isEditModal, setIsEditModal] = useState(false);
+
+  // Người dùng đang chỉnh sửa
   const [editingUser, setEditingUser] = useState<any | null>(null);
 
   const [form] = Form.useForm();
@@ -23,11 +26,12 @@ export function useUserManage() {
 
   const { contextHolder, notifySuccess, notifyError } = AppNotification();
 
-  // fetch
+  // Lấy danh sách người dùng
   const fetchUsers = async () => {
     setLoading(true);
     try {
       const res = await getAllUsers();
+
       if (res.data.errCode === 0) {
         setUsers(res.data.data || []);
       } else {
@@ -40,21 +44,19 @@ export function useUserManage() {
     }
   };
 
+  // Load khi mở trang
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  // ===== CRUD =====
-  // thêm mới
+  // Thêm người dùng mới
   const handleAdd = async () => {
     try {
       const values = await form.validateFields();
       const res = await createUser(values);
+
       if (res.data.errCode === 0) {
-        notifySuccess(
-          "Thêm mới thành công",
-          "Người dùng đã được thêm vào hệ thống."
-        );
+        notifySuccess("Thành công", res.data.errMessage);
         setIsAddModal(false);
         form.resetFields();
         fetchUsers();
@@ -69,17 +71,16 @@ export function useUserManage() {
     }
   };
 
-  // cập nhật
+  // Cập nhật thông tin người dùng
   const handleEdit = async () => {
     if (!editingUser) return;
+
     try {
       const values = await editForm.validateFields();
       const res = await editUser({ id: editingUser.id, ...values });
+
       if (res.data.errCode === 0) {
-        notifySuccess(
-          "Cập nhật thành công",
-          "Thông tin người dùng đã được cập nhật."
-        );
+        notifySuccess("Thành công", res.data.errMessage);
         setIsEditModal(false);
         setEditingUser(null);
         fetchUsers();
@@ -91,15 +92,13 @@ export function useUserManage() {
     }
   };
 
-  // xoá
+  // Xóa một người dùng
   const handleDelete = async (id: number) => {
     try {
       const res = await deleteUser(id);
+
       if (res.data.errCode === 0) {
-        notifySuccess(
-          "Xoá thành công",
-          "Người dùng đã được xoá khỏi hệ thống."
-        );
+        notifySuccess("Thành công", res.data.errMessage);
         fetchUsers();
       } else {
         notifyError("Không thể xoá người dùng", res.data.errMessage);
@@ -109,16 +108,15 @@ export function useUserManage() {
     }
   };
 
-  // xoá nhiều
+  // Xóa nhiều người dùng
   const handleBulkDelete = async (ids: number[]) => {
     if (!ids.length) return;
+
     try {
       setLoading(true);
       await Promise.all(ids.map((id) => deleteUser(id)));
-      notifySuccess(
-        "Xoá thành công",
-        "Các người dùng đã chọn đã được xoá khỏi hệ thống."
-      );
+
+      notifySuccess("Thành công", "Các người dùng đã được xoá khỏi hệ thống.");
       fetchUsers();
     } catch {
       notifyError("Lỗi hệ thống", "Không thể xoá các người dùng đã chọn.");
@@ -127,7 +125,6 @@ export function useUserManage() {
     }
   };
 
-  // return
   return {
     users,
     loading,

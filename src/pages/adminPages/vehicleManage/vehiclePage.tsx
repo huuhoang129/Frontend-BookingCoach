@@ -180,13 +180,13 @@ export default function VehiclePage() {
           <HomeOutlined /> Dashboard
         </Breadcrumb.Item>
         <Breadcrumb.Item>
-          <CarOutlined /> Quản lý xe
+          <CarOutlined /> Quản lý phương tiện
         </Breadcrumb.Item>
       </Breadcrumb>
 
       <Flex justify="space-between" align="center" style={{ marginBottom: 20 }}>
         <Title level={3} style={{ fontWeight: 700, margin: 0 }}>
-          Quản lý Xe
+          Quản lý phương tiện
         </Title>
       </Flex>
 

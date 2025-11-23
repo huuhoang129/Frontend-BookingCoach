@@ -1,3 +1,4 @@
+// src/services/bookingServices/bookingServices.ts
 import axios from "axios";
 
 const API_URL = "http://localhost:8080/api/v1";
@@ -20,7 +21,7 @@ const createBooking = (data: any) => {
 };
 
 //  Cập nhật trạng thái đơn đặt vé
-const updateBookingStatus = (data: any) => {
+const updateBooking = (data: any) => {
   return axios.put(`${API_URL}/bookings`, data);
 };
 
@@ -112,13 +113,12 @@ const updatePaymentStatus = (data: any) => {
   return axios.put(`${API_URL}/bookings/payments/status`, data);
 };
 
-// ==================== EXPORT ====================
 export {
   // bookings
   getAllBookings,
   getBookingById,
   createBooking,
-  updateBookingStatus,
+  updateBooking,
   deleteBooking,
 
   // customers

@@ -9,6 +9,7 @@ import {
   Tooltip,
   Breadcrumb,
   Popconfirm,
+  Tag,
 } from "antd";
 import {
   SearchOutlined,
@@ -17,9 +18,10 @@ import {
   DeleteOutlined,
   HomeOutlined,
   CalendarOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
-import { useState } from "react";
 import type { ColumnsType } from "antd/es/table";
+import { useState } from "react";
 import { useDriverSchedules } from "../../../hooks/vehicleHooks/useDriverSchedules";
 import DriverScheduleModal from "../../../containers/ModalsCollect/VehicleModal/DriverScheduleModal";
 
@@ -31,53 +33,61 @@ export default function DriverSchedulePage() {
     drivers,
     trips,
     loading,
-    isAddOpen,
-    setIsAddOpen,
-    isEditOpen,
-    setIsEditOpen,
+    isAddModal,
+    setIsAddModal,
+    isEditModal,
+    setIsEditModal,
+    editingSchedule,
     setEditingSchedule,
     form,
     editForm,
     handleAdd,
     handleEdit,
     handleDelete,
+    handleBulkDelete,
+    contextHolder,
   } = useDriverSchedules();
 
   const [searchText, setSearchText] = useState("");
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
-  const filtered = schedules.filter((s) => {
-    const text = searchText.toLowerCase();
+  // Filter
+  const filteredData = schedules.filter((s) => {
+    if (!searchText) return true;
+    const lower = searchText.toLowerCase();
     const driverName =
       s.driver?.fullName ||
       `${s.driver?.firstName || ""} ${s.driver?.lastName || ""}`;
     return (
-      driverName.toLowerCase().includes(text) ||
-      s.trip?.route?.fromLocation?.nameLocations
-        ?.toLowerCase()
-        .includes(text) ||
-      s.trip?.vehicle?.licensePlate?.toLowerCase().includes(text)
+      driverName.toLowerCase().includes(lower) ||
+      s.trip?.route?.nameRoute?.toLowerCase().includes(lower) ||
+      s.trip?.vehicle?.licensePlate?.toLowerCase().includes(lower)
     );
   });
 
   const columns: ColumnsType<any> = [
     {
       title: "Tài xế",
-      render: (_, r) =>
-        r.driver ? (
+      key: "driver",
+      render: (_, r) => (
+        <Flex align="center" gap={8}>
+          <UserOutlined style={{ color: "#4d940e" }} />
           <span>
-            {r.driver.fullName || `${r.driver.firstName} ${r.driver.lastName}`}
+            {r.driver?.fullName ||
+              `${r.driver?.firstName || ""} ${r.driver?.lastName || ""}` ||
+              "—"}
           </span>
-        ) : (
-          "—"
-        ),
+        </Flex>
+      ),
     },
     {
       title: "Tuyến xe",
+      key: "route",
       render: (_, r) =>
         r.trip?.route ? (
           <span>
-            {r.trip.route.fromLocation?.nameLocations} →{" "}
-            {r.trip.route.toLocation?.nameLocations}
+            {r.trip.route.fromLocation?.nameLocations || "?"} →{" "}
+            {r.trip.route.toLocation?.nameLocations || "?"}
           </span>
         ) : (
           "—"
@@ -85,19 +95,36 @@ export default function DriverSchedulePage() {
     },
     {
       title: "Xe",
+      key: "vehicle",
       render: (_, r) =>
-        r.trip?.vehicle
-          ? `${r.trip.vehicle.name} (${r.trip.vehicle.licensePlate})`
-          : "—",
+        r.trip?.vehicle ? (
+          <span>
+            {r.trip.vehicle.name}{" "}
+            <Tag color="blue">{r.trip.vehicle.licensePlate}</Tag>
+          </span>
+        ) : (
+          "—"
+        ),
     },
     {
       title: "Ngày khởi hành",
-      render: (_, r) =>
-        r.trip ? `${r.trip.startDate} ${r.trip.startTime}` : "—",
+      key: "startDate",
+      render: (_, r) => (
+        <span>
+          {r.trip?.startDate || "—"} {r.trip?.startTime || ""}
+        </span>
+      ),
     },
-    { title: "Ghi chú", dataIndex: "note" },
     {
-      title: "Hành động",
+      title: "Ghi chú",
+      dataIndex: "note",
+      key: "note",
+      render: (n) => n || "—",
+    },
+    {
+      title: "Thao tác",
+      key: "actions",
+      width: 120,
       render: (_, r) => (
         <Space>
           <Tooltip title="Sửa">
@@ -107,22 +134,25 @@ export default function DriverSchedulePage() {
               style={{ border: "none", color: "#4d940e" }}
               onClick={() => {
                 setEditingSchedule(r);
-                editForm.setFieldsValue(r);
-                setIsEditOpen(true);
+                editForm.setFieldsValue({
+                  userId: r.userId,
+                  coachTripId: r.coachTripId,
+                  note: r.note,
+                });
+                setIsEditModal(true);
               }}
             />
           </Tooltip>
           <Popconfirm
-            title="Xác nhận xoá?"
+            title="Xác nhận xoá"
+            description="Bạn có chắc muốn xoá lịch này không?"
+            okText="Xoá"
+            cancelText="Hủy"
+            okButtonProps={{ danger: true }}
             onConfirm={() => handleDelete(r.id)}
           >
             <Tooltip title="Xoá">
-              <Button
-                shape="circle"
-                icon={<DeleteOutlined />}
-                danger
-                style={{ border: "none" }}
-              />
+              <Button shape="circle" danger icon={<DeleteOutlined />} />
             </Tooltip>
           </Popconfirm>
         </Space>
@@ -130,36 +160,87 @@ export default function DriverSchedulePage() {
     },
   ];
 
+  // Checkbox chọn nhiều
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (keys: React.Key[]) => setSelectedRowKeys(keys),
+  };
+
   return (
     <div style={{ padding: 24, background: "#f4f6f9", minHeight: "100vh" }}>
+      {contextHolder}
+
+      {/* breadcrumb */}
       <Breadcrumb style={{ marginBottom: 16 }}>
         <Breadcrumb.Item>
           <HomeOutlined /> Dashboard
         </Breadcrumb.Item>
         <Breadcrumb.Item>
-          <CalendarOutlined /> Lịch tài xế
+          <CalendarOutlined /> Quản lý lịch làm việc tài xế
         </Breadcrumb.Item>
       </Breadcrumb>
 
-      <Title level={3}>Quản lý lịch làm việc tài xế</Title>
+      <Flex justify="space-between" align="center" style={{ marginBottom: 20 }}>
+        <Title level={3} style={{ fontWeight: 700, margin: 0 }}>
+          Quản lý lịch làm việc tài xế
+        </Title>
+      </Flex>
 
       <Card style={{ marginBottom: 20 }}>
-        <Flex justify="space-between" align="center">
+        <Flex justify="space-between" align="center" wrap="wrap" gap={16}>
           <Input
-            placeholder="🔍 Tìm tài xế, tuyến, xe..."
+            placeholder="🔍 Tìm theo tài xế, tuyến, biển số..."
             prefix={<SearchOutlined />}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             style={{ width: 300 }}
           />
-          <Button
-            icon={<PlusOutlined />}
-            type="primary"
-            onClick={() => setIsAddOpen(true)}
-            style={{ background: "#4d940e", borderColor: "#4d940e" }}
-          >
-            Thêm lịch
-          </Button>
+
+          <Flex gap={12} align="center">
+            {selectedRowKeys.length > 0 ? (
+              <Popconfirm
+                title="Xác nhận xoá"
+                description="Bạn có chắc muốn xoá các lịch đã chọn không?"
+                okText="Xoá"
+                cancelText="Hủy"
+                okButtonProps={{ danger: true }}
+                onConfirm={() => {
+                  handleBulkDelete(selectedRowKeys as number[]);
+                  setSelectedRowKeys([]);
+                }}
+              >
+                <Button
+                  danger
+                  icon={<DeleteOutlined />}
+                  style={{
+                    height: 40,
+                    borderRadius: 8,
+                    padding: "0 20px",
+                    fontWeight: 500,
+                  }}
+                >
+                  Xoá đã chọn
+                </Button>
+              </Popconfirm>
+            ) : (
+              <Button
+                icon={<PlusOutlined />}
+                style={{
+                  borderRadius: 8,
+                  padding: "0 20px",
+                  background: "#4d940e",
+                  borderColor: "#4d940e",
+                  color: "#fff",
+                  fontWeight: 500,
+                  height: 40,
+                }}
+                type="primary"
+                onClick={() => setIsAddModal(true)}
+              >
+                Thêm lịch làm việc
+              </Button>
+            )}
+          </Flex>
         </Flex>
       </Card>
 
@@ -167,32 +248,26 @@ export default function DriverSchedulePage() {
         <Table
           rowKey="id"
           loading={loading}
-          dataSource={filtered}
+          dataSource={filteredData}
           columns={columns}
           pagination={{ pageSize: 8 }}
+          rowSelection={rowSelection}
         />
       </Card>
 
-      {/* Modal thêm */}
       <DriverScheduleModal
-        open={isAddOpen}
-        onCancel={() => setIsAddOpen(false)}
-        onSubmit={handleAdd}
-        form={form}
+        openAdd={isAddModal}
+        setOpenAdd={setIsAddModal}
+        openEdit={isEditModal}
+        setOpenEdit={setIsEditModal}
+        formAdd={form}
+        formEdit={editForm}
+        handleAdd={handleAdd}
+        handleEdit={handleEdit}
+        editingSchedule={editingSchedule}
         drivers={drivers}
         trips={trips}
-        title="Thêm lịch làm việc"
-      />
-
-      {/* Modal sửa */}
-      <DriverScheduleModal
-        open={isEditOpen}
-        onCancel={() => setIsEditOpen(false)}
-        onSubmit={handleEdit}
-        form={editForm}
-        drivers={drivers}
-        trips={trips}
-        title="Sửa lịch làm việc"
+        schedules={schedules}
       />
     </div>
   );

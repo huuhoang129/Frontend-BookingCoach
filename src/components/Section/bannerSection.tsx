@@ -30,7 +30,7 @@ export default function BannerSection() {
         image: `data:image/png;base64,${b.image}`,
       }));
 
-      // 👇 Đảo ngược thứ tự
+      // Đảo ngược thứ tự (banner mới lên đầu)
       setBanners(mapped.reverse());
     } catch (err) {
       console.error("❌ Lỗi khi lấy banners:", err);
@@ -46,6 +46,15 @@ export default function BannerSection() {
   const nextSlide = () => {
     setCurrentIndex((prev) => (prev === banners.length - 1 ? 0 : prev + 1));
   };
+
+  // 🕒 Tự động chạy vô hạn mỗi 5 giây
+  useEffect(() => {
+    if (banners.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev === banners.length - 1 ? 0 : prev + 1));
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [banners]);
 
   if (loading) return <div>Đang tải banner...</div>;
 
@@ -67,6 +76,8 @@ export default function BannerSection() {
         <div
           className="banner-slider"
           style={{
+            display: "flex",
+            transition: "transform 0.8s ease-in-out",
             transform: `translateX(-${currentIndex * 100}%)`,
           }}
         >
@@ -77,10 +88,10 @@ export default function BannerSection() {
           ))}
         </div>
 
+        {/* Nút điều hướng */}
         <button className="nav-btn left" onClick={prevSlide}>
           <LeftOutlined />
         </button>
-
         <button className="nav-btn right" onClick={nextSlide}>
           <RightOutlined />
         </button>

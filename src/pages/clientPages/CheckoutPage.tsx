@@ -582,7 +582,7 @@ export default function CheckoutPage() {
               <div className="option-content">
                 <h4>Thanh toán bằng thẻ</h4>
                 <p>Hỗ trợ Visa, MasterCard, nội địa. An toàn, tiện lợi.</p>
-                <span className="fee">Phí dịch vụ: 5.000đ</span>
+                <span className="fee">Miễn phí dịch vụ</span>
               </div>
             </label>
 

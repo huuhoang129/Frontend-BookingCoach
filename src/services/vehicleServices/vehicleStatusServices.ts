@@ -3,6 +3,8 @@ import axios from "axios";
 
 const API_URL = "http://localhost:8080/api/v1";
 
+// ==================== VEHICLE STATUS ====================
+
 // Lấy danh sách tình trạng xe
 const getAllVehicleStatus = () => {
   return axios.get(`${API_URL}/vehicle-status`);

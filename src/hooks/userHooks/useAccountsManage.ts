@@ -7,7 +7,6 @@ import {
 } from "../../services/userServices/accountServices.ts";
 import { AppNotification } from "../../components/Notification/AppNotification.tsx";
 
-// types
 export interface Account {
   id: number;
   email: string;
@@ -19,19 +18,17 @@ export interface Account {
 }
 
 export function useAccounts() {
-  // state
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(false);
   const { contextHolder, notifySuccess, notifyError } = AppNotification();
 
-  // fetch data
+  // fetch danh sách tài khoản
   const fetchAccounts = async () => {
     setLoading(true);
     try {
       const res = await getAllAccounts();
       if (res.data.errCode === 0) {
-        const users: Account[] = res.data.data || [];
-        setAccounts(users);
+        setAccounts(res.data.data || []);
       } else {
         notifyError("Không thể tải danh sách", res.data.errMessage);
       }
@@ -41,6 +38,7 @@ export function useAccounts() {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchAccounts();
   }, []);
@@ -50,7 +48,7 @@ export function useAccounts() {
     try {
       const res = await lockAccount(id);
       if (res.data.errCode === 0) {
-        notifySuccess("Khóa tài khoản thành công", "Tài khoản đã bị khóa.");
+        notifySuccess("Thành công", res.data.errMessage);
         fetchAccounts();
       } else {
         notifyError("Không thể khóa tài khoản", res.data.errMessage);
@@ -68,10 +66,7 @@ export function useAccounts() {
     try {
       const res = await unlockAccount(id);
       if (res.data.errCode === 0) {
-        notifySuccess(
-          "Mở khóa thành công",
-          "Tài khoản đã được kích hoạt trở lại."
-        );
+        notifySuccess("Thành công", res.data.errMessage);
         fetchAccounts();
       } else {
         notifyError("Không thể mở khóa tài khoản", res.data.errMessage);
@@ -81,7 +76,6 @@ export function useAccounts() {
     }
   };
 
-  // return
   return {
     accounts,
     loading,

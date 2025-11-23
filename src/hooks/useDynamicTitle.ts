@@ -1,17 +1,18 @@
+// src/hooks/common/useDynamicTitle.ts
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 /**
- * Hook cập nhật tiêu đề trình duyệt dựa trên đường dẫn hiện tại.
- * Hỗ trợ Client, Admin, Driver.
+ * Hook thay đổi tiêu đề trang theo đường dẫn hiện tại.
+ * Áp dụng cho giao diện Client, Admin, Driver.
  */
 export default function useDynamicTitle() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    // Map các đường dẫn và tiêu đề
+    // Danh sách đường dẫn và tiêu đề tương ứng
     const titles: Record<string, string> = {
-      // 🌐 CLIENT
+      // CLIENT
       "/": "Trang chủ | Nhà Xe Hương Dương",
       "/about": "Giới thiệu | Nhà Xe Hương Dương",
       "/contact": "Liên hệ | Nhà Xe Hương Dương",
@@ -31,7 +32,7 @@ export default function useDynamicTitle() {
       "/news": "Tin tức | Nhà Xe Hương Dương",
       "/test": "Trang kiểm thử | Nhà Xe Hương Dương",
 
-      // 🧭 ADMIN
+      // ADMIN
       "/admin": "Bảng điều khiển | Quản trị Hương Dương",
       "/admin/banner-manage": "Quản lý banner | Quản trị Hương Dương",
       "/admin/homepage-manage": "Quản lý trang chủ | Quản trị Hương Dương",
@@ -53,21 +54,21 @@ export default function useDynamicTitle() {
       "/admin/employee-manage": "Quản lý nhân viên | Quản trị Hương Dương",
       "/admin/account-manage": "Quản lý tài khoản | Quản trị Hương Dương",
 
-      // 🚍 DRIVER
+      // DRIVER
       "/driver/dashboard": "Bảng điều khiển tài xế | Nhà Xe Hương Dương",
     };
 
-    // Đặc biệt: xử lý các route có tham số động (ví dụ /news/:id/:slug)
+    // Các trang có tham số động (ví dụ /news/:id)
     if (pathname.startsWith("/news/")) {
       document.title = "Chi tiết tin tức | Nhà Xe Hương Dương";
       return;
     }
 
-    // Nếu có tiêu đề tương ứng → gán
+    // Gán tiêu đề theo đường dẫn
     if (titles[pathname]) {
       document.title = titles[pathname];
     } else {
-      // Mặc định
+      // Tiêu đề mặc định
       document.title = "Nhà Xe Hương Dương";
     }
   }, [pathname]);

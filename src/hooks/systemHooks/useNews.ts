@@ -1,5 +1,5 @@
+// src/hooks/systemHooks/useNews.ts
 import { useState, useEffect } from "react";
-import { message } from "antd";
 import {
   getAllNews,
   createNews,
@@ -9,6 +9,7 @@ import {
 } from "../../services/systemServices/newServices.ts";
 import { parseMarkdownToBlocks, blocksToMarkdown } from "../../utils/markdown";
 import { toBase64 } from "../../utils/base64";
+import { AppNotification } from "../../components/Notification/AppNotification";
 
 interface Author {
   id: number;
@@ -44,9 +45,10 @@ export function useNews() {
   const [loading, setLoading] = useState(true);
   const [selectedNews, setSelectedNews] = useState<any>(null);
 
-  // filter
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
+
+  const { contextHolder, notifySuccess, notifyError } = AppNotification();
 
   const fetchNews = async () => {
     setLoading(true);
@@ -55,11 +57,10 @@ export function useNews() {
       if (res.data?.errCode === 0) {
         setNewsList(res.data.data || []);
       } else {
-        message.error(res.data?.errMessage || "Lỗi tải tin tức");
+        notifyError("Lỗi hệ thống", res.data?.errMessage);
       }
-    } catch (e) {
-      console.error(e);
-      message.error("Không thể tải danh sách tin tức");
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể tải danh sách tin tức.");
     } finally {
       setLoading(false);
     }
@@ -69,11 +70,12 @@ export function useNews() {
     fetchNews();
   }, []);
 
-  // CRUD
+  // thêm mới tin tức
   const handleCreateSubmit = async (values: any, cb?: () => void) => {
     const thumbnailBase64 = await getThumbnailBase64(values.thumbnail, false);
+
     const user = JSON.parse(localStorage.getItem("user") || "{}");
-    if (!user.id) return message.error("Bạn cần đăng nhập");
+    if (!user.id) return notifyError("Lỗi hệ thống", "Bạn cần đăng nhập.");
 
     const payload = {
       title: values.title,
@@ -87,21 +89,23 @@ export function useNews() {
     try {
       const res = await createNews(payload);
       if (res.data?.errCode === 0) {
-        message.success("Thêm tin tức thành công");
-        cb?.(); // 👈 chỉ gọi nếu có
+        notifySuccess("Thành công", res.data.errMessage);
+        cb?.();
         fetchNews();
       } else {
-        message.error(res.data?.errMessage || "Thêm thất bại");
+        notifyError("Lỗi hệ thống", res.data?.errMessage);
       }
     } catch {
-      message.error("Không thể gửi dữ liệu");
+      notifyError("Lỗi hệ thống", "Không thể thêm tin tức.");
     }
   };
 
+  // cập nhật tin tức
   const handleEditSubmit = async (values: any, cb?: () => void) => {
     const thumbnailBase64 = await getThumbnailBase64(values.thumbnail, true);
+
     const user = JSON.parse(localStorage.getItem("user") || "{}");
-    if (!user.id) return message.error("Bạn cần đăng nhập");
+    if (!user.id) return notifyError("Lỗi hệ thống", "Bạn cần đăng nhập.");
 
     const payload: any = {
       id: selectedNews.id,
@@ -112,59 +116,68 @@ export function useNews() {
       blocks: parseMarkdownToBlocks(values.content),
     };
 
-    if (thumbnailBase64 !== undefined)
+    if (thumbnailBase64 !== undefined) {
       payload.thumbnailBase64 = thumbnailBase64;
+    }
 
     try {
       const res = await updateNews(payload);
       if (res.data?.errCode === 0) {
-        message.success("Cập nhật thành công");
-        cb?.(); // 👈 chỉ gọi nếu có
+        notifySuccess("Thành công", res.data.errMessage);
+        cb?.();
         fetchNews();
       } else {
-        message.error(res.data?.errMessage || "Cập nhật thất bại");
+        notifyError("Lỗi hệ thống", res.data?.errMessage);
       }
     } catch {
-      message.error("Không thể cập nhật");
+      notifyError("Lỗi hệ thống", "Không thể cập nhật tin tức.");
     }
   };
 
+  // xóa tin tức
   const handleDelete = async (id: number) => {
     try {
       const res = await deleteNews(id);
       if (res.data?.errCode === 0) {
-        message.success("Xoá thành công");
+        notifySuccess("Thành công", res.data.errMessage);
         fetchNews();
       } else {
-        message.error(res.data?.errMessage || "Xoá thất bại");
+        notifyError("Lỗi hệ thống", res.data?.errMessage);
       }
     } catch {
-      message.error("Không thể xoá tin tức");
+      notifyError("Lỗi hệ thống", "Không thể xoá tin tức.");
     }
   };
 
+  // lấy chi tiết tin tức theo id
   const handleGetById = async (id: number, onOpen: () => void) => {
-    const res = await getNewsById(id);
-    if (res.data?.errCode === 0) {
-      const detail = res.data.data;
-      setSelectedNews({
-        id: detail.id,
-        title: detail.title,
-        status: detail.status,
-        newsType: detail.newsType,
-        content: blocksToMarkdown(detail.details || []),
-        thumbnail: detail.thumbnail
-          ? [
-              {
-                uid: "-1",
-                url: detail.thumbnail,
-                name: "thumbnail.png",
-                status: "done",
-              },
-            ]
-          : [],
-      });
-      onOpen();
+    try {
+      const res = await getNewsById(id);
+      if (res.data?.errCode === 0) {
+        const detail = res.data.data;
+        setSelectedNews({
+          id: detail.id,
+          title: detail.title,
+          status: detail.status,
+          newsType: detail.newsType,
+          content: blocksToMarkdown(detail.details || []),
+          thumbnail: detail.thumbnail
+            ? [
+                {
+                  uid: "-1",
+                  url: detail.thumbnail,
+                  name: "thumbnail.png",
+                  status: "done",
+                },
+              ]
+            : [],
+        });
+        onOpen();
+      } else {
+        notifyError("Lỗi hệ thống", res.data?.errMessage);
+      }
+    } catch {
+      notifyError("Lỗi hệ thống", "Không thể tải chi tiết tin tức.");
     }
   };
 
@@ -182,5 +195,6 @@ export function useNews() {
     handleEditSubmit,
     handleDelete,
     handleGetById,
+    contextHolder,
   };
 }

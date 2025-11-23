@@ -1,5 +1,7 @@
+//hooks/useDriverSchedules.ts
 import { useEffect, useState } from "react";
-import { Form, message } from "antd";
+import { Form } from "antd";
+import { AppNotification } from "../../components/Notification/AppNotification";
 import {
   getAllDriverSchedules,
   createDriverSchedule,
@@ -26,21 +28,44 @@ export interface DriverSchedule {
     startDate: string;
     startTime: string;
     route?: {
-      fromLocation?: { nameLocations: string };
-      toLocation?: { nameLocations: string };
+      nameRoute: string;
+      fromLocation?: { id: number; nameLocations: string };
+      toLocation?: { id: number; nameLocations: string };
     };
     vehicle?: { name: string; licensePlate: string };
   };
 }
 
+export interface Driver {
+  id: number;
+  firstName: string;
+  lastName: string;
+  phoneNumber?: string;
+  fullName?: string;
+}
+
+export interface CoachTrip {
+  id: number;
+  startDate: string;
+  startTime: string;
+  totalTime: number;
+  route?: {
+    nameRoute: string;
+    fromLocation?: { id: number; nameLocations: string };
+    toLocation?: { id: number; nameLocations: string };
+  };
+  vehicle?: { name: string; licensePlate: string };
+}
+
+// hooks
 export function useDriverSchedules() {
   const [schedules, setSchedules] = useState<DriverSchedule[]>([]);
-  const [drivers, setDrivers] = useState<any[]>([]);
-  const [trips, setTrips] = useState<any[]>([]);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [trips, setTrips] = useState<CoachTrip[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const [isAddOpen, setIsAddOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isAddModal, setIsAddModal] = useState(false);
+  const [isEditModal, setIsEditModal] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<DriverSchedule | null>(
     null
   );
@@ -48,69 +73,161 @@ export function useDriverSchedules() {
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
 
-  // Fetch
-  const fetchData = async () => {
+  const { contextHolder, notifySuccess, notifyError } = AppNotification();
+
+  // fetch data
+  const fetchSchedules = async () => {
     setLoading(true);
     try {
-      const [schRes, driverRes, tripRes] = await Promise.all([
-        getAllDriverSchedules(),
-        getAllDrivers(),
-        getAllTrips(),
-      ]);
-      if (schRes.data.errCode === 0) setSchedules(schRes.data.data || []);
-      if (driverRes.data.errCode === 0) setDrivers(driverRes.data.data || []);
-      if (tripRes.data.errCode === 0) setTrips(tripRes.data.data || []);
+      const res = await getAllDriverSchedules();
+      const { errCode, errMessage, data } = res.data;
+
+      if (errCode === 0) {
+        setSchedules(data || []);
+      } else {
+        notifyError("Lỗi", errMessage || "Không thể tải lịch làm việc");
+      }
+    } catch (e: any) {
+      notifyError(
+        "Lỗi",
+        e?.response?.data?.errMessage ||
+          "Không thể tải lịch làm việc. Lỗi hệ thống"
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchDrivers = async () => {
+    try {
+      const res = await getAllDrivers();
+      const { errCode, errMessage, data } = res.data;
+
+      if (errCode === 0) {
+        setDrivers(data || []);
+      } else {
+        notifyError("Lỗi", errMessage || "Không thể tải danh sách tài xế");
+      }
+    } catch (e: any) {
+      notifyError(
+        "Lỗi",
+        e?.response?.data?.errMessage ||
+          "Không thể tải danh sách tài xế. Lỗi hệ thống"
+      );
+    }
+  };
+
+  const fetchTrips = async () => {
+    try {
+      const res = await getAllTrips();
+      const { errCode, errMessage, data } = res.data;
+
+      if (errCode === 0) {
+        setTrips(data || []);
+      } else {
+        notifyError("Lỗi", errMessage || "Không thể tải danh sách chuyến xe");
+      }
+    } catch (e: any) {
+      notifyError(
+        "Lỗi",
+        e?.response?.data?.errMessage ||
+          "Không thể tải danh sách chuyến xe. Lỗi hệ thống"
+      );
+    }
+  };
+
   useEffect(() => {
-    fetchData();
+    fetchSchedules();
+    fetchDrivers();
+    fetchTrips();
   }, []);
 
-  // Add
+  // thêm mới
   const handleAdd = async () => {
     try {
       const values = await form.validateFields();
       const res = await createDriverSchedule(values);
-      if (res.data.errCode === 0) {
-        message.success("Thêm lịch làm việc thành công!");
+      const { errCode, errMessage } = res.data;
+
+      if (errCode === 0) {
+        notifySuccess("Thành công", errMessage);
+        setIsAddModal(false);
         form.resetFields();
-        setIsAddOpen(false);
-        fetchData();
-      } else message.error(res.data.errMessage || "Lỗi khi thêm");
-    } catch (err) {
-      console.error(err);
+        fetchSchedules();
+      } else {
+        notifyError("Lỗi", errMessage);
+      }
+    } catch (e: any) {
+      notifyError("Lỗi", e?.response?.data?.errMessage);
     }
   };
 
-  // Edit
+  // cập nhật
   const handleEdit = async () => {
+    if (!editingSchedule) return;
+
     try {
       const values = await editForm.validateFields();
-      if (!editingSchedule) return;
-      const res = await updateDriverSchedule(editingSchedule.id, values);
-      if (res.data.errCode === 0) {
-        message.success("Cập nhật lịch làm việc thành công!");
-        setIsEditOpen(false);
-        fetchData();
-      } else message.error(res.data.errMessage || "Lỗi khi cập nhật");
-    } catch (err) {
-      console.error(err);
+      const payload = { id: editingSchedule.id, ...values };
+
+      const res = await updateDriverSchedule(editingSchedule.id, payload);
+      const { errCode, errMessage } = res.data;
+
+      if (errCode === 0) {
+        notifySuccess("Thành công", errMessage);
+        setIsEditModal(false);
+        setEditingSchedule(null);
+        fetchSchedules();
+      } else {
+        notifyError("Lỗi", errMessage);
+      }
+    } catch (e: any) {
+      notifyError(
+        "Lỗi",
+        e?.response?.data?.errMessage ||
+          "Không thể cập nhật lịch làm việc. Lỗi hệ thống"
+      );
     }
   };
 
-  // Delete
+  // xóa
   const handleDelete = async (id: number) => {
     try {
       const res = await deleteDriverSchedule(id);
-      if (res.data.errCode === 0) {
-        message.success("Xóa lịch thành công!");
-        fetchData();
-      } else message.error(res.data.errMessage || "Lỗi khi xóa");
-    } catch (err) {
-      message.error("Không thể xóa. Vui lòng thử lại!");
+      const { errCode, errMessage } = res.data;
+
+      if (errCode === 0) {
+        notifySuccess("Thành công", errMessage);
+        fetchSchedules();
+      } else {
+        notifyError("Lỗi", errMessage);
+      }
+    } catch (e: any) {
+      notifyError(
+        "Lỗi",
+        e?.response?.data?.errMessage ||
+          "Không thể xóa lịch làm việc. Lỗi hệ thống"
+      );
+    }
+  };
+
+  // xóa nhiều
+  const handleBulkDelete = async (ids: number[]) => {
+    if (!ids.length) return;
+
+    try {
+      setLoading(true);
+      await Promise.all(ids.map((id) => deleteDriverSchedule(id)));
+      notifySuccess("Thành công", "Các lịch làm việc đã được xóa thành công.");
+      fetchSchedules();
+    } catch (e: any) {
+      notifyError(
+        "Lỗi",
+        e?.response?.data?.errMessage ||
+          "Không thể xóa các lịch đã chọn. Lỗi hệ thống"
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -119,16 +236,18 @@ export function useDriverSchedules() {
     drivers,
     trips,
     loading,
-    form,
-    editForm,
-    isAddOpen,
-    setIsAddOpen,
-    isEditOpen,
-    setIsEditOpen,
+    isAddModal,
+    setIsAddModal,
+    isEditModal,
+    setIsEditModal,
     editingSchedule,
     setEditingSchedule,
+    form,
+    editForm,
     handleAdd,
     handleEdit,
     handleDelete,
+    handleBulkDelete,
+    contextHolder,
   };
 }

@@ -1,6 +1,10 @@
+// src/services/paymentServices/vnpayService.ts
 import axios from "axios";
 
-export const createVNPayPayment = async ({
+// ==================== VNPay PAYMENTS ====================
+
+// Tạo thanh toán VNPay cho đơn đặt vé
+const createVNPayPayment = async ({
   bookingId,
   amount,
   bankCode,
@@ -15,3 +19,5 @@ export const createVNPayPayment = async ({
     bankCode,
   });
 };
+
+export { createVNPayPayment };

@@ -9,6 +9,7 @@ import {
   Tooltip,
   Breadcrumb,
   Tag,
+  Popconfirm,
 } from "antd";
 import {
   SearchOutlined,
@@ -32,12 +33,14 @@ export default function SchedulePage() {
     schedules,
     routes,
     vehicles,
+    vehicleStatuses,
     prices,
     loading,
     isModalOpen,
     setIsModalOpen,
     isEdit,
     setIsEdit,
+    editingSchedule,
     setEditingSchedule,
     form,
     handleSubmit,
@@ -48,24 +51,25 @@ export default function SchedulePage() {
 
   const [searchText, setSearchText] = useState("");
 
-  // ====== Lọc dữ liệu ======
+  // 🔍 Lọc dữ liệu
   const filteredData = schedules.filter((s) => {
     if (!searchText) return true;
     return (
       s.route?.fromLocation?.nameLocations
-        .toLowerCase()
+        ?.toLowerCase()
         .includes(searchText.toLowerCase()) ||
       s.route?.toLocation?.nameLocations
-        .toLowerCase()
+        ?.toLowerCase()
         .includes(searchText.toLowerCase()) ||
-      s.vehicle?.licensePlate.toLowerCase().includes(searchText.toLowerCase())
+      s.vehicle?.licensePlate?.toLowerCase().includes(searchText.toLowerCase())
     );
   });
 
-  // ====== Cấu hình bảng ======
+  // 🧱 Cột hiển thị
   const columns: ColumnsType<any> = [
     {
       title: "Tuyến",
+      key: "route",
       render: (_, r) =>
         r.route
           ? `${r.route.fromLocation?.nameLocations} → ${r.route.toLocation?.nameLocations}`
@@ -73,79 +77,103 @@ export default function SchedulePage() {
     },
     {
       title: "Xe",
+      key: "vehicle",
       render: (_, r) =>
-        r.vehicle ? `${r.vehicle.licensePlate} (${r.vehicle.type})` : "—",
+        r.vehicle ? `${r.vehicle.licensePlate} (${r.vehicle.name})` : "—",
     },
     {
       title: "Giá vé",
+      key: "price",
       render: (_, r) =>
         r.price ? `${r.price.priceTrip.toLocaleString()} đ` : "—",
     },
     {
       title: "Giờ khởi hành",
+      key: "startTime",
       render: (_, r) =>
         r.startTime ? dayjs(r.startTime, "HH:mm:ss").format("HH:mm") : "—",
     },
     {
       title: "Thời gian hành trình",
+      key: "totalTime",
       render: (_, r) =>
         r.totalTime ? dayjs(r.totalTime, "HH:mm:ss").format("HH:mm") : "—",
     },
     {
       title: "Trạng thái",
+      key: "status",
       render: (_, r) => (
-        <Tag color={r.status === "ACTIVE" ? "green" : "red"}>
+        <Tag
+          color={r.status === "ACTIVE" ? "green" : "red"}
+          style={{ borderRadius: 6, fontWeight: 500, padding: "2px 8px" }}
+        >
           {r.status === "ACTIVE" ? "Hoạt động" : "Ngừng"}
         </Tag>
       ),
     },
     {
       title: "Hành động",
-      render: (_, r) => (
+      key: "actions",
+      align: "center",
+      width: 130,
+      render: (_, record) => (
         <Space>
-          <Tooltip title="Sửa">
+          <Tooltip title="Sửa lịch trình">
             <Button
               shape="circle"
               icon={<EditOutlined />}
-              style={{ color: "#4d940e", border: "none" }}
+              style={{
+                color: "#4d940e",
+                border: "none",
+                background: "transparent",
+              }}
               onClick={() => {
                 setIsEdit(true);
-                setEditingSchedule(r);
+                setEditingSchedule(record);
                 form.setFieldsValue({
-                  coachRouteId: r.route?.id,
-                  vehicleId: r.vehicle?.id,
-                  tripPriceId: r.price?.id,
-                  startTime: dayjs(r.startTime, "HH:mm:ss"),
-                  totalTime: r.totalTime
-                    ? dayjs(r.totalTime, "HH:mm:ss")
+                  coachRouteId: record.route?.id,
+                  vehicleId: record.vehicle?.id,
+                  tripPriceId: record.price?.id,
+                  startTime: record.startTime
+                    ? dayjs(record.startTime, "HH:mm:ss")
                     : null,
-                  status: r.status,
+                  totalTime: record.totalTime
+                    ? dayjs(record.totalTime, "HH:mm:ss")
+                    : null,
+                  status: record.status,
                 });
                 setIsModalOpen(true);
               }}
             />
           </Tooltip>
 
-          <Tooltip title="Xóa">
-            <Button
-              shape="circle"
-              danger
-              icon={<DeleteOutlined />}
-              onClick={() => handleDelete(r.id)}
-              style={{ border: "none" }}
-            />
+          <Tooltip title="Xóa lịch trình">
+            <Popconfirm
+              title="Xác nhận xóa"
+              description="Bạn có chắc muốn xóa lịch trình này?"
+              okText="Xóa"
+              cancelText="Hủy"
+              okButtonProps={{ danger: true }}
+              onConfirm={() => handleDelete(record.id)}
+            >
+              <Button
+                shape="circle"
+                danger
+                icon={<DeleteOutlined />}
+                style={{ border: "none" }}
+              />
+            </Popconfirm>
           </Tooltip>
         </Space>
       ),
     },
   ];
 
-  // ====== JSX ======
   return (
     <div style={{ padding: 24, background: "#f4f6f9", minHeight: "100vh" }}>
       {contextHolder}
 
-      {/* breadcrumb */}
+      {/* Breadcrumb */}
       <Breadcrumb style={{ marginBottom: 16 }}>
         <Breadcrumb.Item>
           <HomeOutlined /> Dashboard
@@ -161,7 +189,7 @@ export default function SchedulePage() {
         </Title>
       </Flex>
 
-      {/* bộ lọc */}
+      {/* Bộ lọc & nút */}
       <Card
         style={{
           marginBottom: 20,
@@ -216,9 +244,12 @@ export default function SchedulePage() {
         </Flex>
       </Card>
 
-      {/* bảng */}
+      {/* Bảng dữ liệu */}
       <Card
-        style={{ borderRadius: 12, boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}
+        style={{
+          borderRadius: 12,
+          boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+        }}
       >
         <Table
           rowKey="id"
@@ -229,7 +260,7 @@ export default function SchedulePage() {
         />
       </Card>
 
-      {/* modal thêm/sửa */}
+      {/* Modal thêm/sửa */}
       <ScheduleModal
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
@@ -238,7 +269,9 @@ export default function SchedulePage() {
         form={form}
         routes={routes}
         vehicles={vehicles}
+        vehicleStatuses={vehicleStatuses}
         prices={prices}
+        editingSchedule={editingSchedule}
       />
     </div>
   );

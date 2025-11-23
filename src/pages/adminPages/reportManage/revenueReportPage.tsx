@@ -211,14 +211,6 @@ export default function RevenueReportPage() {
             <Button onClick={fetchData} icon={<ReloadOutlined />}>
               Tải lại
             </Button>
-            <Button
-              type="primary"
-              onClick={handleExportCSV}
-              icon={<FileExcelOutlined />}
-              style={{ backgroundColor: "#4d940e", borderColor: "#4d940e" }}
-            >
-              Xuất CSV
-            </Button>
             {groupBy === "day" && (
               <Button
                 type={chartMA ? "primary" : "default"}

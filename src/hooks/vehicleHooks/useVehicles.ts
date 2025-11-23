@@ -1,4 +1,4 @@
-//src/hooks/vehicleHooks/useVehicles.ts
+// src/hooks/vehicleHooks/useVehicles.ts
 import { useEffect, useState } from "react";
 import { Form } from "antd";
 import {
@@ -9,7 +9,6 @@ import {
 } from "../../services/vehicleServices/vehicleServices";
 import { AppNotification } from "../../components/Notification/AppNotification.tsx";
 
-// type
 export interface Vehicle {
   id: number;
   name: string;
@@ -21,10 +20,11 @@ export interface Vehicle {
 }
 
 export function useVehicles() {
-  // state
+  // Danh sách xe
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // Modal và xe đang chỉnh sửa
   const [isAddModal, setIsAddModal] = useState(false);
   const [isEditModal, setIsEditModal] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
@@ -34,6 +34,7 @@ export function useVehicles() {
 
   const { contextHolder, notifySuccess, notifyError } = AppNotification();
 
+  // Cấu hình số tầng và số ghế theo loại xe
   const configByType: Record<
     string,
     { numberFloors: number; seatCount: number }
@@ -44,26 +45,31 @@ export function useVehicles() {
     DOUBLESLEEPER: { numberFloors: 2, seatCount: 22 },
   };
 
-  // fetche vehicle
+  // Lấy danh sách xe
   const fetchVehicles = async () => {
     setLoading(true);
     try {
       const res = await getAllVehicles();
-      if (res.data.errCode === 0) setVehicles(res.data.data);
-      else notifyError("Không thể tải danh sách xe", res.data.errMessage);
+      const { errCode, errMessage, data } = res.data;
+
+      if (errCode === 0) {
+        setVehicles(data);
+      } else {
+        notifyError("Không thể tải danh sách xe", errMessage);
+      }
     } catch {
-      notifyError("Lỗi hệ thống", "Không thể tải danh sách xe.");
+      notifyError("Lỗi hệ thống", "Không thể tải danh sách xe");
     } finally {
       setLoading(false);
     }
   };
 
+  // Load khi mở trang
   useEffect(() => {
     fetchVehicles();
   }, []);
 
-  // ===== CRUD =====
-  // thêm xe mới
+  // Thêm xe
   const handleAdd = async () => {
     try {
       const values = await form.validateFields();
@@ -71,75 +77,80 @@ export function useVehicles() {
       const payload = { ...values, ...config };
 
       const res = await createVehicle(payload);
-      if (res.data.errCode === 0) {
-        notifySuccess("Thêm mới thành công", "Xe đã được thêm vào hệ thống.");
+      const { errCode, errMessage } = res.data;
+
+      if (errCode === 0) {
+        notifySuccess("Thành công", errMessage);
         setIsAddModal(false);
         form.resetFields();
         fetchVehicles();
       } else {
-        notifyError("Không thể thêm xe", res.data.errMessage);
+        notifyError("Không thể thêm xe", errMessage);
       }
     } catch {
-      notifyError("Lỗi hệ thống", "Không thể thêm xe, vui lòng thử lại.");
+      notifyError("Lỗi hệ thống", "Không thể thêm xe");
     }
   };
 
-  // cập nhật xe
+  // Cập nhật xe
   const handleEdit = async () => {
     if (!editingVehicle) return;
+
     try {
       const values = await editForm.validateFields();
       const config = configByType[values.type];
       const payload = { id: editingVehicle.id, ...values, ...config };
 
       const res = await updateVehicle(editingVehicle.id, payload);
-      if (res.data.errCode === 0) {
-        notifySuccess("Cập nhật thành công", "Thông tin xe đã được cập nhật.");
+      const { errCode, errMessage } = res.data;
+
+      if (errCode === 0) {
+        notifySuccess("Thành công", errMessage);
         setIsEditModal(false);
         setEditingVehicle(null);
         fetchVehicles();
       } else {
-        notifyError("Không thể cập nhật xe", res.data.errMessage);
+        notifyError("Không thể cập nhật xe", errMessage);
       }
     } catch {
-      notifyError("Lỗi hệ thống", "Không thể cập nhật xe.");
+      notifyError("Lỗi hệ thống", "Không thể cập nhật xe");
     }
   };
 
-  // xoá xe
+  // Xoá xe
   const handleDelete = async (id: number) => {
     try {
       const res = await deleteVehicle(id);
-      if (res.data.errCode === 0) {
-        notifySuccess("Xoá thành công", "Xe đã được xoá khỏi hệ thống.");
+      const { errCode, errMessage } = res.data;
+
+      if (errCode === 0) {
+        notifySuccess("Thành công", errMessage);
         fetchVehicles();
       } else {
-        notifyError("Không thể xoá xe", res.data.errMessage);
+        notifyError("Không thể xoá xe", errMessage);
       }
     } catch {
-      notifyError("Lỗi hệ thống", "Không thể xoá xe.");
+      notifyError("Lỗi hệ thống", "Không thể xoá xe");
     }
   };
 
-  // xoá nhiều xe
+  // Xoá nhiều xe
   const handleBulkDelete = async (ids: number[]) => {
     if (!ids.length) return;
+
     try {
       setLoading(true);
       await Promise.all(ids.map((id) => deleteVehicle(id)));
-      notifySuccess(
-        "Xoá thành công",
-        "Các xe đã chọn đã được xoá khỏi hệ thống."
-      );
+
+      notifySuccess("Thành công", "Các xe đã được xoá khỏi hệ thống.");
       fetchVehicles();
     } catch {
-      notifyError("Lỗi hệ thống", "Không thể xoá các xe đã chọn.");
+      notifyError("Lỗi hệ thống", "Không thể xoá các xe đã chọn");
     } finally {
       setLoading(false);
     }
   };
 
-  // return
   return {
     vehicles,
     loading,

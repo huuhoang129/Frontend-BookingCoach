@@ -98,12 +98,12 @@ export default function VehicleModal({
             rules={[{ required: true, message: "Vui lòng chọn loại xe" }]}
           >
             <Select placeholder="Chọn loại xe">
-              <Option value="Normal">Normal (45 ghế)</Option>
-              <Option value="Sleeper">Sleeper (36 ghế - 2 tầng)</Option>
-              <Option value="DoubleSleeper">
+              <Option value="NORMAL">Normal (45 ghế)</Option>
+              <Option value="SLEEPER">Sleeper (36 ghế - 2 tầng)</Option>
+              <Option value="DOUBLESLEEPER">
                 DoubleSleeper (22 ghế - 2 tầng)
               </Option>
-              <Option value="Limousine">Limousine (9 ghế)</Option>
+              <Option value="LIMOUSINE">Limousine (9 ghế)</Option>
             </Select>
           </Form.Item>
         </Form>
@@ -157,12 +157,12 @@ export default function VehicleModal({
             rules={[{ required: true, message: "Vui lòng chọn loại xe" }]}
           >
             <Select placeholder="Chọn loại xe">
-              <Option value="Normal">Normal (45 ghế)</Option>
-              <Option value="Sleeper">Sleeper (36 ghế - 2 tầng)</Option>
-              <Option value="DoubleSleeper">
+              <Option value="NORMAL">Normal (45 ghế)</Option>
+              <Option value="SLEEPER">Sleeper (36 ghế - 2 tầng)</Option>
+              <Option value="DOUBLESLEEPER">
                 DoubleSleeper (22 ghế - 2 tầng)
               </Option>
-              <Option value="Limousine">Limousine (9 ghế)</Option>
+              <Option value="LIMOUSINE">Limousine (9 ghế)</Option>
             </Select>
           </Form.Item>
         </Form>

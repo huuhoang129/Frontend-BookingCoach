@@ -1,15 +1,16 @@
-import { Layout, Menu, Avatar, Dropdown } from "antd";
+import { Layout, Menu, Avatar, Dropdown, Drawer, Button } from "antd";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   BusFront,
   Gauge,
-  CalendarClock,
-  UserRound,
+  Menu as MenuIcon,
   LogOut,
+  UserRound,
 } from "lucide-react";
 import "./driverTemplate.scss";
 
-const { Header, Sider, Content } = Layout;
+const { Header, Content } = Layout;
 
 interface DriverTemplateProps {
   Component: React.ComponentType<any>;
@@ -18,6 +19,7 @@ interface DriverTemplateProps {
 export default function DriverTemplate({ Component }: DriverTemplateProps) {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -30,20 +32,11 @@ export default function DriverTemplate({ Component }: DriverTemplateProps) {
       key: "dashboard",
       icon: <Gauge size={18} strokeWidth={1.5} />,
       label: "Lịch làm việc",
-      onClick: () => navigate("/driver/dashboard"),
+      onClick: () => {
+        navigate("/driver/dashboard");
+        setDrawerOpen(false);
+      },
     },
-    // {
-    //   key: "schedule",
-    //   icon: <CalendarClock size={18} strokeWidth={1.5} />,
-    //   label: "Lịch làm việc",
-    //   onClick: () => navigate("/driver/schedule"),
-    // },
-    // {
-    //   key: "vehicles",
-    //   icon: <BusFront size={18} strokeWidth={1.5} />,
-    //   label: "Xe được phân công",
-    //   onClick: () => navigate("/driver/vehicles"),
-    // },
   ];
 
   const userMenu = (
@@ -68,58 +61,68 @@ export default function DriverTemplate({ Component }: DriverTemplateProps) {
 
   return (
     <Layout className="driver-layout">
-      {/* Sidebar */}
-      <Sider
-        breakpoint="lg"
-        collapsedWidth="0"
-        width={240}
-        className="driver-sider"
-      >
-        <div
-          className="driver-logo"
-          onClick={() => navigate("/driver/dashboard")}
-        >
-          <div className="logo-icon">
-            <BusFront size={28} strokeWidth={1.5} />
+      {/* Header */}
+      <Header className="driver-header">
+        <div className="header-left">
+          <Button
+            className="menu-toggle"
+            type="text"
+            icon={<MenuIcon size={22} />}
+            onClick={() => setDrawerOpen(true)}
+          />
+          <div
+            className="logo-mini"
+            onClick={() => navigate("/driver/dashboard")}
+          >
+            <BusFront size={26} strokeWidth={1.6} color="#4d940e" />
+            <span>Huong Duong</span>
           </div>
-          <span className="logo-text">DRIVER PANEL</span>
         </div>
 
-        <Menu
-          theme="dark"
-          mode="inline"
-          items={menuItems}
-          defaultSelectedKeys={["dashboard"]}
-        />
-      </Sider>
-
-      {/* Main layout */}
-      <Layout>
-        <Header className="driver-header">
-          <div className="driver-header-right">
+        <div className="driver-header-right">
+          <Dropdown overlay={userMenu} placement="bottomRight">
             <div className="driver-info">
               <span className="driver-name">
                 {user?.firstName || "Tài xế"} {user?.lastName || ""}
               </span>
-              <Dropdown overlay={userMenu} placement="bottomRight">
-                <Avatar
-                  size="large"
-                  className="driver-avatar"
-                  src={`https://api.dicebear.com/7.x/personas/svg?seed=${
-                    user?.firstName || "driver"
-                  }`}
-                />
-              </Dropdown>
+              <Avatar
+                size="large"
+                className="driver-avatar"
+                src={`https://api.dicebear.com/7.x/personas/svg?seed=${
+                  user?.firstName || "driver"
+                }`}
+              />
             </div>
-          </div>
-        </Header>
+          </Dropdown>
+        </div>
+      </Header>
 
-        <Content className="driver-content">
-          <div className="driver-page-container">
-            <Component />
-          </div>
-        </Content>
-      </Layout>
+      {/* Drawer cho mobile */}
+      <Drawer
+        title="Bảng điều khiển"
+        placement="left"
+        closable
+        onClose={() => setDrawerOpen(false)}
+        open={drawerOpen}
+        bodyStyle={{ padding: 0 }}
+      >
+        <div className="drawer-logo">
+          <BusFront size={28} strokeWidth={1.5} />
+          <span>DRIVER PANEL</span>
+        </div>
+        <Menu
+          mode="inline"
+          items={menuItems}
+          defaultSelectedKeys={["dashboard"]}
+        />
+      </Drawer>
+
+      {/* Content */}
+      <Content className="driver-content">
+        <div className="driver-page-container">
+          <Component />
+        </div>
+      </Content>
     </Layout>
   );
 }

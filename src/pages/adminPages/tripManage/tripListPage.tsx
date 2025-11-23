@@ -11,6 +11,7 @@ import {
   Select,
   DatePicker,
   Popconfirm,
+  Tag,
 } from "antd";
 import {
   SearchOutlined,
@@ -19,6 +20,8 @@ import {
   DeleteOutlined,
   HomeOutlined,
   CarOutlined,
+  ExclamationCircleOutlined,
+  CheckCircleOutlined,
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
@@ -60,47 +63,67 @@ export default function TripPage() {
   >(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
-  // 🔍 Lọc dữ liệu
-  const filteredData = trips.filter((t) => {
-    let match = true;
-    if (
-      searchText &&
-      !(
-        t.route?.fromLocation?.nameLocations
-          .toLowerCase()
-          .includes(searchText.toLowerCase()) ||
-        t.route?.toLocation?.nameLocations
-          .toLowerCase()
-          .includes(searchText.toLowerCase()) ||
-        t.vehicle?.name.toLowerCase().includes(searchText.toLowerCase())
+  const filteredData = trips
+    .filter((t) => {
+      let match = true;
+      if (
+        searchText &&
+        !(
+          t.route?.fromLocation?.nameLocations
+            .toLowerCase()
+            .includes(searchText.toLowerCase()) ||
+          t.route?.toLocation?.nameLocations
+            .toLowerCase()
+            .includes(searchText.toLowerCase()) ||
+          t.vehicle?.name.toLowerCase().includes(searchText.toLowerCase())
+        )
       )
-    )
-      match = false;
-    if (filterVehicle && t.vehicle?.id !== filterVehicle) match = false;
-    if (filterStatus && t.status !== filterStatus) match = false;
-    if (filterDateRange && filterDateRange.length === 2) {
-      const start = dayjs(t.startDate);
-      const from = filterDateRange[0].startOf("day");
-      const to = filterDateRange[1].endOf("day");
-      if (!start.isBetween(from, to, "day", "[]")) match = false;
-    }
-    return match;
-  });
+        match = false;
+      if (filterVehicle && t.vehicle?.id !== filterVehicle) match = false;
+      if (filterStatus && t.status !== filterStatus) match = false;
+      if (filterDateRange && filterDateRange.length === 2) {
+        const start = dayjs(t.startDate);
+        const from = filterDateRange[0].startOf("day");
+        const to = filterDateRange[1].endOf("day");
+        if (!start.isBetween(from, to, "day", "[]")) match = false;
+      }
+      return match;
+    })
+    // Sắp xếp từ mới nhất → cũ nhất
+    .sort(
+      (a, b) => dayjs(b.startDate).valueOf() - dayjs(a.startDate).valueOf()
+    );
 
-  // 🧱 Cột bảng
+  //  Cột bảng
   const columns: ColumnsType<any> = [
     {
       title: "Tuyến",
-      render: (_, r) =>
-        r.route ? (
-          <span style={{ fontWeight: 600 }}>
-            {r.route.fromLocation?.nameLocations} →{" "}
-            {r.route.toLocation?.nameLocations}
+      render: (_, r) => (
+        <Flex align="center" gap={8} style={{ fontWeight: 600 }}>
+          <span>
+            {r.route?.fromLocation?.nameLocations} →{" "}
+            {r.route?.toLocation?.nameLocations}
           </span>
-        ) : (
-          "—"
-        ),
+
+          {/* Chưa phân công tài xế */}
+          {!r.hasDriver && (
+            <Tooltip title="Chưa phân công tài xế">
+              <ExclamationCircleOutlined
+                style={{ color: "#ff4d4f", fontSize: 14 }}
+              />
+            </Tooltip>
+          )}
+
+          {/* Đã có tài xế */}
+          {r.hasDriver && (
+            <Tooltip title={`Tài xế: ${r.driverName}`}>
+              <CheckCircleOutlined style={{ color: "#52c41a", fontSize: 14 }} />
+            </Tooltip>
+          )}
+        </Flex>
+      ),
     },
+
     {
       title: "Xe",
       render: (_, r) =>
@@ -113,16 +136,46 @@ export default function TripPage() {
     },
     { title: "Giờ đi", dataIndex: "startTime" },
     { title: "Thời gian", dataIndex: "totalTime" },
+
     {
-      title: "Giá vé",
-      render: (_, r) =>
-        r.price ? (
-          <span style={{ fontWeight: 600, color: "#4d940e" }}>
-            {r.price.priceTrip.toLocaleString()} đ
-          </span>
-        ) : (
-          "—"
-        ),
+      title: "Trạng thái",
+      align: "center",
+      render: (_, r) => {
+        let color = "default";
+        let label = "";
+        switch (r.status) {
+          case "OPEN":
+            color = "green";
+            label = "Còn vé";
+            break;
+          case "FULL":
+            color = "orange";
+            label = "Đóng chuyến";
+            break;
+          case "CANCELLED":
+            color = "red";
+            label = "Đã hủy";
+            break;
+          default:
+            label = "Không xác định";
+        }
+        return <Tag color={color}>{label}</Tag>;
+      },
+    },
+
+    {
+      title: (
+        <>
+          Số ghế <br />
+          <span style={{ fontSize: 12, color: "#888" }}>(Còn / Tổng)</span>
+        </>
+      ),
+      align: "center",
+      render: (_, r) => (
+        <span style={{ fontWeight: 600 }}>
+          {r.availableSeats ?? 0}/{r.totalSeats ?? 0}
+        </span>
+      ),
     },
     {
       title: "Hành động",
@@ -135,7 +188,7 @@ export default function TripPage() {
               icon={<EditOutlined />}
               style={{ border: "none", color: "#4d940e" }}
               onClick={() => {
-                setEditingTrip(record);
+                form.resetFields();
                 form.setFieldsValue({
                   coachRouteId: record.route?.id,
                   vehicleId: record.vehicle?.id,
@@ -147,6 +200,7 @@ export default function TripPage() {
                     : null,
                   status: record.status,
                 });
+                setEditingTrip(record);
                 setIsEdit(true);
                 setIsModalOpen(true);
               }}
@@ -175,7 +229,6 @@ export default function TripPage() {
     },
   ];
 
-  // checkbox
   const rowSelection = {
     selectedRowKeys,
     onChange: (keys: React.Key[]) => setSelectedRowKeys(keys),
@@ -186,7 +239,6 @@ export default function TripPage() {
     <div style={{ padding: 24, background: "#f4f6f9", minHeight: "100vh" }}>
       {contextHolder}
 
-      {/* breadcrumb */}
       <Breadcrumb style={{ marginBottom: 16 }}>
         <Breadcrumb.Item>
           <HomeOutlined /> Dashboard
@@ -196,17 +248,14 @@ export default function TripPage() {
         </Breadcrumb.Item>
       </Breadcrumb>
 
-      {/* title */}
       <Flex justify="space-between" align="center" style={{ marginBottom: 20 }}>
         <Title level={3} style={{ fontWeight: 700, margin: 0 }}>
           Quản lý chuyến xe
         </Title>
       </Flex>
 
-      {/* filter + actions */}
       <Card style={{ marginBottom: 20 }}>
         <Flex justify="space-between" align="center" wrap="wrap" gap={16}>
-          {/* Bộ lọc bên trái */}
           <Flex gap={16} wrap="wrap">
             <Input
               placeholder="🔍 Tìm tuyến, xe..."
@@ -236,7 +285,7 @@ export default function TripPage() {
               onChange={(val) => setFilterStatus(val || null)}
             >
               <Option value="OPEN">Còn vé</Option>
-              <Option value="FULL">Hết vé</Option>
+              <Option value="FULL">Đóng chuyến</Option>
               <Option value="CANCELLED">Đã hủy</Option>
             </Select>
             <RangePicker
@@ -248,7 +297,6 @@ export default function TripPage() {
             />
           </Flex>
 
-          {/* Nút hành động bên phải */}
           <Flex gap={12} align="center">
             {selectedRowKeys.length > 0 ? (
               <Popconfirm
@@ -301,7 +349,6 @@ export default function TripPage() {
         </Flex>
       </Card>
 
-      {/* Bảng */}
       <Card>
         <Table
           rowKey="id"
@@ -313,7 +360,6 @@ export default function TripPage() {
         />
       </Card>
 
-      {/* Modal thêm/sửa */}
       <TripModal
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}

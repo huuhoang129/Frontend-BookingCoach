@@ -22,9 +22,9 @@ export interface Seat {
 
 export interface Payment {
   id: number;
-  method: string;
+  method: "CASH" | "BANKING" | "VNPAY";
   amount: number;
-  status: string;
+  status: "SUCCESS" | "FAILED" | "PENDING";
 }
 
 export interface Trip {
@@ -37,11 +37,14 @@ export interface Trip {
   };
 }
 
+/** 🎯 BookingStatus: khớp enum DB */
+export type BookingStatus = "PENDING" | "CONFIRMED" | "CANCELLED" | "EXPIRED";
+
 export interface Booking {
   id: number;
   userId?: number;
   coachTripId: number;
-  status: "PENDING" | "CONFIRMED" | "CANCELLED";
+  status: BookingStatus;
   totalAmount: number;
   createdAt: string;
   updatedAt: string;
@@ -50,4 +53,5 @@ export interface Booking {
   seats?: Seat[];
   payment?: Payment[];
   trip?: Trip;
+  bookingCode?: string;
 }

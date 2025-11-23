@@ -269,34 +269,6 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
               )}
             </Typography.Text>
           </div>
-
-          {/* --- Hoàn / Hủy vé --- */}
-          <div
-            style={{
-              background: "#fff1f0",
-              border: "1px solid #ffccc7",
-              borderRadius: 10,
-              padding: "14px 16px",
-              cursor: "not-allowed",
-              opacity: 0.7,
-            }}
-          >
-            <div
-              style={{
-                fontWeight: 600,
-                color: "#cf1322",
-                fontSize: 15,
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-              }}
-            >
-              🔴 Hoàn / Hủy vé
-            </div>
-            <Typography.Text style={{ fontSize: 13, color: "#666" }}>
-              Chưa có thông tin hoàn / hủy mới.
-            </Typography.Text>
-          </div>
         </div>
       )}
 
@@ -473,10 +445,10 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
             title="Quản lý người dùng"
           >
             <Menu.Item key="/admin/user-manage">
-              <Link to="/admin/user-manage">Danh sách khách hàng</Link>
+              <Link to="/admin/user-manage">Quản lý khách hàng</Link>
             </Menu.Item>
             <Menu.Item key="/admin/employee-manage">
-              <Link to="/admin/employee-manage">Danh sách tài xế</Link>
+              <Link to="/admin/employee-manage">Quản lý tài xế</Link>
             </Menu.Item>
             <Menu.Item key="/admin/account-manage">
               <Link to="/admin/account-manage">Khóa/mở tài khoản</Link>
@@ -505,14 +477,14 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
             title="Quản lý vé"
           >
             <Menu.Item key="/admin/booking-tickets">
-              <Link to="/admin/booking-tickets">Danh sách vé đã đặt</Link>
+              <Link to="/admin/booking-tickets">Quản lý đặt vé</Link>
             </Menu.Item>
             {/* <Menu.Item key="available-tickets" disabled>
               Đang phát triển.....
               <Link to="#">Vé còn trống</Link>
             </Menu.Item> */}
             <Menu.Item key="/admin/ticket-status">
-              <Link to="/admin/ticket-status">Tình trạng vé</Link>
+              <Link to="/admin/ticket-status">Quản lý thanh toán</Link>
             </Menu.Item>
             {/* <Menu.Item key="refund-cancel" disabled>
               <Link to="#">Xử lý hoàn / hủy vé</Link>
@@ -544,7 +516,7 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
             title="Quản lý xe & tài xế"
           >
             <Menu.Item key="/admin/vehicle-list">
-              <Link to="/admin/vehicle-list">Danh sách xe</Link>
+              <Link to="/admin/vehicle-list">Danh sách phương tiện</Link>
             </Menu.Item>
             <Menu.Item key="/admin/vehicle-condition">
               <Link to="/admin/vehicle-condition">
@@ -565,7 +537,7 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
               <Link to="/admin/location-list">Danh sách điểm dừng</Link>
             </Menu.Item>
             <Menu.Item key="/admin/route-list">
-              <Link to="/admin/route-list">Các tuyến đường chính</Link>
+              <Link to="/admin/route-list">Quản lý tuyến đường</Link>
             </Menu.Item>
           </SubMenu>
 

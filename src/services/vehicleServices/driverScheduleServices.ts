@@ -1,8 +1,9 @@
+// src/services/vehicleServices/driverScheduleServices.ts
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/api/v1/vehicle";
+const API_URL = "http://localhost:8080/api/v1";
 
-// ---------- DRIVER SCHEDULE ----------
+// ==================== DRIVER SCHEDULE ====================
 
 // Lấy toàn bộ lịch làm việc tài xế
 const getAllDriverSchedules = () => axios.get(`${API_URL}/driver-schedules`);
@@ -23,7 +24,7 @@ const updateDriverSchedule = (id: number | string, data: any) =>
 const deleteDriverSchedule = (id: number | string) =>
   axios.delete(`${API_URL}/driver-schedules/${id}`);
 
-const getAllDrivers = () => axios.get(`${API_URL}/drivers/all`);
+const getAllDrivers = () => axios.get(`${API_URL}/drivers-all`);
 
 export {
   getAllDriverSchedules,

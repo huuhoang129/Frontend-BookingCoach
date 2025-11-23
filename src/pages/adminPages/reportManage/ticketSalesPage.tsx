@@ -162,14 +162,6 @@ export default function TicketSalesPage() {
             <Button onClick={fetchData} icon={<ReloadOutlined />}>
               Tải lại
             </Button>
-            <Button
-              type="primary"
-              onClick={handleExportCSV}
-              icon={<FileExcelOutlined />}
-              style={{ backgroundColor: "#4d940e", borderColor: "#4d940e" }}
-            >
-              Xuất CSV
-            </Button>
           </Space>
         </Space>
       </Card>

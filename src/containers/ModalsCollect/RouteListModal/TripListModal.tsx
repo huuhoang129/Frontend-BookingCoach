@@ -203,7 +203,7 @@ export default function TripModal({
         >
           <Select placeholder="Chọn trạng thái">
             <Option value="OPEN">Còn vé</Option>
-            <Option value="FULL">Hết vé</Option>
+            <Option value="FULL">Đóng chuyến</Option>
             <Option value="CANCELLED">Đã hủy</Option>
           </Select>
         </Form.Item>

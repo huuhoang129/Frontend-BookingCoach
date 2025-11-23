@@ -32,14 +32,18 @@ export function useBanners() {
 
   const { contextHolder, notifySuccess, notifyError } = AppNotification();
 
-  //fetch data banner
+  // fetch danh sách banner
   const fetchBanners = async () => {
     setLoading(true);
     try {
       const res = await getAllBanners();
-      setBanners(res.data.data || []);
+      if (res.data.errCode === 0) {
+        setBanners(res.data.data || []);
+      } else {
+        notifyError("Lỗi hệ thống", res.data.errMessage);
+      }
     } catch {
-      notifyError("Không thể tải danh sách banner", "");
+      notifyError("Lỗi hệ thống", "Không thể tải danh sách banner.");
     } finally {
       setLoading(false);
     }
@@ -49,13 +53,17 @@ export function useBanners() {
   const handleOpenView = async (id: number) => {
     try {
       const res = await getAllBannerById(id);
-      setBannerData(res.data?.data || res.data);
+      if (res.data.errCode === 0) {
+        setBannerData(res.data.data || null);
+      } else {
+        notifyError("Lỗi hệ thống", res.data.errMessage);
+      }
     } catch {
-      notifyError("Không thể tải chi tiết banner", "");
+      notifyError("Lỗi hệ thống", "Không thể tải chi tiết banner.");
     }
   };
 
-  // thêm mới banenr
+  // thêm mới banner
   const handleAdd = async () => {
     try {
       const values = await form.validateFields();
@@ -63,15 +71,19 @@ export function useBanners() {
       const file = values.image?.[0]?.originFileObj as File;
       const base64 = file ? (await toBase64(file)).split(",")[1] : "";
 
-      await createBanner({
+      const res = await createBanner({
         title: values.title,
         imageBase64: base64,
       });
 
-      notifySuccess("Thêm mới thành công", "Banner đã được thêm.");
-      form.resetFields();
-      setIsAddModal(false);
-      fetchBanners();
+      if (res.data.errCode === 0) {
+        notifySuccess("Thành công", res.data.errMessage);
+        form.resetFields();
+        setIsAddModal(false);
+        fetchBanners();
+      } else {
+        notifyError("Lỗi hệ thống", res.data.errMessage);
+      }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể thêm banner.");
     }
@@ -82,45 +94,66 @@ export function useBanners() {
     try {
       const values = await editForm.validateFields();
       if (!bannerData) return;
+
       const fileList = values.image;
       let base64 = "";
       if (fileList && fileList.length > 0) {
         const fileObj = fileList[0].originFileObj as File;
         base64 = (await toBase64(fileObj)).split(",")[1];
       }
-      await editBanner({
+
+      const res = await editBanner({
         id: bannerData.id,
         title: values.title,
         imageBase64: base64,
       });
-      notifySuccess("Cập nhật thành công", "Banner đã được cập nhật.");
-      setIsEditModal(false);
-      setBannerData(null);
-      fetchBanners();
+
+      if (res.data.errCode === 0) {
+        notifySuccess("Thành công", res.data.errMessage);
+        setIsEditModal(false);
+        setBannerData(null);
+        fetchBanners();
+      } else {
+        notifyError("Lỗi hệ thống", res.data.errMessage);
+      }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể cập nhật banner.");
     }
   };
 
-  // xáo banner
+  // xoá banner
   const handleDelete = async (id: number) => {
     try {
-      await deleteBanner(id);
-      notifySuccess("Xoá thành công", "Banner đã bị xoá.");
-      fetchBanners();
+      const res = await deleteBanner(id);
+      if (res.data.errCode === 0) {
+        notifySuccess("Thành công", res.data.errMessage);
+        fetchBanners();
+      } else {
+        notifyError("Lỗi hệ thống", res.data.errMessage);
+      }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể xoá banner.");
     }
   };
 
-  // xóa nhiều banner
+  // xoá nhiều banner
   const handleBulkDelete = async (ids: number[]) => {
     if (!ids.length) return;
 
     try {
       setLoading(true);
-      await Promise.all(ids.map((id) => deleteBanner(id)));
-      notifySuccess("Xoá thành công", "Đã xoá các banner đã chọn.");
+      const results = await Promise.all(ids.map((id) => deleteBanner(id)));
+      const hasError = results.some((res) => res.data.errCode !== 0);
+
+      if (hasError) {
+        notifyError(
+          "Lỗi hệ thống",
+          "Một số banner không thể xoá. Vui lòng thử lại."
+        );
+      } else {
+        notifySuccess("Thành công", "Đã xoá các banner đã chọn.");
+      }
+
       fetchBanners();
     } catch {
       notifyError("Lỗi hệ thống", "Không thể xoá các banner đã chọn.");

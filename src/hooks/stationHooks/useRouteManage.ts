@@ -45,13 +45,16 @@ export function useRouteManage() {
 
   const { contextHolder, notifySuccess, notifyError } = AppNotification();
 
-  // fetch data
+  // fetch data tuyến đường
   const fetchRoutes = async () => {
     setLoading(true);
     try {
       const res = await getAllRoutes();
-      if (res.data.errCode === 0) setRoutes(res.data.data);
-      else notifyError("Không thể tải danh sách tuyến", res.data.errMessage);
+      if (res.data.errCode === 0) {
+        setRoutes(res.data.data);
+      } else {
+        notifyError("Không thể tải danh sách tuyến", res.data.errMessage);
+      }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể tải danh sách tuyến.");
     } finally {
@@ -63,8 +66,11 @@ export function useRouteManage() {
   const fetchLocations = async () => {
     try {
       const res = await getAllLocations();
-      if (res.data.errCode === 0) setLocations(res.data.data);
-      else notifyError("Không thể tải danh sách địa điểm", res.data.errMessage);
+      if (res.data.errCode === 0) {
+        setLocations(res.data.data);
+      } else {
+        notifyError("Không thể tải danh sách địa điểm", res.data.errMessage);
+      }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể tải danh sách địa điểm.");
     }
@@ -75,7 +81,7 @@ export function useRouteManage() {
     fetchLocations();
   }, []);
 
-  // xử lý ảnh
+  // xử lý ảnh về dạng base64 (lấy phần content)
   const processImage = async (fileList: any[], oldImage?: string | null) => {
     if (fileList?.length > 0) {
       const fileObj = fileList[0].originFileObj;
@@ -92,11 +98,12 @@ export function useRouteManage() {
     return null;
   };
 
-  // ===== CRUD ROUTE =====
-  // thêm chuyến
+  // thêm tuyến
   const handleAddRoute = async () => {
     try {
       const values = await form.validateFields();
+
+      // check trùng tuyến trên client
       const duplicate = routes.find(
         (r) =>
           r.fromLocation.id === values.fromLocationId &&
@@ -119,10 +126,7 @@ export function useRouteManage() {
 
       const res = await createRoute(payload);
       if (res.data.errCode === 0) {
-        notifySuccess(
-          "Thêm mới thành công",
-          "Tuyến đường đã được thêm vào hệ thống."
-        );
+        notifySuccess("Thành công", res.data.errMessage);
         setIsAddModal(false);
         form.resetFields();
         fetchRoutes();
@@ -140,6 +144,7 @@ export function useRouteManage() {
       const values = await editForm.validateFields();
       if (!editingRoute) return;
 
+      // check trùng tuyến (trừ chính nó)
       const duplicate = routes.find(
         (r) =>
           r.id !== editingRoute.id &&
@@ -168,10 +173,7 @@ export function useRouteManage() {
 
       const res = await updateRoute(editingRoute.id, payload);
       if (res.data.errCode === 0) {
-        notifySuccess(
-          "Cập nhật thành công",
-          "Thông tin tuyến đường đã được cập nhật."
-        );
+        notifySuccess("Thành công", res.data.errMessage);
         setIsEditModal(false);
         editForm.resetFields();
         setEditingRoute(null);
@@ -184,15 +186,12 @@ export function useRouteManage() {
     }
   };
 
-  // xoá tuyến
+  // xoá một tuyến
   const handleDeleteRoute = async (id: number) => {
     try {
       const res = await deleteRoute(id);
       if (res.data.errCode === 0) {
-        notifySuccess(
-          "Xoá thành công",
-          "Tuyến đường đã được xoá khỏi hệ thống."
-        );
+        notifySuccess("Thành công", res.data.errMessage);
         fetchRoutes();
       } else {
         notifyError("Không thể xoá tuyến đường", res.data.errMessage);
@@ -209,7 +208,7 @@ export function useRouteManage() {
       setLoading(true);
       await Promise.all(ids.map((id) => deleteRoute(id)));
       notifySuccess(
-        "Xoá thành công",
+        "Thành công",
         "Các tuyến đã chọn đã được xoá khỏi hệ thống."
       );
       fetchRoutes();
@@ -220,7 +219,7 @@ export function useRouteManage() {
     }
   };
 
-  // filter
+  // filter hiển thị
   const filteredData = routes
     .sort((a, b) => a.id - b.id)
     .map((r, idx) => ({ ...r, index: idx + 1 }))
@@ -237,15 +236,17 @@ export function useRouteManage() {
             .toLowerCase()
             .includes(searchText.toLowerCase())
         )
-      )
+      ) {
         match = false;
+      }
 
       if (
         filterProvince &&
         r.fromLocation.province.nameProvince !== filterProvince &&
         r.toLocation.province.nameProvince !== filterProvince
-      )
+      ) {
         match = false;
+      }
 
       return match;
     });

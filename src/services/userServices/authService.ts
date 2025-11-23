@@ -1,6 +1,9 @@
+// src/services/userServices/authService.ts
 import axios from "axios";
 
 const API_URL = "http://localhost:8080/api/v1";
+
+// ==================== AUTH ====================
 
 // Đăng nhập
 const login = (data: { email: string; password: string }) => {

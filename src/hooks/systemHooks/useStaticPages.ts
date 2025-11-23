@@ -1,3 +1,4 @@
+// src/hooks/systemHooks/useStaticPages.ts
 import { useEffect, useState } from "react";
 import {
   getStaticPage,
@@ -53,7 +54,6 @@ export function useStaticPages() {
     )
   );
 
-  // 👇 lấy từ .env
   const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
 
   useEffect(() => {
@@ -66,11 +66,10 @@ export function useStaticPages() {
           const blocks = result.data;
 
           const content = blocks
-            .map(
-              (b: any) =>
-                b.blockType === "text"
-                  ? b.content
-                  : `![image](${API_URL}/upload/${b.imageUrl})` // 👈 prepend domain từ .env
+            .map((b: any) =>
+              b.blockType === "text"
+                ? b.content
+                : `![image](${API_URL}/upload/${b.imageUrl})`
             )
             .join("\n\n");
 
@@ -81,7 +80,7 @@ export function useStaticPages() {
           setMode((prev) => ({ ...prev, [key]: "preview" }));
         }
       } catch (err) {
-        console.error(`❌ Load ${key} error:`, err);
+        console.error(`Load ${key} error:`, err);
       }
     };
 
@@ -103,7 +102,7 @@ export function useStaticPages() {
             const relativePath = imageMatch[1].split("/").pop();
             return {
               blockType: "image",
-              imageUrl: `${key}/${relativePath}`, // 👈 chỉ lưu folder + filename
+              imageUrl: `${key}/${relativePath}`,
               sortOrder: index + 1,
             };
           }
@@ -119,7 +118,7 @@ export function useStaticPages() {
       setSavedContent((prev) => ({ ...prev, [key]: values }));
       setMode((prev) => ({ ...prev, [key]: "preview" }));
     } catch (err) {
-      console.error(`❌ Update ${key} error:`, err);
+      console.error(`Update ${key} error:`, err);
     }
   };
 

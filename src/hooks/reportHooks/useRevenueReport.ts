@@ -1,8 +1,9 @@
+// src/hooks/reportHooks/useRevenueReport.ts
 import { useEffect, useMemo, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import { message } from "antd";
-// import { getRevenue } from "../../services/reportServices/reportServices";
-import { getRevenue } from "../../services/reportServices/reportServices.allRevenue.mock";
+import { getRevenue } from "../../services/reportServices/reportServices";
+
 export type GroupBy = "day" | "month" | "year";
 
 export interface Revenue {
@@ -19,6 +20,7 @@ export interface RowView {
   cumulative: number;
 }
 
+// Định dạng nhãn hiển thị theo kiểu groupBy
 const fmtLabel = (iso: string, groupBy: GroupBy) => {
   const d = dayjs(iso);
   if (groupBy === "day") return d.format("DD/MM/YYYY");
@@ -26,6 +28,7 @@ const fmtLabel = (iso: string, groupBy: GroupBy) => {
   return d.format("YYYY");
 };
 
+// Tính moving average cho mảng doanh thu
 const movingAverage = (arr: Revenue[], windowSize = 7): number[] => {
   if (arr.length === 0) return [];
   const res: number[] = [];
@@ -41,15 +44,21 @@ const movingAverage = (arr: Revenue[], windowSize = 7): number[] => {
 };
 
 export const useRevenueReport = () => {
+  // Dữ liệu thô từ API
   const [rawData, setRawData] = useState<Revenue[]>([]);
+  // Trạng thái loading cho toàn hook
   const [loading, setLoading] = useState(false);
+  // Kiểu group theo ngày/tháng/năm
   const [groupBy, setGroupBy] = useState<GroupBy>("day");
+  // Khoảng thời gian lọc báo cáo
   const [range, setRange] = useState<[Dayjs, Dayjs]>([
     dayjs().subtract(29, "day"),
     dayjs(),
   ]);
+  // Bật/tắt hiển thị đường MA trên chart
   const [chartMA, setChartMA] = useState(true);
 
+  // Gọi API lấy dữ liệu doanh thu
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -58,6 +67,7 @@ export const useRevenueReport = () => {
       const res = await getRevenue(from, to, groupBy);
 
       if (res.data?.errCode === 0) {
+        // Chuẩn hoá dữ liệu từ API về dạng Revenue
         const items: Revenue[] = (res.data.data || []).map((r: any) => ({
           date: r.date,
           totalRevenue: Number(r.totalRevenue || 0),
@@ -75,11 +85,12 @@ export const useRevenueReport = () => {
     }
   };
 
+  // Tự động refetch khi groupBy hoặc range thay đổi
   useEffect(() => {
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupBy, range]);
 
+  // Thêm label hiển thị cho từng record
   const data = useMemo(
     () =>
       rawData.map((r) => ({
@@ -89,6 +100,7 @@ export const useRevenueReport = () => {
     [rawData, groupBy]
   );
 
+  // Gắn thêm giá trị MA7 để vẽ chart nếu bật MA và group theo ngày
   const dataWithMA = useMemo(() => {
     if (!chartMA || groupBy !== "day") return data;
     const ma = movingAverage(rawData, 7);
@@ -98,19 +110,24 @@ export const useRevenueReport = () => {
     }));
   }, [data, chartMA, groupBy, rawData]);
 
+  // Tổng doanh thu trong khoảng
   const totalRevenue = useMemo(
     () => data.reduce((acc, cur) => acc + Number(cur.totalRevenue || 0), 0),
     [data]
   );
 
+  // Số kỳ (số dòng) dữ liệu
   const periods = data.length;
+  // Doanh thu trung bình mỗi kỳ
   const avgPerPeriod = periods ? totalRevenue / periods : 0;
 
+  // Kỳ có doanh thu cao nhất
   const maxItem =
     periods > 0
       ? data.reduce((a, b) => (a.totalRevenue > b.totalRevenue ? a : b))
       : null;
 
+  // Chuẩn bị dữ liệu cho bảng: delta, delta %, cộng dồn
   const tableRows: RowView[] = useMemo(() => {
     let cumul = 0;
     return data.map((d, idx) => {
@@ -134,6 +151,7 @@ export const useRevenueReport = () => {
     });
   }, [data]);
 
+  // Set nhanh các preset khoảng thời gian + groupBy tương ứng
   const setPreset = (type: "7d" | "30d" | "ytd" | "thisYear") => {
     if (type === "7d") {
       setRange([dayjs().subtract(6, "day"), dayjs()]);

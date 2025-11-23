@@ -1,3 +1,4 @@
+// src/hooks/userHooks/useDriverManage.ts
 import { useEffect, useState } from "react";
 import { Form } from "antd";
 import {
@@ -23,13 +24,19 @@ export interface Driver {
 }
 
 export function useDrivers() {
+  // Danh sách tài xế
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Xem chi tiết
   const [viewDriver, setViewDriver] = useState<Driver | null>(null);
 
+  // Trạng thái modal
   const [isAddModal, setIsAddModal] = useState(false);
   const [isEditModal, setIsEditModal] = useState(false);
   const [isViewModal, setIsViewModal] = useState(false);
+
+  // Tài xế đang chỉnh sửa
   const [editingDriver, setEditingDriver] = useState<Driver | null>(null);
 
   const [form] = Form.useForm();
@@ -37,7 +44,7 @@ export function useDrivers() {
 
   const { contextHolder, notifySuccess, notifyError } = AppNotification();
 
-  // ===== Fetch all =====
+  // Lấy danh sách tài xế
   const fetchDrivers = async () => {
     setLoading(true);
     try {
@@ -60,20 +67,19 @@ export function useDrivers() {
     }
   };
 
+  // Load khi mở trang
   useEffect(() => {
     fetchDrivers();
   }, []);
 
-  // ===== CRUD =====
+  // Thêm tài xế mới
   const handleAdd = async () => {
     try {
       const values = await form.validateFields();
       const res = await createDriver(values);
+
       if (res.data.errCode === 0) {
-        notifySuccess(
-          "Thêm mới thành công",
-          "Tài xế đã được thêm vào hệ thống."
-        );
+        notifySuccess("Thành công", res.data.errMessage);
         setIsAddModal(false);
         form.resetFields();
         fetchDrivers();
@@ -85,16 +91,16 @@ export function useDrivers() {
     }
   };
 
+  // Cập nhật tài xế
   const handleEdit = async () => {
     if (!editingDriver) return;
+
     try {
       const values = await editForm.validateFields();
       const res = await editDriver(editingDriver.id, values);
+
       if (res.data.errCode === 0) {
-        notifySuccess(
-          "Cập nhật thành công",
-          "Thông tin tài xế đã được cập nhật."
-        );
+        notifySuccess("Thành công", res.data.errMessage);
         setIsEditModal(false);
         setEditingDriver(null);
         fetchDrivers();
@@ -106,11 +112,12 @@ export function useDrivers() {
     }
   };
 
+  // Xóa một tài xế
   const handleDelete = async (id: number) => {
     try {
       const res = await deleteDriver(id);
       if (res.data.errCode === 0) {
-        notifySuccess("Xoá thành công", "Tài xế đã được xoá khỏi hệ thống.");
+        notifySuccess("Thành công", res.data.errMessage);
         fetchDrivers();
       } else {
         notifyError("Không thể xoá tài xế", res.data.errMessage);
@@ -120,15 +127,15 @@ export function useDrivers() {
     }
   };
 
+  // Xóa nhiều tài xế
   const handleBulkDelete = async (ids: number[]) => {
     if (!ids.length) return;
+
     try {
       setLoading(true);
       await Promise.all(ids.map((id) => deleteDriver(id)));
-      notifySuccess(
-        "Xoá thành công",
-        "Các tài xế đã chọn đã được xoá khỏi hệ thống."
-      );
+
+      notifySuccess("Thành công", "Các tài xế đã được xoá khỏi hệ thống.");
       fetchDrivers();
     } catch {
       notifyError("Lỗi hệ thống", "Không thể xoá các tài xế đã chọn.");
@@ -137,17 +144,24 @@ export function useDrivers() {
     }
   };
 
-  // ===== View detail =====
+  // Xem chi tiết tài xế
   const handleView = async (id: number) => {
     try {
       const res = await getDriverById(id);
-      const drv = res.data?.data || res.data;
+
+      if (res.data.errCode !== 0) {
+        notifyError("Không thể tải thông tin tài xế", res.data.errMessage);
+        return;
+      }
+
+      const drv = res.data.data;
       setViewDriver({
         ...drv,
         address: drv.staffDetail?.address || "",
         dateOfBirth: drv.staffDetail?.dateOfBirth || "",
         citizenId: drv.staffDetail?.citizenId || "",
       });
+
       setIsViewModal(true);
     } catch {
       notifyError("Lỗi hệ thống", "Không thể tải thông tin tài xế.");

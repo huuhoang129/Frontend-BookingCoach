@@ -19,6 +19,7 @@ import {
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
+import { useState, useMemo } from "react";
 import { usePayments } from "../../../hooks/ticketHooks/usePaymentsManage.ts";
 import type { Payment } from "../../../hooks/ticketHooks/usePaymentsManage.ts";
 
@@ -29,14 +30,20 @@ export default function PaymentPage() {
   const {
     filteredData,
     loading,
-    searchText,
-    setSearchText,
     handleStatusChange,
     isModalOpen,
     setIsModalOpen,
     selectedPayment,
     setSelectedPayment,
   } = usePayments();
+
+  // 🟢 Local state (như VehiclePage)
+  const [searchText, setSearchText] = useState("");
+  const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [selectedPriceRange, setSelectedPriceRange] = useState<string | null>(
+    null
+  );
 
   // Map sang tiếng Việt cho phương thức và trạng thái
   const methodLabel: Record<string, string> = {
@@ -51,8 +58,49 @@ export default function PaymentPage() {
     FAILED: "Thất bại",
   };
 
+  // Lọc dữ liệu
+  const filteredPayments = useMemo(() => {
+    return filteredData
+      .filter((p: Payment) => {
+        const keyword = searchText.toLowerCase().trim();
+        const matchKeyword =
+          !keyword ||
+          String(p.id).includes(keyword) ||
+          String(p.booking?.bookingCode || "")
+            .toLowerCase()
+            .includes(keyword) ||
+          p.method.toLowerCase().includes(keyword);
+
+        const matchMethod = !selectedMethod || p.method === selectedMethod;
+        const matchStatus = !selectedStatus || p.status === selectedStatus;
+
+        let matchPrice = true;
+        if (selectedPriceRange) {
+          const [min, max] = selectedPriceRange.split("-").map(Number);
+          matchPrice =
+            Number(p.amount) >= min * 1000 && Number(p.amount) < max * 1000;
+        }
+
+        return matchKeyword && matchMethod && matchStatus && matchPrice;
+      })
+      .sort((a, b) => b.id - a.id);
+  }, [
+    filteredData,
+    searchText,
+    selectedMethod,
+    selectedStatus,
+    selectedPriceRange,
+  ]);
+
+  // Cấu hình bảng
   const columns: ColumnsType<Payment> = [
-    { title: "Mã đặt vé", dataIndex: "bookingId", width: 140 },
+    {
+      title: "Mã đặt vé",
+      key: "bookingCode",
+      dataIndex: "booking",
+      width: 160,
+      render: (b) => b?.bookingCode || "—", // 🟢 bỏ CSS ở đây, hiển thị text bình thường
+    },
     {
       title: "Phương thức",
       dataIndex: "method",
@@ -120,16 +168,59 @@ export default function PaymentPage() {
         Quản lý thanh toán
       </Title>
 
-      {/* Ô tìm kiếm */}
+      {/* Bộ lọc */}
       <Card style={{ marginBottom: 20 }}>
-        <Flex justify="space-between" align="center" gap={16} wrap="wrap">
-          <Input
-            placeholder="🔍 Tìm theo Mã thanh toán, Mã đặt vé, phương thức..."
-            prefix={<SearchOutlined />}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            style={{ width: 320 }}
-          />
+        <Flex justify="space-between" align="center" wrap="wrap" gap={16}>
+          <Flex gap={16} wrap="wrap">
+            {/* Input tìm kiếm */}
+            <Input
+              placeholder="🔍 Tìm theo mã đặt vé, mã thanh toán, phương thức..."
+              prefix={<SearchOutlined />}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              style={{ width: 320 }}
+            />
+
+            {/* Lọc phương thức */}
+            <Select
+              allowClear
+              placeholder="Phương thức"
+              style={{ width: 180 }}
+              value={selectedMethod || undefined}
+              onChange={(val) => setSelectedMethod(val || null)}
+            >
+              <Option value="CASH">Tiền mặt</Option>
+              <Option value="BANKING">Chuyển khoản</Option>
+              <Option value="VNPAY">VNPay</Option>
+            </Select>
+
+            {/* Lọc khoảng tiền */}
+            <Select
+              allowClear
+              placeholder="Khoảng tiền (nghìn)"
+              style={{ width: 200 }}
+              value={selectedPriceRange || undefined}
+              onChange={(val) => setSelectedPriceRange(val || null)}
+            >
+              <Option value="100-200">100k – 200k</Option>
+              <Option value="200-400">200k – 400k</Option>
+              <Option value="400-600">400k – 600k</Option>
+              <Option value="600-1000">600k – 1.000k</Option>
+            </Select>
+
+            {/* Lọc trạng thái */}
+            <Select
+              allowClear
+              placeholder="Trạng thái"
+              style={{ width: 180 }}
+              value={selectedStatus || undefined}
+              onChange={(val) => setSelectedStatus(val || null)}
+            >
+              <Option value="PENDING">Đang xử lý</Option>
+              <Option value="SUCCESS">Thành công</Option>
+              <Option value="FAILED">Thất bại</Option>
+            </Select>
+          </Flex>
         </Flex>
       </Card>
 
@@ -138,7 +229,7 @@ export default function PaymentPage() {
         <Table
           rowKey="id"
           loading={loading}
-          dataSource={filteredData}
+          dataSource={filteredPayments}
           columns={columns}
           pagination={{ pageSize: 8 }}
         />
@@ -160,7 +251,7 @@ export default function PaymentPage() {
               style={{ marginBottom: 16 }}
             >
               <p>
-                <b>Mã đặt vé:</b> {selectedPayment.bookingId}
+                <b>Mã đặt vé:</b> {selectedPayment.booking?.bookingCode || "—"}
               </p>
               <p>
                 <b>Phương thức:</b>{" "}

@@ -1,3 +1,4 @@
+// src/hooks/routerListHooks/useTripList.ts
 import { useEffect, useState } from "react";
 import { Form } from "antd";
 import {
@@ -41,6 +42,14 @@ export interface Trip {
   status: "OPEN" | "FULL" | "CANCELLED";
   totalSeats?: number;
   availableSeats?: number;
+  hasDriver?: boolean;
+  driverName?: string;
+  driver?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    phoneNumber?: string;
+  } | null;
 }
 
 export function useTrips() {
@@ -58,7 +67,7 @@ export function useTrips() {
 
   const { contextHolder, notifySuccess, notifyError } = AppNotification();
 
-  // ===== FETCH =====
+  // fetch data
   const fetchAll = async () => {
     setLoading(true);
     try {
@@ -69,6 +78,7 @@ export function useTrips() {
         getAllVehicleStatus(),
         getAllTripPrices(),
       ]);
+
       if (tRes.data.errCode === 0) setTrips(tRes.data.data);
       if (rRes.data.errCode === 0) setRoutes(rRes.data.data);
       if (vRes.data.errCode === 0) setVehicles(vRes.data.data);
@@ -85,7 +95,7 @@ export function useTrips() {
     fetchAll();
   }, []);
 
-  // ===== ADD / EDIT =====
+  //  Thêm sửa chuyến
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
@@ -103,53 +113,54 @@ export function useTrips() {
 
       if (isEdit && editingTrip) {
         const res = await updateTrip(editingTrip.id, payload);
+
         if (res.data.errCode === 0) {
-          notifySuccess(
-            "Cập nhật thành công",
-            "Thông tin chuyến xe đã được cập nhật."
-          );
+          notifySuccess("Thành công", res.data.errMessage);
           setIsModalOpen(false);
           fetchAll();
-        } else notifyError("Không thể cập nhật", res.data.errMessage);
+        } else {
+          notifyError("Không thể cập nhật chuyến xe", res.data.errMessage);
+        }
       } else {
         const res = await createTrip(payload);
+
         if (res.data.errCode === 0) {
-          notifySuccess(
-            "Thêm mới thành công",
-            "Chuyến xe đã được thêm vào hệ thống."
-          );
+          notifySuccess("Thành công", res.data.errMessage);
           setIsModalOpen(false);
           fetchAll();
-        } else notifyError("Không thể thêm chuyến", res.data.errMessage);
+        } else {
+          notifyError("Không thể thêm chuyến xe", res.data.errMessage);
+        }
       }
     } catch {
-      notifyError("Lỗi hệ thống", "Không thể xử lý chuyến xe.");
+      notifyError("Lỗi hệ thống", "Không thể xử lý dữ liệu chuyến xe.");
     }
   };
 
-  // ===== DELETE 1 =====
+  // Xóa 1 chuyến
   const handleDelete = async (id: number) => {
     try {
       const res = await deleteTrip(id);
       if (res.data.errCode === 0) {
-        notifySuccess("Xoá thành công", "Chuyến xe đã bị xoá khỏi hệ thống.");
+        notifySuccess("Thành công", res.data.errMessage);
         fetchAll();
-      } else notifyError("Không thể xoá chuyến", res.data.errMessage);
+      } else {
+        notifyError("Không thể xoá chuyến xe", res.data.errMessage);
+      }
     } catch {
       notifyError("Lỗi hệ thống", "Không thể xoá chuyến xe.");
     }
   };
 
-  // ===== DELETE NHIỀU =====
+  // xóa nhiều chuyến
   const handleBulkDelete = async (ids: number[]) => {
     if (!ids.length) return;
+
     try {
       setLoading(true);
       await Promise.all(ids.map((id) => deleteTrip(id)));
-      notifySuccess(
-        "Xoá thành công",
-        "Các chuyến xe đã được xoá khỏi hệ thống."
-      );
+
+      notifySuccess("Thành công", "Các chuyến xe đã được xoá khỏi hệ thống.");
       fetchAll();
     } catch {
       notifyError("Lỗi hệ thống", "Không thể xoá các chuyến đã chọn.");

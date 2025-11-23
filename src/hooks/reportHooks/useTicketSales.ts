@@ -1,8 +1,9 @@
+// src/hooks/reportHooks/useTicketSales.ts
 import { useState, useEffect, useMemo } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import { message } from "antd";
-// import { getTicketSales } from "../../services/reportServices/reportServices";
-import { getTicketSales } from "../../services/reportServices/reportServices.ticketSales.mock";
+import { getTicketSales } from "../../services/reportServices/reportServices";
+// import { getTicketSales } from "../../services/reportServices/reportServices.ticketSales.mock";
 
 export interface Sales {
   date: string;
@@ -18,18 +19,19 @@ export interface RowView {
 }
 
 export function useTicketSales(initialRange?: [Dayjs, Dayjs]) {
-  const [data, setData] = useState<Sales[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<Sales[]>([]); // Dữ liệu vé bán theo thời gian
+  const [loading, setLoading] = useState(false); // Trạng thái loading
 
-  // Range 14 ngày gần nhất
+  // Khoảng thời gian (mặc định 14 ngày gần nhất)
   const [range, setRange] = useState<[Dayjs, Dayjs]>(
     initialRange || [dayjs().subtract(14, "day"), dayjs()]
   );
 
-  // groupBy và chartMA
+  // Group theo ngày/tháng/năm và bật/tắt đường MA trên chart
   const [groupBy, setGroupBy] = useState<"day" | "month" | "year">("day");
   const [chartMA, setChartMA] = useState(false);
 
+  // Gọi API lấy dữ liệu vé bán trong khoảng thời gian + groupBy
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -57,11 +59,12 @@ export function useTicketSales(initialRange?: [Dayjs, Dayjs]) {
     }
   };
 
+  // Tự động refetch khi range hoặc groupBy thay đổi
   useEffect(() => {
     fetchData();
   }, [range, groupBy]);
 
-  // KPI
+  // KPI: tổng vé, trung bình, max
   const totalTickets = useMemo(
     () => data.reduce((acc, cur) => acc + cur.ticketsSold, 0),
     [data]
@@ -72,7 +75,7 @@ export function useTicketSales(initialRange?: [Dayjs, Dayjs]) {
       ? data.reduce((a, b) => (a.ticketsSold > b.ticketsSold ? a : b))
       : null;
 
-  // Table rows
+  // Dữ liệu cho bảng: chênh lệch và % chênh lệch so với kỳ trước
   const tableRows: RowView[] = useMemo(() => {
     return data.map((d, idx) => {
       const prev = idx > 0 ? data[idx - 1] : null;
@@ -89,7 +92,7 @@ export function useTicketSales(initialRange?: [Dayjs, Dayjs]) {
     });
   }, [data]);
 
-  // CSV export
+  // Xuất CSV dữ liệu vé bán
   const handleExportCSV = () => {
     const headers = ["date", "ticketsSold"];
     const rows = data.map((d) => [d.date, d.ticketsSold]);
@@ -105,7 +108,7 @@ export function useTicketSales(initialRange?: [Dayjs, Dayjs]) {
     URL.revokeObjectURL(url);
   };
 
-  // Preset ranges
+  // Preset nhanh cho range
   const setPreset = (type: "7d" | "30d" | "ytd" | "thisYear") => {
     if (type === "7d") {
       setRange([dayjs().subtract(6, "day"), dayjs()]);

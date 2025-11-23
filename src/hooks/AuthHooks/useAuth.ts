@@ -1,3 +1,4 @@
+// src/hooks/AuthHooks/useAuth.ts
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -14,19 +15,19 @@ import {
 export function useAuth() {
   const navigate = useNavigate();
 
-  // User state
+  // Trạng thái người dùng hiện tại
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [resetEmail, setResetEmail] = useState("");
   const [otp, setOtp] = useState("");
 
-  // Modal states
+  // Trạng thái các modal
   const [openLogin, setOpenLogin] = useState(false);
   const [openRegister, setOpenRegister] = useState(false);
   const [openForgotPassword, setOpenForgotPassword] = useState(false);
   const [openResetPassword, setOpenResetPassword] = useState(false);
   const [openVerifyOtp, setOpenVerifyOtp] = useState(false);
 
-  // 🔹 Khi load app, tự khôi phục user từ localStorage
+  // Khôi phục user từ localStorage khi load ứng dụng
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
@@ -38,7 +39,7 @@ export function useAuth() {
     }
   }, []);
 
-  // Handlers
+  // Xử lý đăng nhập
   const handleLogin = async (values: any) => {
     try {
       const res = await login({
@@ -46,36 +47,48 @@ export function useAuth() {
         password: values.password,
       });
 
-      if (res.data?.user) {
-        const user = res.data.user;
-        setCurrentUser(user);
+      const data = res.data;
 
-        localStorage.setItem("user", JSON.stringify(user));
-        localStorage.setItem("token", res.data.token);
-
-        // Điều hướng theo vai trò
-        if (user.role === "Admin") {
-          navigate("/admin");
-        } else if (user.role === "Driver") {
-          navigate("/driver/dashboard");
-        } else {
-          navigate("/");
-        }
-
-        // timeout session
-        startSessionTimeout(() => {
-          setCurrentUser(null);
-          localStorage.removeItem("user");
-          localStorage.removeItem("token");
-          alert("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!");
-        });
+      if (data.errCode !== 0) {
+        alert(data.errMessage || "Đăng nhập thất bại!");
+        return;
       }
+
+      const user = data.user;
+      if (!user) {
+        alert("Không tìm thấy thông tin người dùng!");
+        return;
+      }
+
+      // Lưu thông tin vào localStorage
+      setCurrentUser(user);
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("token", data.token);
+
+      // Điều hướng theo vai trò
+      if (user.role === "Admin") {
+        navigate("/admin");
+      } else if (user.role === "Driver") {
+        navigate("/driver/dashboard");
+      } else {
+        navigate("/");
+      }
+
+      // Thiết lập tự động đăng xuất khi hết phiên
+      startSessionTimeout(() => {
+        setCurrentUser(null);
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+        alert("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!");
+      });
+
       setOpenLogin(false);
     } catch {
-      alert("Đăng nhập thất bại!");
+      alert("Đăng nhập thất bại! Vui lòng thử lại.");
     }
   };
 
+  // Xử lý đăng ký
   const handleRegister = async (values: any) => {
     try {
       await register({
@@ -85,6 +98,7 @@ export function useAuth() {
         lastName: values.lastName,
         phoneNumber: values.phoneNumber,
       });
+
       alert("Đăng ký thành công!");
       setOpenRegister(false);
     } catch {
@@ -92,9 +106,11 @@ export function useAuth() {
     }
   };
 
+  // Gửi OTP
   const handleForgotPassword = async (values: any) => {
     try {
       await forgotPassword(values.email);
+
       alert("OTP đã được gửi tới email!");
       setResetEmail(values.email);
       setOpenForgotPassword(false);
@@ -104,27 +120,32 @@ export function useAuth() {
     }
   };
 
+  // Xác minh OTP
   const handleVerifyOtp = async (values: any) => {
     if (!values.otp) {
       alert("Vui lòng nhập OTP!");
       return;
     }
+
     setOtp(values.otp);
     setOpenVerifyOtp(false);
     setOpenResetPassword(true);
   };
 
+  // Đặt lại mật khẩu
   const handleResetPassword = async (values: any) => {
     if (values.newPassword !== values.confirmPassword) {
       alert("Mật khẩu nhập lại không khớp!");
       return;
     }
+
     try {
       await resetPassword({
         email: resetEmail,
         otp: otp,
         newPassword: values.newPassword,
       });
+
       alert("Đặt lại mật khẩu thành công!");
       setOpenResetPassword(false);
     } catch {
@@ -132,12 +153,13 @@ export function useAuth() {
     }
   };
 
+  // Đăng xuất
   const handleLogout = () => {
     try {
-      console.log("🚪 [Logout] Bắt đầu đăng xuất...");
-      console.log("📦 Trước khi xóa:", { ...localStorage });
+      console.log("Bắt đầu đăng xuất...");
+      console.log("Dữ liệu trước khi xóa:", { ...localStorage });
 
-      // Xóa dữ liệu
+      // Xóa dữ liệu lưu trữ
       localStorage.removeItem("user");
       localStorage.removeItem("token");
       localStorage.removeItem("bookingData");
@@ -146,16 +168,15 @@ export function useAuth() {
       clearSessionTimeout();
       setCurrentUser(null);
 
-      console.log("Sau khi xóa:", { ...localStorage });
-      console.log("🔁 Reload về trang chủ...");
+      console.log("Dữ liệu sau khi xóa:", { ...localStorage });
+      console.log("Chuyển về trang chủ...");
 
       window.location.replace("/");
     } catch (err) {
-      console.error("❌ Lỗi khi logout:", err);
+      console.error("Lỗi khi đăng xuất:", err);
     }
   };
 
-  // Return API
   return {
     currentUser,
     setCurrentUser,

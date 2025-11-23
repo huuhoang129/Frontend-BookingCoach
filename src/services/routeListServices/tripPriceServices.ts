@@ -3,6 +3,8 @@ import axios from "axios";
 
 const API_URL = "http://localhost:8080/api/v1";
 
+// ==================== TRIP PRICE ====================
+
 // lấy tất cả giá vé
 const getAllTripPrices = () => {
   return axios.get(`${API_URL}/trip-prices`);
