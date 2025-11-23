@@ -20,7 +20,7 @@ export function useSchedules() {
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [vehicleStatuses, setVehicleStatuses] = useState<any[]>([]);
   const [prices, setPrices] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -29,23 +29,16 @@ export function useSchedules() {
 
   const { contextHolder, notifySuccess, notifyError } = AppNotification();
 
-  // fetch data
-  const fetchAll = async () => {
-    setLoading(true);
+  // fectch dữ liệu chính
+  const fetchPrimary = async () => {
     try {
-      const [sRes, rRes, vRes, vsRes, pRes] = await Promise.all([
+      const [sRes, rRes] = await Promise.all([
         getAllSchedules(),
         getAllRoutes(),
-        getAllVehicles(),
-        getAllVehicleStatus(),
-        getAllTripPrices(),
       ]);
 
       if (sRes.data.errCode === 0) setSchedules(sRes.data.data);
       if (rRes.data.errCode === 0) setRoutes(rRes.data.data);
-      if (vRes.data.errCode === 0) setVehicles(vRes.data.data);
-      if (vsRes.data.errCode === 0) setVehicleStatuses(vsRes.data.data);
-      if (pRes.data.errCode === 0) setPrices(pRes.data.data);
     } catch {
       notifyError("Lỗi hệ thống", "Không thể tải dữ liệu lịch trình.");
     } finally {
@@ -53,11 +46,29 @@ export function useSchedules() {
     }
   };
 
+  // fetch dữ liệu phụ
+  const fetchSecondary = async () => {
+    try {
+      const [vRes, vsRes, pRes] = await Promise.all([
+        getAllVehicles(),
+        getAllVehicleStatus(),
+        getAllTripPrices(),
+      ]);
+
+      if (vRes.data.errCode === 0) setVehicles(vRes.data.data);
+      if (vsRes.data.errCode === 0) setVehicleStatuses(vsRes.data.data);
+      if (pRes.data.errCode === 0) setPrices(pRes.data.data);
+    } catch {
+      console.error("Load phụ bị lỗi");
+    }
+  };
+
   useEffect(() => {
-    fetchAll();
+    fetchPrimary();
+    setTimeout(fetchSecondary, 0);
   }, []);
 
-  // xóa và cập nhập lịch trình
+  // Cập nhật
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
@@ -80,7 +91,7 @@ export function useSchedules() {
       if (res.data.errCode === 0) {
         notifySuccess("Thành công", res.data.errMessage);
         setIsModalOpen(false);
-        fetchAll();
+        fetchPrimary(); // refresh bảng
       } else {
         notifyError("Thao tác thất bại", res.data.errMessage);
       }
@@ -89,13 +100,13 @@ export function useSchedules() {
     }
   };
 
-  // xóa lịch trình
+  // Xóa lịch trình
   const handleDelete = async (id: number) => {
     try {
       const res = await deleteSchedule(id);
       if (res.data.errCode === 0) {
         notifySuccess("Thành công", res.data.errMessage);
-        fetchAll();
+        fetchPrimary();
       } else {
         notifyError("Không thể xoá lịch trình", res.data.errMessage);
       }
@@ -104,7 +115,7 @@ export function useSchedules() {
     }
   };
 
-  // sinh chuyến từ lịch trình
+  // Sinh chuyến
   const handleGenerateTrips = async () => {
     try {
       const res = await generateTripsFromSchedules();

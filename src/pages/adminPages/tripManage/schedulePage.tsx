@@ -130,19 +130,7 @@ export default function SchedulePage() {
               onClick={() => {
                 setIsEdit(true);
                 setEditingSchedule(record);
-                form.setFieldsValue({
-                  coachRouteId: record.route?.id,
-                  vehicleId: record.vehicle?.id,
-                  tripPriceId: record.price?.id,
-                  startTime: record.startTime
-                    ? dayjs(record.startTime, "HH:mm:ss")
-                    : null,
-                  totalTime: record.totalTime
-                    ? dayjs(record.totalTime, "HH:mm:ss")
-                    : null,
-                  status: record.status,
-                });
-                setIsModalOpen(true);
+                setIsModalOpen(true); // chỉ mở modal thôi
               }}
             />
           </Tooltip>

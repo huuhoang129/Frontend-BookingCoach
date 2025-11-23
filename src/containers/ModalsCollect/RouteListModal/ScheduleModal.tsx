@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+// src/containers/ModalsCollect/RouteListModal/ScheduleModal.tsx
+import { useEffect } from "react";
 import { Modal, Form, Select, TimePicker, Button, message } from "antd";
 import dayjs from "dayjs";
 
@@ -55,49 +56,40 @@ export default function ScheduleModal({
   prices,
   editingSchedule,
 }: ScheduleModalProps) {
-  const [selectedRoute, setSelectedRoute] = useState<number | null>(null);
-  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
-
-  // Lấy trạng thái xe
   const getVehicleStatus = (vehicleId: number) => {
     const found = vehicleStatuses.find((v) => v.vehicleId === vehicleId);
     return found ? found.status : "UNKNOWN";
   };
 
-  // Khi chọn xe → hiển thị cảnh báo nếu cần bảo dưỡng
   const handleVehicleSelect = (vehicleId: number) => {
     const status = getVehicleStatus(vehicleId);
     if (status === "NEEDS_MAINTENANCE") {
-      message.warning(
-        "Xe này đang cần bảo dưỡng, vui lòng kiểm tra trước khi tạo lịch!"
-      );
+      message.warning("Xe cần bảo dưỡng, vui lòng kiểm tra!");
     }
   };
 
-  // Reset & khởi tạo form
   useEffect(() => {
-    if (open && isEdit && editingSchedule) {
-      const routeId = editingSchedule.coachRouteId;
-      const vehicleId = editingSchedule.vehicleId;
-      const vehicleObj = vehicles.find((v) => v.id === vehicleId) || null;
-      setSelectedRoute(routeId || null);
-      setSelectedVehicle(vehicleObj);
-
-      form.setFieldsValue({
-        ...editingSchedule,
-        startTime: editingSchedule.startTime
-          ? dayjs(editingSchedule.startTime, "HH:mm:ss")
-          : null,
-        totalTime: editingSchedule.totalTime
-          ? dayjs(editingSchedule.totalTime, "HH:mm:ss")
-          : null,
-      });
-    } else if (!open) {
+    if (!open) {
       form.resetFields();
-      setSelectedRoute(null);
-      setSelectedVehicle(null);
+      return;
     }
-  }, [open, isEdit, editingSchedule, form, vehicles]);
+
+    if (isEdit && editingSchedule) {
+      const e = editingSchedule;
+      form.setFieldsValue({
+        coachRouteId: e.coachRouteId,
+        vehicleId: e.vehicleId,
+        tripPriceId: e.tripPriceId,
+        startTime: e.startTime ? dayjs(e.startTime, "HH:mm:ss") : null,
+        totalTime: e.totalTime ? dayjs(e.totalTime, "HH:mm:ss") : null,
+        status: e.status,
+      });
+    }
+  }, [open]);
+
+  const currentRoute = form.getFieldValue("coachRouteId");
+  const currentVehicleId = form.getFieldValue("vehicleId");
+  const currentVehicle = vehicles.find((v) => v.id === currentVehicleId);
 
   return (
     <Modal
@@ -121,18 +113,12 @@ export default function ScheduleModal({
       ]}
     >
       <Form form={form} layout="vertical">
-        {/* Tuyến */}
         <Form.Item
           name="coachRouteId"
           label="Tuyến"
           rules={[{ required: true, message: "Vui lòng chọn tuyến" }]}
         >
-          <Select
-            placeholder="Chọn tuyến"
-            onChange={(val) => setSelectedRoute(val)}
-            showSearch
-            optionFilterProp="children"
-          >
+          <Select placeholder="Chọn tuyến" showSearch>
             {routes.map((r) => (
               <Option key={r.id} value={r.id}>
                 {r.fromLocation?.nameLocations} → {r.toLocation?.nameLocations}
@@ -141,7 +127,6 @@ export default function ScheduleModal({
           </Select>
         </Form.Item>
 
-        {/* Xe (có trạng thái như TripModal) */}
         <Form.Item
           name="vehicleId"
           label="Xe"
@@ -149,13 +134,8 @@ export default function ScheduleModal({
         >
           <Select
             placeholder="Chọn xe"
-            onChange={(val) => {
-              const found = vehicles.find((v) => v.id === val) || null;
-              setSelectedVehicle(found);
-              handleVehicleSelect(val);
-            }}
             showSearch
-            optionFilterProp="children"
+            onChange={(val) => handleVehicleSelect(val)}
           >
             {vehicles.map((v) => {
               const status = getVehicleStatus(v.id);
@@ -176,21 +156,19 @@ export default function ScheduleModal({
           </Select>
         </Form.Item>
 
-        {/* Giá vé */}
         <Form.Item
           name="tripPriceId"
           label="Giá vé"
           rules={[{ required: true, message: "Vui lòng chọn giá vé" }]}
         >
-          <Select placeholder="Chọn giá vé">
+          <Select>
             {prices
               .filter(
                 (p) =>
-                  selectedRoute &&
-                  selectedVehicle &&
-                  p.coachRouteId === selectedRoute &&
-                  p.seatType?.toLowerCase() ===
-                    selectedVehicle.type?.toLowerCase()
+                  currentRoute &&
+                  currentVehicle &&
+                  p.coachRouteId === currentRoute &&
+                  p.seatType.toLowerCase() === currentVehicle.type.toLowerCase()
               )
               .map((p) => (
                 <Option key={p.id} value={p.id}>
@@ -200,7 +178,6 @@ export default function ScheduleModal({
           </Select>
         </Form.Item>
 
-        {/* Giờ khởi hành */}
         <Form.Item
           name="startTime"
           label="Giờ khởi hành"
@@ -209,7 +186,6 @@ export default function ScheduleModal({
           <TimePicker format="HH:mm" style={{ width: "100%" }} />
         </Form.Item>
 
-        {/* Thời gian hành trình */}
         <Form.Item
           name="totalTime"
           label="Thời gian hành trình"
@@ -218,14 +194,12 @@ export default function ScheduleModal({
           <TimePicker format="HH:mm" style={{ width: "100%" }} />
         </Form.Item>
 
-        {/* Trạng thái */}
         <Form.Item
           name="status"
           label="Trạng thái"
           rules={[{ required: true, message: "Vui lòng chọn trạng thái" }]}
-          initialValue="ACTIVE"
         >
-          <Select placeholder="Chọn trạng thái">
+          <Select>
             <Option value="ACTIVE">Hoạt động</Option>
             <Option value="INACTIVE">Ngừng</Option>
           </Select>
