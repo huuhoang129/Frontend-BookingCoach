@@ -2,9 +2,9 @@ import { Routes, Route } from "react-router-dom";
 import HomeTemplate from "./templates/clientTemplates";
 import AdminRoute from "./routes/AdminRoute";
 import DriverRoute from "./routes/DriverRoute";
+import UserHomeRedirect from "./routes/UserHomeRedirect";
 
 // client pages
-import HomePage from "./pages/clientPages/HomePage";
 import ContactPage from "./pages/clientPages/staticPage/contactPage";
 import AboutPage from "./pages/clientPages/staticPage/AboutPage";
 import TermPage from "./pages/clientPages/staticPage/TermPage";
@@ -55,7 +55,8 @@ export default function App() {
     <Routes>
       {/* Client */}
       <Route element={<HomeTemplate />}>
-        <Route index element={<HomePage />} />
+        <Route index element={<UserHomeRedirect />} />
+
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/news" element={<NewsPage />} />

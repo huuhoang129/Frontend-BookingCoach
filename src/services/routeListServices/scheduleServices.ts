@@ -1,31 +1,35 @@
 // src/services/routeListServices/scheduleServices.ts
-import axios from "axios";
-
-const API_URL = "http://localhost:8080/api/v1";
-
-// ==================== SCHEDULE ====================
+import requestAPI from "../../api/requestAPI";
 
 // Lấy tất cả lịch trình
-const getAllSchedules = () => axios.get(`${API_URL}/schedules`);
+const getAllSchedules = () => {
+  return requestAPI.get(`/schedules`);
+};
 
 // Lấy lịch trình theo id
-const getScheduleById = (id: number | string) =>
-  axios.get(`${API_URL}/schedules/${id}`);
+const getScheduleById = (id: number | string) => {
+  return requestAPI.get(`/schedules/${id}`);
+};
 
 // Tạo lịch trình mới
-const createSchedule = (data: any) => axios.post(`${API_URL}/schedules`, data);
+const createSchedule = (data: any) => {
+  return requestAPI.post(`/schedules`, data);
+};
 
 // Cập nhật lịch trình
-const updateSchedule = (id: number | string, data: any) =>
-  axios.put(`${API_URL}/schedules/${id}`, data);
+const updateSchedule = (id: number | string, data: any) => {
+  return requestAPI.put(`/schedules/${id}`, data);
+};
 
 // Xóa lịch trình
-const deleteSchedule = (id: number | string) =>
-  axios.delete(`${API_URL}/schedules/${id}`);
+const deleteSchedule = (id: number | string) => {
+  return requestAPI.delete(`/schedules/${id}`);
+};
 
 // Sinh chuyến từ lịch trình
-const generateTripsFromSchedules = () =>
-  axios.post(`${API_URL}/schedules/generate-trips`);
+const generateTripsFromSchedules = () => {
+  return requestAPI.post(`/schedules/generate-trips`);
+};
 
 export {
   getAllSchedules,

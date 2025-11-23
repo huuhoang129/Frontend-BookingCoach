@@ -7,39 +7,44 @@ import {
   forgotPassword,
   resetPassword,
 } from "../../services/userServices/authService";
+
 import {
-  startSessionTimeout,
-  clearSessionTimeout,
-} from "../../utils/sessionTimeout";
+  startInactivityTimer,
+  stopInactivityTimer,
+} from "../../utils/inactivityLogout";
 
 export function useAuth() {
   const navigate = useNavigate();
 
-  // Trạng thái người dùng hiện tại
   const [currentUser, setCurrentUser] = useState<any>(null);
+
   const [resetEmail, setResetEmail] = useState("");
   const [otp, setOtp] = useState("");
 
-  // Trạng thái các modal
   const [openLogin, setOpenLogin] = useState(false);
   const [openRegister, setOpenRegister] = useState(false);
   const [openForgotPassword, setOpenForgotPassword] = useState(false);
   const [openResetPassword, setOpenResetPassword] = useState(false);
   const [openVerifyOtp, setOpenVerifyOtp] = useState(false);
 
-  // Khôi phục user từ localStorage khi load ứng dụng
+  // Khi reload trang → khôi phục user
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
-    if (savedUser) {
+    const token = localStorage.getItem("token");
+
+    if (savedUser && token) {
       try {
         setCurrentUser(JSON.parse(savedUser));
+        startInactivityTimer(() => {
+          handleLogout();
+        });
       } catch {
         localStorage.removeItem("user");
       }
     }
   }, []);
 
-  // Xử lý đăng nhập
+  // login
   const handleLogin = async (values: any) => {
     try {
       const res = await login({
@@ -55,32 +60,27 @@ export function useAuth() {
       }
 
       const user = data.user;
-      if (!user) {
-        alert("Không tìm thấy thông tin người dùng!");
+      const token = data.token;
+
+      if (!user || !token) {
+        alert("Đăng nhập thất bại! Không có token hoặc user.");
         return;
       }
 
-      // Lưu thông tin vào localStorage
+      // Lưu vào localStorage
       setCurrentUser(user);
       localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("token", token);
 
-      // Điều hướng theo vai trò
-      if (user.role === "Admin") {
-        navigate("/admin");
-      } else if (user.role === "Driver") {
-        navigate("/driver/dashboard");
-      } else {
-        navigate("/");
-      }
-
-      // Thiết lập tự động đăng xuất khi hết phiên
-      startSessionTimeout(() => {
-        setCurrentUser(null);
-        localStorage.removeItem("user");
-        localStorage.removeItem("token");
-        alert("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!");
+      // Bắt đầu đếm thời gian không hoạt động
+      startInactivityTimer(() => {
+        handleLogout();
       });
+
+      // Chuyển trang theo role
+      if (user.role === "Admin") navigate("/admin");
+      else if (user.role === "Driver") navigate("/driver/dashboard");
+      else navigate("/");
 
       setOpenLogin(false);
     } catch {
@@ -88,7 +88,7 @@ export function useAuth() {
     }
   };
 
-  // Xử lý đăng ký
+  // register
   const handleRegister = async (values: any) => {
     try {
       await register({
@@ -106,13 +106,14 @@ export function useAuth() {
     }
   };
 
-  // Gửi OTP
+  // forgot password
   const handleForgotPassword = async (values: any) => {
     try {
       await forgotPassword(values.email);
 
       alert("OTP đã được gửi tới email!");
       setResetEmail(values.email);
+
       setOpenForgotPassword(false);
       setOpenVerifyOtp(true);
     } catch {
@@ -120,7 +121,6 @@ export function useAuth() {
     }
   };
 
-  // Xác minh OTP
   const handleVerifyOtp = async (values: any) => {
     if (!values.otp) {
       alert("Vui lòng nhập OTP!");
@@ -132,7 +132,6 @@ export function useAuth() {
     setOpenResetPassword(true);
   };
 
-  // Đặt lại mật khẩu
   const handleResetPassword = async (values: any) => {
     if (values.newPassword !== values.confirmPassword) {
       alert("Mật khẩu nhập lại không khớp!");
@@ -153,23 +152,17 @@ export function useAuth() {
     }
   };
 
-  // Đăng xuất
+  // logout
   const handleLogout = () => {
     try {
-      console.log("Bắt đầu đăng xuất...");
-      console.log("Dữ liệu trước khi xóa:", { ...localStorage });
+      stopInactivityTimer();
 
-      // Xóa dữ liệu lưu trữ
       localStorage.removeItem("user");
       localStorage.removeItem("token");
       localStorage.removeItem("bookingData");
       localStorage.removeItem("bookings");
 
-      clearSessionTimeout();
       setCurrentUser(null);
-
-      console.log("Dữ liệu sau khi xóa:", { ...localStorage });
-      console.log("Chuyển về trang chủ...");
 
       window.location.replace("/");
     } catch (err) {
@@ -180,6 +173,7 @@ export function useAuth() {
   return {
     currentUser,
     setCurrentUser,
+
     openLogin,
     setOpenLogin,
     openRegister,
@@ -190,6 +184,7 @@ export function useAuth() {
     setOpenResetPassword,
     openVerifyOtp,
     setOpenVerifyOtp,
+
     handlers: {
       handleLogin,
       handleRegister,

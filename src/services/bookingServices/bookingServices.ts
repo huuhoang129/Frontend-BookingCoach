@@ -1,116 +1,114 @@
 // src/services/bookingServices/bookingServices.ts
-import axios from "axios";
-
-const API_URL = "http://localhost:8080/api/v1";
+import requestAPI from "../../api/requestAPI";
 
 // ==================== BOOKINGS ====================
 
-//  Lấy toàn bộ đơn đặt vé
+// Lấy toàn bộ đơn đặt vé
 const getAllBookings = () => {
-  return axios.get(`${API_URL}/bookings`);
+  return requestAPI.get(`/bookings`);
 };
 
-//  Lấy chi tiết đơn đặt vé theo ID
+// Lấy chi tiết đơn đặt vé theo ID
 const getBookingById = (id: number | string) => {
-  return axios.get(`${API_URL}/bookings/${id}`);
+  return requestAPI.get(`/bookings/${id}`);
 };
 
-//  Tạo đơn đặt vé mới
+// Tạo đơn đặt vé mới
 const createBooking = (data: any) => {
-  return axios.post(`${API_URL}/bookings`, data);
+  return requestAPI.post(`/bookings`, data);
 };
 
-//  Cập nhật trạng thái đơn đặt vé
+// Cập nhật trạng thái đơn đặt vé
 const updateBooking = (data: any) => {
-  return axios.put(`${API_URL}/bookings`, data);
+  return requestAPI.put(`/bookings`, data);
 };
 
-//  Xóa đơn đặt vé
+// Xóa đơn đặt vé
 const deleteBooking = (id: number | string) => {
-  return axios.delete(`${API_URL}/bookings/${id}`);
+  return requestAPI.delete(`/bookings/${id}`);
 };
 
 // ==================== BOOKING CUSTOMERS ====================
 
-//  Lấy danh sách khách hàng trong một booking
+// Lấy danh sách khách hàng trong một booking
 const getCustomersByBooking = (bookingId: number | string) => {
-  return axios.get(`${API_URL}/bookings/${bookingId}/customers`);
+  return requestAPI.get(`/bookings/${bookingId}/customers`);
 };
 
-//  Thêm khách hàng vào booking
+// Thêm khách hàng vào booking
 const addCustomer = (data: any) => {
-  return axios.post(`${API_URL}/bookings/customers`, data);
+  return requestAPI.post(`/bookings/customers`, data);
 };
 
-//  Cập nhật thông tin khách hàng
+// Cập nhật thông tin khách hàng
 const updateCustomer = (data: any) => {
-  return axios.put(`${API_URL}/bookings/customers`, data);
+  return requestAPI.put(`/bookings/customers`, data);
 };
 
-//  Xóa khách hàng khỏi booking
+// Xóa khách hàng khỏi booking
 const deleteCustomer = (id: number | string) => {
-  return axios.delete(`${API_URL}/bookings/customers/${id}`);
+  return requestAPI.delete(`/bookings/customers/${id}`);
 };
 
 // ==================== BOOKING POINTS ====================
 
-//  Lấy danh sách điểm đón/trả theo booking
+// Lấy danh sách điểm đón/trả theo booking
 const getPointsByBooking = (bookingId: number | string) => {
-  return axios.get(`${API_URL}/bookings/${bookingId}/points`);
+  return requestAPI.get(`/bookings/${bookingId}/points`);
 };
 
-//  Thêm điểm đón/trả
+// Thêm điểm đón/trả
 const addPoint = (data: any) => {
-  return axios.post(`${API_URL}/bookings/points`, data);
+  return requestAPI.post(`/bookings/points`, data);
 };
 
-//  Cập nhật điểm đón/trả
+// Cập nhật điểm đón/trả
 const updatePoint = (data: any) => {
-  return axios.put(`${API_URL}/bookings/points`, data);
+  return requestAPI.put(`/bookings/points`, data);
 };
 
-//  Xóa điểm đón/trả
+// Xóa điểm đón/trả
 const deletePoint = (id: number | string) => {
-  return axios.delete(`${API_URL}/bookings/points/${id}`);
+  return requestAPI.delete(`/bookings/points/${id}`);
 };
 
 // ==================== BOOKING SEATS ====================
 
-//  Lấy danh sách ghế theo booking
+// Lấy danh sách ghế theo booking
 const getSeatsByBooking = (bookingId: number | string) => {
-  return axios.get(`${API_URL}/bookings/${bookingId}/seats`);
+  return requestAPI.get(`/bookings/${bookingId}/seats`);
 };
 
-//  Thêm ghế vào booking
+// Thêm ghế vào booking
 const addSeat = (data: any) => {
-  return axios.post(`${API_URL}/bookings/seats`, data);
+  return requestAPI.post(`/bookings/seats`, data);
 };
 
-//  Cập nhật ghế trong booking
+// Cập nhật ghế trong booking
 const updateSeat = (data: any) => {
-  return axios.put(`${API_URL}/bookings/seats`, data);
+  return requestAPI.put(`/bookings/seats`, data);
 };
 
-//  Xóa ghế khỏi booking
+// Xóa ghế khỏi booking
 const deleteSeat = (id: number | string) => {
-  return axios.delete(`${API_URL}/bookings/seats/${id}`);
+  return requestAPI.delete(`/bookings/seats/${id}`);
 };
 
 // ==================== PAYMENTS ====================
 
 // Tạo thanh toán mới cho booking
 const createPayment = (data: any) => {
-  return axios.post(`${API_URL}/bookings/payments`, data);
+  return requestAPI.post(`/bookings/payments`, data);
 };
 
 // Lấy thông tin thanh toán theo booking
 const getPaymentByBooking = (bookingId: number | string) => {
-  return axios.get(`${API_URL}/bookings/payments/${bookingId}`);
+  return requestAPI.get(`/bookings/payments/${bookingId}`);
 };
 
 // Cập nhật trạng thái thanh toán
 const updatePaymentStatus = (data: any) => {
-  return axios.put(`${API_URL}/bookings/payments/status`, data);
+  return requestAPI.put(`/bookings/payments/status`, data);
 };
 
 export {

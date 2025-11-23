@@ -1,33 +1,29 @@
-//src/services/vehicleServices/vehicleServices.ts
-import axios from "axios";
-
-const API_URL = "http://localhost:8080/api/v1";
-
-// ==================== VEHICLE ====================
+// src/services/vehicleServices/vehicleServices.ts
+import requestAPI from "../../api/requestAPI";
 
 // Lấy tất cả xe
 const getAllVehicles = () => {
-  return axios.get(`${API_URL}/vehicles`);
+  return requestAPI.get(`/vehicles`);
 };
 
 // Lấy xe theo id
 const getVehicleById = (id: number | string) => {
-  return axios.get(`${API_URL}/vehicles/${id}`);
+  return requestAPI.get(`/vehicles/${id}`);
 };
 
 // Tạo xe mới
 const createVehicle = (data: any) => {
-  return axios.post(`${API_URL}/vehicles`, data);
+  return requestAPI.post(`/vehicles`, data);
 };
 
 // Cập nhật xe
 const updateVehicle = (id: number | string, data: any) => {
-  return axios.put(`${API_URL}/vehicles/${id}`, data);
+  return requestAPI.put(`/vehicles/${id}`, data);
 };
 
 // Xóa xe
 const deleteVehicle = (id: number | string) => {
-  return axios.delete(`${API_URL}/vehicles/${id}`);
+  return requestAPI.delete(`/vehicles/${id}`);
 };
 
 export {

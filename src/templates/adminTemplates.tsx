@@ -1,22 +1,18 @@
 import { useState, useEffect, useRef } from "react";
 import dayjs from "dayjs";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { clearSessionTimeout } from "../utils/sessionTimeout.ts";
+import { stopInactivityTimer } from "../utils/inactivityLogout.ts";
 import axios from "axios";
 import { List } from "antd";
 import { Layout, Menu, Badge, Avatar, Dropdown, Typography } from "antd";
 import {
-  SearchOutlined,
   BellOutlined,
   UserOutlined,
   CarOutlined,
   FileTextOutlined,
-  CreditCardOutlined,
   TeamOutlined,
   EnvironmentOutlined,
-  GiftOutlined,
   SettingOutlined,
-  CustomerServiceOutlined,
   BarChartOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
@@ -102,7 +98,7 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    clearSessionTimeout();
+    stopInactivityTimer();
     navigate("/");
     alert("Bạn đã đăng xuất thành công!");
   };

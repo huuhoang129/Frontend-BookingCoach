@@ -1,13 +1,9 @@
 // src/services/userServices/authService.ts
-import axios from "axios";
-
-const API_URL = "http://localhost:8080/api/v1";
-
-// ==================== AUTH ====================
+import requestAPI from "../../api/requestAPI";
 
 // Đăng nhập
 const login = (data: { email: string; password: string }) => {
-  return axios.post(`${API_URL}/login`, data);
+  return requestAPI.post("/login", data);
 };
 
 // Đăng ký
@@ -18,12 +14,12 @@ const register = (data: {
   lastName: string;
   phoneNumber: string;
 }) => {
-  return axios.post(`${API_URL}/register`, data);
+  return requestAPI.post("/register", data);
 };
 
-// Quên mật khẩu (gửi OTP)
+// Quên mật khẩu
 const forgotPassword = (email: string) => {
-  return axios.post(`${API_URL}/forgot-password`, { email });
+  return requestAPI.post("/forgot-password", { email });
 };
 
 // Đặt lại mật khẩu
@@ -32,7 +28,7 @@ const resetPassword = (data: {
   otp: string;
   newPassword: string;
 }) => {
-  return axios.post(`${API_URL}/reset-password`, data);
+  return requestAPI.post("/reset-password", data);
 };
 
 export { login, register, forgotPassword, resetPassword };

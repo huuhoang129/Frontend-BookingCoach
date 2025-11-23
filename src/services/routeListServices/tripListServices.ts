@@ -1,42 +1,39 @@
 // src/services/routeListServices/tripListServices.ts
-import axios from "axios";
-
-const API_URL = "http://localhost:8080/api/v1";
-
-// ==================== TRIP ====================
+import requestAPI from "../../api/requestAPI";
 
 // Lấy tất cả chuyến
 const getAllTrips = () => {
-  return axios.get(`${API_URL}/trips`);
+  return requestAPI.get(`/trips`);
 };
 
 // Lấy chuyến theo id
 const getTripById = (id: number | string) => {
-  return axios.get(`${API_URL}/trips/${id}`);
+  return requestAPI.get(`/trips/${id}`);
 };
 
 // Tạo chuyến mới
 const createTrip = (data: any) => {
-  return axios.post(`${API_URL}/trips`, data);
+  return requestAPI.post(`/trips`, data);
 };
 
 // Cập nhật chuyến
 const updateTrip = (id: number | string, data: any) => {
-  return axios.put(`${API_URL}/trips/${id}`, data);
+  return requestAPI.put(`/trips/${id}`, data);
 };
 
 // Xóa chuyến
 const deleteTrip = (id: number | string) => {
-  return axios.delete(`${API_URL}/trips/${id}`);
+  return requestAPI.delete(`/trips/${id}`);
 };
 
+// Tìm kiếm chuyến
 const searchTrips = (params: {
   fromLocationId?: number | string;
   toLocationId?: number | string;
   startDate: string;
   endDate?: string;
 }) => {
-  return axios.get(`${API_URL}/search-trips`, { params });
+  return requestAPI.get(`/search-trips`, { params });
 };
 
 export {
