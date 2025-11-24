@@ -14,9 +14,21 @@ export interface Point {
   Location?: { id: number; nameLocations: string };
 }
 
+export interface Vehicle {
+  id: number;
+  name: string;
+  licensePlate: string;
+}
+
 export interface Seat {
   id: number;
   seatId: number;
+  name?: string;
+  seat?: {
+    id: number;
+    name: string;
+    vehicleId: number;
+  };
   price: number;
 }
 
@@ -31,13 +43,13 @@ export interface Trip {
   id: number;
   startDate: string;
   startTime: string;
+  vehicle?: Vehicle;
   route?: {
     fromLocation: { nameLocations: string };
     toLocation: { nameLocations: string };
   };
 }
 
-/** 🎯 BookingStatus: khớp enum DB */
 export type BookingStatus = "PENDING" | "CONFIRMED" | "CANCELLED" | "EXPIRED";
 
 export interface Booking {

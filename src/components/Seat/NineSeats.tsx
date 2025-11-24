@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import "../styles/Seats/NineSeats.scss";
 
 // icon ghế
@@ -8,7 +8,10 @@ import SeatSold from "../../assets/icon/seat-3.svg";
 
 import type { Trip, Seat } from "../../types/booking";
 import { formatDuration, formatStartTime, calcEndTime } from "../../utils/time";
-import { getSeatNumber } from "../../utils/seat"; // import hàm tiện ích
+import { getSeatNumber } from "../../utils/seat";
+
+// Notification custom
+import { AppNotification } from "../../components/Notification/AppNotification";
 
 interface NineSeatsProps {
   seats: Seat[];
@@ -25,12 +28,47 @@ export default function NineSeats({
 }: NineSeatsProps) {
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
 
+  // notification
+  const { notifySuccess, notifyInfo, contextHolder } = AppNotification();
+
+  // ============================
+  // 🔥 FIX DOUBLE NOTIFY
+  // ============================
+  const notifyLock = useRef(false);
+
+  const safeNotify = (fn: () => void) => {
+    if (notifyLock.current) return; // chặn lần thứ 2
+    notifyLock.current = true;
+
+    fn();
+
+    setTimeout(() => {
+      notifyLock.current = false;
+    }, 100); // đảm bảo notify chỉ chạy 1 lần mỗi click
+  };
+  // ============================
+
   // Toggle chọn ghế (chỉ ghế trống mới chọn được)
   const toggleSeat = (seat: Seat) => {
-    if (seat.status === "SOLD" || seat.status === "HOLD") return; // không cho chọn
+    if (seat.status === "SOLD" || seat.status === "HOLD") return;
+
     setSelectedSeats((prev) => {
       const exists = prev.some((s) => s.id === seat.id);
-      return exists ? prev.filter((s) => s.id !== seat.id) : [...prev, seat];
+
+      if (exists) {
+        safeNotify(() =>
+          notifyInfo(
+            "Hủy chọn ghế",
+            `Đã bỏ chọn ghế ${getSeatNumber(seat.name)}`
+          )
+        );
+        return prev.filter((s) => s.id !== seat.id);
+      } else {
+        safeNotify(() =>
+          notifySuccess("Chọn ghế", `Đã chọn ghế ${getSeatNumber(seat.name)}`)
+        );
+        return [...prev, seat];
+      }
     });
   };
 
@@ -54,6 +92,9 @@ export default function NineSeats({
 
   return (
     <div className="seat-layout">
+      {/* 🔔 Notification holder */}
+      {contextHolder}
+
       <div className="seat-container">
         {/* Header */}
         <div className="seat-header">

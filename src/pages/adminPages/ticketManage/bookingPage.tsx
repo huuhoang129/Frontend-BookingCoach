@@ -9,8 +9,6 @@ import {
   Typography,
   Tooltip,
   Breadcrumb,
-  Modal,
-  Tag,
   Select,
   DatePicker,
 } from "antd";
@@ -25,13 +23,8 @@ import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import { useState, useMemo } from "react";
 import { useBookingManage } from "../../../hooks/ticketHooks/useBookingManage";
-import type {
-  Booking,
-  Customer,
-  Seat,
-  Payment,
-  Point,
-} from "../../../types/bookingTypes";
+import type { Booking, Customer } from "../../../types/bookingTypes";
+import BookingModal from "../../../containers/ModalsCollect/TicketModal/BookingModal";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -293,134 +286,11 @@ export default function BookingPage() {
         />
       </Card>
 
-      <Modal
-        title={`Chi tiết Booking #${selectedBooking?.id}`}
+      <BookingModal
         open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
-        footer={null}
-        width={800}
-      >
-        {selectedBooking && <BookingDetail booking={selectedBooking} />}
-      </Modal>
-    </div>
-  );
-}
-
-/* -------- Component chi tiết Booking -------- */
-import { Card as InfoCard } from "antd";
-
-function BookingDetail({ booking }: { booking: Booking }) {
-  const statusLabel: Record<string, string> = {
-    SUCCESS: "Thành công",
-    FAILED: "Thất bại",
-    PENDING: "Đang xử lý",
-    CONFIRMED: "Đã xác nhận",
-    CANCELLED: "Đã hủy",
-    EXPIRED: "Hết hạn",
-  };
-
-  const methodLabel: Record<string, string> = {
-    CASH: "Tiền mặt",
-    BANKING: "Chuyển khoản",
-    VNPAY: "VNPay",
-  };
-
-  return (
-    <div style={{ lineHeight: 1.8 }}>
-      <InfoCard
-        size="small"
-        title="🚌 Thông tin chuyến"
-        style={{ marginBottom: 16 }}
-      >
-        <p>
-          <b>Tuyến:</b>{" "}
-          {booking.trip?.route
-            ? `${booking.trip.route.fromLocation?.nameLocations} → ${booking.trip.route.toLocation?.nameLocations}`
-            : "—"}
-        </p>
-        <p>
-          <b>Ngày giờ đi:</b>{" "}
-          {booking.trip
-            ? `${dayjs(booking.trip.startDate).format("DD/MM/YYYY")} ${
-                booking.trip.startTime
-              }`
-            : "—"}
-        </p>
-        <p>
-          <b>Ghế:</b>{" "}
-          {booking.seats?.map((s: Seat) => `#${s.seatId}`).join(", ") || "—"}
-        </p>
-        <p>
-          <b>Tổng tiền:</b> {Number(booking.totalAmount).toLocaleString()} đ
-        </p>
-      </InfoCard>
-
-      <InfoCard size="small" title="👤 Khách hàng" style={{ marginBottom: 16 }}>
-        {booking.customers?.length
-          ? booking.customers.map((c: Customer) => (
-              <div key={c.id}>
-                <b>{c.fullName}</b> - {c.phone} {c.email ? `(${c.email})` : ""}
-              </div>
-            ))
-          : "—"}
-      </InfoCard>
-
-      <InfoCard
-        size="small"
-        title="📍 Điểm đón / trả"
-        style={{ marginBottom: 16 }}
-      >
-        {booking.points?.length
-          ? booking.points.map((p: Point) => (
-              <div key={p.id}>
-                <Tag color={p.type === "PICKUP" ? "blue" : "volcano"}>
-                  {p.type === "PICKUP" ? "Điểm đón" : "Điểm trả"}
-                </Tag>{" "}
-                {p.Location?.nameLocations} {p.time ? `(${p.time})` : ""}{" "}
-                {p.note ? `- ${p.note}` : ""}
-              </div>
-            ))
-          : "—"}
-      </InfoCard>
-
-      <InfoCard size="small" title="💳 Thanh toán" style={{ marginBottom: 16 }}>
-        {booking.payment?.length
-          ? booking.payment.map((p: Payment) => (
-              <div key={p.id}>
-                <Tag color="purple">{methodLabel[p.method] || p.method}</Tag>{" "}
-                {Number(p.amount).toLocaleString()} đ -{" "}
-                <Tag
-                  color={
-                    p.status === "SUCCESS"
-                      ? "green"
-                      : p.status === "FAILED"
-                      ? "red"
-                      : "orange"
-                  }
-                >
-                  {statusLabel[p.status] || p.status}
-                </Tag>
-              </div>
-            ))
-          : "—"}
-      </InfoCard>
-
-      <InfoCard size="small" title="📌 Trạng thái">
-        <Tag
-          color={
-            booking.status === "CONFIRMED"
-              ? "green"
-              : booking.status === "CANCELLED"
-              ? "red"
-              : booking.status === "EXPIRED"
-              ? "gray"
-              : "orange"
-          }
-          style={{ fontSize: 14, padding: "4px 12px" }}
-        >
-          {statusLabel[booking.status] || booking.status}
-        </Tag>
-      </InfoCard>
+        booking={selectedBooking}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 }

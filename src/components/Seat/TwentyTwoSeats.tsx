@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import "../styles/Seats/TwentyTwoSeats.scss";
 
 // icon
@@ -6,9 +6,12 @@ import SeatAvailable from "../../assets/icon/seat-1.svg";
 import SeatSelected from "../../assets/icon/seat-2.svg";
 import SeatSold from "../../assets/icon/seat-3.svg";
 
+// Notification
+import { AppNotification } from "../../components/Notification/AppNotification";
+
 import type { Seat, Trip } from "../../types/booking";
 import { formatDuration, formatStartTime, calcEndTime } from "../../utils/time";
-import { getSeatNumber } from "../../utils/seat"; //
+import { getSeatNumber } from "../../utils/seat";
 
 interface DoubleDeckSeats22Props {
   seats: Seat[];
@@ -25,12 +28,49 @@ export default function DoubleDeckSeats22({
 }: DoubleDeckSeats22Props) {
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
 
+  // ============================
+  // 🔔 Notification
+  // ============================
+  const { notifySuccess, notifyInfo, contextHolder } = AppNotification();
+
+  // ============================
+  // 🔥 FIX DOUBLE NOTIFY
+  // ============================
+  const notifyLock = useRef(false);
+
+  const safeNotify = (callback: () => void) => {
+    if (notifyLock.current) return;
+
+    notifyLock.current = true;
+    callback();
+
+    setTimeout(() => {
+      notifyLock.current = false;
+    }, 100);
+  };
+  // ============================
+
   // Toggle chọn ghế
   const toggleSeat = (seat: Seat) => {
     if (seat.status === "SOLD" || seat.status === "HOLD") return;
+
     setSelectedSeats((prev) => {
       const exists = prev.some((s) => s.id === seat.id);
-      return exists ? prev.filter((s) => s.id !== seat.id) : [...prev, seat];
+
+      if (exists) {
+        safeNotify(() =>
+          notifyInfo(
+            "Hủy chọn ghế",
+            `Đã bỏ chọn ghế ${getSeatNumber(seat.name)}`
+          )
+        );
+        return prev.filter((s) => s.id !== seat.id);
+      } else {
+        safeNotify(() =>
+          notifySuccess("Chọn ghế", `Đã chọn ghế ${getSeatNumber(seat.name)}`)
+        );
+        return [...prev, seat];
+      }
     });
   };
 
@@ -81,6 +121,7 @@ export default function DoubleDeckSeats22({
                   <p>{getSeatNumber(row[0].name)}</p>
                 </td>
               )}
+
               {row[1] ? (
                 <>
                   <td className="aisle"></td>
@@ -107,6 +148,9 @@ export default function DoubleDeckSeats22({
 
   return (
     <div className="twentytwo-seat-layout">
+      {/* 🔔 Notification holder */}
+      {contextHolder}
+
       <div className="twentytwo-seat-container">
         {/* Header */}
         <div className="twentytwo-seat-header">
@@ -143,16 +187,21 @@ export default function DoubleDeckSeats22({
                   {selectedSeats.map((s) => getSeatNumber(s.name)).join(", ")}
                 </span>
               </div>
+
               <hr className="divider" />
+
               <div className="price-row">
                 <span>Đơn giá:</span>
                 <span>{unitPrice.toLocaleString("vi-VN")} đ</span>
               </div>
+
               <div className="price-row">
                 <span>Tổng tiền:</span>
                 <span>{total.toLocaleString("vi-VN")} đ</span>
               </div>
+
               <hr className="divider" />
+
               <div className="price-row total">
                 <span>Thanh toán:</span>
                 <span>{total.toLocaleString("vi-VN")} đ</span>
@@ -177,7 +226,6 @@ export default function DoubleDeckSeats22({
             {trip?.vehicle?.name || "Hương Dương"}
           </h2>
 
-          {/* Legend */}
           <div className="twentytwo-seat-legend">
             <div className="legend-item">
               <img src={SeatAvailable} alt="available" /> Ghế trống

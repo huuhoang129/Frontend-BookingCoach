@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import "../styles/Seats/FortyFiveSeats.scss";
+
+// Notification custom
+import { AppNotification } from "../../components/Notification/AppNotification";
 
 // icons
 import SeatAvailable from "../../assets/icon/seat-1.svg";
@@ -25,12 +28,50 @@ export default function FortyFiveSeats({
 }: FortyFiveSeatsProps) {
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
 
-  // Toggle chọn ghế (không thay đổi status gốc)
+  // ============================
+  // 🔔 Notification
+  // ============================
+  const { notifySuccess, notifyInfo, contextHolder } = AppNotification();
+
+  // ============================
+  // 🔥 FIX DOUBLE NOTIFICATION
+  // ============================
+  const notifyLock = useRef(false);
+
+  const safeNotify = (callback: () => void) => {
+    if (notifyLock.current) return;
+    notifyLock.current = true;
+
+    callback();
+
+    // khóa 100ms — strict mode render double cũng không bị notify 2 lần
+    setTimeout(() => {
+      notifyLock.current = false;
+    }, 100);
+  };
+  // ============================
+
+  // Toggle chọn ghế
   const toggleSeat = (seat: Seat) => {
     if (seat.status === "SOLD" || seat.status === "HOLD") return;
+
     setSelectedSeats((prev) => {
       const exists = prev.some((s) => s.id === seat.id);
-      return exists ? prev.filter((s) => s.id !== seat.id) : [...prev, seat];
+
+      if (exists) {
+        safeNotify(() =>
+          notifyInfo(
+            "Hủy chọn ghế",
+            `Đã bỏ chọn ghế ${getSeatNumber(seat.name)}`
+          )
+        );
+        return prev.filter((s) => s.id !== seat.id);
+      } else {
+        safeNotify(() =>
+          notifySuccess("Chọn ghế", `Đã chọn ghế ${getSeatNumber(seat.name)}`)
+        );
+        return [...prev, seat];
+      }
     });
   };
 
@@ -41,6 +82,7 @@ export default function FortyFiveSeats({
     return SeatAvailable;
   };
 
+  // Class CSS ghế
   const getSeatClass = (seat: Seat) => {
     if (selectedSeats.some((s) => s.id === seat.id))
       return "fortyfive-seat-selected";
@@ -56,7 +98,7 @@ export default function FortyFiveSeats({
   // Render thân xe (40 ghế đầu)
   const renderBody = () => {
     const rows = Array.from({ length: 10 }, (_, i) => [
-      seats[i * 2], // cột bên trái
+      seats[i * 2],
       seats[i * 2 + 1],
       seats[i * 2 + 20],
       seats[i * 2 + 21],
@@ -70,7 +112,6 @@ export default function FortyFiveSeats({
               {row.map((seat, index) =>
                 index === 2 ? (
                   <>
-                    {/* lối đi giữa */}
                     <td className="aisle" key={`aisle-${idx}`}></td>
                     {seat && (
                       <td
@@ -128,6 +169,9 @@ export default function FortyFiveSeats({
 
   return (
     <div className="fortyfive-seat-layout">
+      {/* 🔔 MUST HAVE — Notification holder */}
+      {contextHolder}
+
       <div className="fortyfive-seat-container">
         {/* Header */}
         <div className="fortyfive-seat-header">
@@ -185,14 +229,14 @@ export default function FortyFiveSeats({
             <h4>Dịch vụ kèm theo</h4>
             <ul>
               <li>Wifi tốc độ cao</li>
-              <li>Ổ cắm sạc, điều hoà</li>
-              <li>Chăn và nước uống đóng chai</li>
+              <li>Ổ cắm sạc / điều hoà</li>
+              <li>Chăn và nước uống</li>
               <li>Đón trả tận nơi</li>
             </ul>
           </div>
         </div>
 
-        {/* Wrapper */}
+        {/* Body */}
         <div className="fortyfive-seat-wrapper">
           <h2 className="fortyfive-seat-title">
             {trip?.vehicle?.name || "Hương Dương"}
@@ -211,7 +255,6 @@ export default function FortyFiveSeats({
             </div>
           </div>
 
-          {/* Body + Back row */}
           {renderBody()}
           {renderBack()}
         </div>

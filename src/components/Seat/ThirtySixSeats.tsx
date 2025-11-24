@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import "../styles/Seats/ThirtySixSeats.scss";
+
+// Notification custom
+import { AppNotification } from "../../components/Notification/AppNotification";
 
 // icon ghế
 import SeatAvailable from "../../assets/icon/seat-1.svg";
@@ -25,12 +28,49 @@ export default function DoubleDeckSeats36({
 }: DoubleDeckSeats36Props) {
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
 
+  // ============================
+  // 🔔 Notification
+  // ============================
+  const { notifySuccess, notifyInfo, contextHolder } = AppNotification();
+
+  // ============================
+  // 🔥 FIX DOUBLE NOTIFY
+  // ============================
+  const notifyLock = useRef(false);
+
+  const safeNotify = (callback: () => void) => {
+    if (notifyLock.current) return; // chặn double
+    notifyLock.current = true;
+
+    callback();
+
+    setTimeout(() => {
+      notifyLock.current = false;
+    }, 100);
+  };
+  // ============================
+
   // Toggle chọn ghế
   const toggleSeat = (seat: Seat) => {
     if (seat.status === "SOLD" || seat.status === "HOLD") return;
+
     setSelectedSeats((prev) => {
       const exists = prev.some((s) => s.id === seat.id);
-      return exists ? prev.filter((s) => s.id !== seat.id) : [...prev, seat];
+
+      if (exists) {
+        safeNotify(() =>
+          notifyInfo(
+            "Hủy chọn ghế",
+            `Đã bỏ chọn ghế ${getSeatNumber(seat.name)}`
+          )
+        );
+        return prev.filter((s) => s.id !== seat.id);
+      } else {
+        safeNotify(() =>
+          notifySuccess("Chọn ghế", `Đã chọn ghế ${getSeatNumber(seat.name)}`)
+        );
+        return [...prev, seat];
+      }
     });
   };
 
@@ -90,6 +130,9 @@ export default function DoubleDeckSeats36({
 
   return (
     <div className="thirtysix-seat-layout">
+      {/* 🔔 MUST HAVE */}
+      {contextHolder}
+
       <div className="thirtysix-seat-container">
         {/* Header */}
         <div className="thirtysix-seat-header">
@@ -172,7 +215,6 @@ export default function DoubleDeckSeats36({
             </div>
           </div>
 
-          {/* floors */}
           <div className="thirtysix-floors">
             <div className="floor-block">
               <h3 className="thirtysix-floor-title">Tầng 1</h3>
