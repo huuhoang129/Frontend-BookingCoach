@@ -1,16 +1,12 @@
+//src/components/Seat/NineSeats.tsx
 import { useState, useRef } from "react";
 import "../styles/Seats/NineSeats.scss";
-
-// icon ghế
 import SeatAvailable from "../../assets/icon/seat-1.svg";
 import SeatSelected from "../../assets/icon/seat-2.svg";
 import SeatSold from "../../assets/icon/seat-3.svg";
-
 import type { Trip, Seat } from "../../types/booking";
 import { formatDuration, formatStartTime, calcEndTime } from "../../utils/time";
 import { getSeatNumber } from "../../utils/seat";
-
-// Notification custom
 import { AppNotification } from "../../components/Notification/AppNotification";
 
 interface NineSeatsProps {
@@ -27,28 +23,22 @@ export default function NineSeats({
   onClose,
 }: NineSeatsProps) {
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
-
-  // notification
   const { notifySuccess, notifyInfo, contextHolder } = AppNotification();
 
-  // ============================
-  // 🔥 FIX DOUBLE NOTIFY
-  // ============================
+  // Ngăn thông báo bị gọi hai lần khi click nhanh
   const notifyLock = useRef(false);
-
   const safeNotify = (fn: () => void) => {
-    if (notifyLock.current) return; // chặn lần thứ 2
+    if (notifyLock.current) return;
     notifyLock.current = true;
-
     fn();
 
+    // Reset khóa
     setTimeout(() => {
       notifyLock.current = false;
-    }, 100); // đảm bảo notify chỉ chạy 1 lần mỗi click
+    }, 100);
   };
-  // ============================
 
-  // Toggle chọn ghế (chỉ ghế trống mới chọn được)
+  // Xử lý chọn / hủy ghế
   const toggleSeat = (seat: Seat) => {
     if (seat.status === "SOLD" || seat.status === "HOLD") return;
 
@@ -56,6 +46,7 @@ export default function NineSeats({
       const exists = prev.some((s) => s.id === seat.id);
 
       if (exists) {
+        // Hủy chọn ghế
         safeNotify(() =>
           notifyInfo(
             "Hủy chọn ghế",
@@ -64,6 +55,7 @@ export default function NineSeats({
         );
         return prev.filter((s) => s.id !== seat.id);
       } else {
+        // Chọn ghế
         safeNotify(() =>
           notifySuccess("Chọn ghế", `Đã chọn ghế ${getSeatNumber(seat.name)}`)
         );
@@ -72,31 +64,29 @@ export default function NineSeats({
     });
   };
 
-  // Icon ghế
+  // Lấy icon theo trạng thái ghế
   const getIcon = (seat: Seat) => {
     if (selectedSeats.some((s) => s.id === seat.id)) return SeatSelected;
     if (seat.status === "SOLD" || seat.status === "HOLD") return SeatSold;
     return SeatAvailable;
   };
 
-  // Class CSS ghế
+  // Lấy class CSS theo trạng thái ghế
   const getSeatClass = (seat: Seat) => {
     if (selectedSeats.some((s) => s.id === seat.id)) return "seat-selected";
     if (seat.status === "SOLD" || seat.status === "HOLD") return "seat-sold";
     return "seat-available";
   };
 
-  // 💰 Giá vé
+  // Tính tổng giá ghế
   const unitPrice = trip?.price?.priceTrip ? Number(trip.price.priceTrip) : 0;
   const total = selectedSeats.length * unitPrice;
 
   return (
     <div className="seat-layout">
-      {/* 🔔 Notification holder */}
       {contextHolder}
 
       <div className="seat-container">
-        {/* Header */}
         <div className="seat-header">
           <div className="seat-title">
             <h2>{trip?.vehicle?.name || "Xe Hương Dương"}</h2>
@@ -121,7 +111,7 @@ export default function NineSeats({
             </span>
           </div>
 
-          {/* 💸 Box giá ghế */}
+          {/* Hộp giá ghế nếu đã chọn ít nhất 1 ghế */}
           {selectedSeats.length > 0 && (
             <div className="seat-price-box">
               <h4>Giá ghế:</h4>
@@ -159,11 +149,9 @@ export default function NineSeats({
           </div>
         </div>
 
-        {/* Layout ghế */}
+        {/* Layout ghế trong xe */}
         <div className="seat-wrapper">
           <h2 className="seat-title">{trip?.vehicle?.name || "Hương Dương"}</h2>
-
-          {/* legend */}
           <div className="seat-legend">
             <div className="seat-legend-item">
               <img src={SeatAvailable} alt="available" /> Ghế trống
@@ -176,7 +164,7 @@ export default function NineSeats({
             </div>
           </div>
 
-          {/* Table layout 9 ghế */}
+          {/* Bảng layout 9 ghế*/}
           <table className="seat-table">
             <tbody>
               <tr>
@@ -279,7 +267,6 @@ export default function NineSeats({
         </div>
       </div>
 
-      {/* Button */}
       <button
         className="seat-btn"
         disabled={!trip || selectedSeats.length === 0}

@@ -1,14 +1,10 @@
+//src/components/Seat/TwentyTwoSeats.tsx
 import { useState, useRef } from "react";
 import "../styles/Seats/TwentyTwoSeats.scss";
-
-// icon
 import SeatAvailable from "../../assets/icon/seat-1.svg";
 import SeatSelected from "../../assets/icon/seat-2.svg";
 import SeatSold from "../../assets/icon/seat-3.svg";
-
-// Notification
 import { AppNotification } from "../../components/Notification/AppNotification";
-
 import type { Seat, Trip } from "../../types/booking";
 import { formatDuration, formatStartTime, calcEndTime } from "../../utils/time";
 import { getSeatNumber } from "../../utils/seat";
@@ -27,30 +23,22 @@ export default function DoubleDeckSeats22({
   onClose,
 }: DoubleDeckSeats22Props) {
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
-
-  // ============================
-  // 🔔 Notification
-  // ============================
   const { notifySuccess, notifyInfo, contextHolder } = AppNotification();
 
-  // ============================
-  // 🔥 FIX DOUBLE NOTIFY
-  // ============================
+  // Ngăn hiện thông báo trùng khi click nhanh
   const notifyLock = useRef(false);
-
   const safeNotify = (callback: () => void) => {
     if (notifyLock.current) return;
-
     notifyLock.current = true;
     callback();
 
+    // Reset
     setTimeout(() => {
       notifyLock.current = false;
     }, 100);
   };
-  // ============================
 
-  // Toggle chọn ghế
+  // Xử lý chọn hoặc hủy chọn ghế
   const toggleSeat = (seat: Seat) => {
     if (seat.status === "SOLD" || seat.status === "HOLD") return;
 
@@ -65,23 +53,22 @@ export default function DoubleDeckSeats22({
           )
         );
         return prev.filter((s) => s.id !== seat.id);
-      } else {
-        safeNotify(() =>
-          notifySuccess("Chọn ghế", `Đã chọn ghế ${getSeatNumber(seat.name)}`)
-        );
-        return [...prev, seat];
       }
+
+      safeNotify(() =>
+        notifySuccess("Chọn ghế", `Đã chọn ghế ${getSeatNumber(seat.name)}`)
+      );
+      return [...prev, seat];
     });
   };
 
-  // Icon ghế
+  // Icon ghế theo trạng thái
   const getIcon = (seat: Seat) => {
     if (selectedSeats.some((s) => s.id === seat.id)) return SeatSelected;
     if (seat.status === "SOLD" || seat.status === "HOLD") return SeatSold;
     return SeatAvailable;
   };
 
-  // Class ghế
   const getSeatClass = (seat: Seat) => {
     if (selectedSeats.some((s) => s.id === seat.id))
       return "twentytwo-seat-selected";
@@ -90,21 +77,22 @@ export default function DoubleDeckSeats22({
     return "twentytwo-seat-available";
   };
 
-  // 💰 Giá vé
+  // Tính giá
   const unitPrice = trip?.price?.priceTrip ? Number(trip.price.priceTrip) : 0;
   const total = selectedSeats.length * unitPrice;
 
-  // Render từng tầng
+  // Render 1 tầng ghế
   const renderFloor = (floor: number) => {
     const floorSeats = seats.filter((s) => s.floor === floor);
 
+    // Cấu trúc ghế
     const rows = [
       [floorSeats[0], floorSeats[1]],
       [floorSeats[2], floorSeats[3]],
       [floorSeats[4], floorSeats[5]],
       [floorSeats[6], floorSeats[7]],
       [floorSeats[8], floorSeats[9]],
-      [floorSeats[10]], // hàng cuối chỉ 1 ghế
+      [floorSeats[10]],
     ];
 
     return (
@@ -112,6 +100,7 @@ export default function DoubleDeckSeats22({
         <tbody>
           {rows.map((row, idx) => (
             <tr key={idx}>
+              {/* Ghế trái */}
               {row[0] && (
                 <td
                   className={`twentytwo-seat ${getSeatClass(row[0])}`}
@@ -121,7 +110,7 @@ export default function DoubleDeckSeats22({
                   <p>{getSeatNumber(row[0].name)}</p>
                 </td>
               )}
-
+              {/* Lối đi & ghế phải */}
               {row[1] ? (
                 <>
                   <td className="aisle"></td>
@@ -148,16 +137,13 @@ export default function DoubleDeckSeats22({
 
   return (
     <div className="twentytwo-seat-layout">
-      {/* 🔔 Notification holder */}
       {contextHolder}
-
       <div className="twentytwo-seat-container">
-        {/* Header */}
+        {/* Thông tin chuyến xe */}
         <div className="twentytwo-seat-header">
           <div className="twentytwo-seat-title">
             <h2>{trip?.vehicle?.name || "Xe Hương Dương"}</h2>
           </div>
-
           <div className="twentytwo-seat-type">
             <p>XE GIƯỜNG NẰM VIP 22 CHỖ</p>
           </div>
@@ -177,10 +163,11 @@ export default function DoubleDeckSeats22({
             </span>
           </div>
 
-          {/* 💸 Box giá ghế */}
+          {/* Box hiển thị giá  */}
           {selectedSeats.length > 0 && (
             <div className="twentytwo-seat-price-box">
               <h4>Giá ghế:</h4>
+
               <div className="price-row">
                 <span>Ghế:</span>
                 <span>
@@ -208,7 +195,6 @@ export default function DoubleDeckSeats22({
               </div>
             </div>
           )}
-
           <div className="twentytwo-seat-services">
             <h4>Dịch vụ kèm theo</h4>
             <ul>
@@ -220,12 +206,13 @@ export default function DoubleDeckSeats22({
           </div>
         </div>
 
-        {/* Wrapper */}
+        {/* Giao diện ghế */}
         <div className="twentytwo-seat-wrapper">
           <h2 className="twentytwo-seat-title">
             {trip?.vehicle?.name || "Hương Dương"}
           </h2>
 
+          {/* Chú thích ghế */}
           <div className="twentytwo-seat-legend">
             <div className="legend-item">
               <img src={SeatAvailable} alt="available" /> Ghế trống
@@ -238,12 +225,13 @@ export default function DoubleDeckSeats22({
             </div>
           </div>
 
-          {/* Floors */}
+          {/* Hai tầng ghế của xe */}
           <div className="twentytwo-floors">
             <div className="floor-block">
               <h3 className="twentytwo-floor-title">Tầng 1</h3>
               {renderFloor(1)}
             </div>
+
             <div className="floor-block">
               <h3 className="twentytwo-floor-title">Tầng 2</h3>
               {renderFloor(2)}
@@ -252,7 +240,6 @@ export default function DoubleDeckSeats22({
         </div>
       </div>
 
-      {/* Button */}
       <button
         className="twentytwo-seat-btn"
         disabled={!trip || selectedSeats.length === 0}

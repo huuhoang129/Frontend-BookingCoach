@@ -50,12 +50,12 @@ export default function VehicleStatusPage() {
     contextHolder,
   } = useVehicleStatus();
 
-  // state
+  // State
   const [searchText, setSearchText] = useState("");
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
-  // lọc dữ liệu
+  // Lọc dữ liệu
   const filteredData = vehicleStatuses.filter((v) => {
     let match = true;
     if (
@@ -72,7 +72,7 @@ export default function VehicleStatusPage() {
     return match;
   });
 
-  // map màu trạng thái
+  // Map màu trạng thái
   const statusColors: Record<string, string> = {
     GOOD: "green",
     NEEDS_MAINTENANCE: "orange",
@@ -84,7 +84,7 @@ export default function VehicleStatusPage() {
     IN_REPAIR: "Đang sửa chữa",
   };
 
-  // cấu hình bảng
+  // Cấu hình bảng
   const columns: ColumnsType<any> = [
     {
       title: "Xe",
@@ -155,7 +155,7 @@ export default function VehicleStatusPage() {
     },
   ];
 
-  // checkbox
+  // Checkbox
   const rowSelection = {
     selectedRowKeys,
     onChange: (keys: React.Key[]) => setSelectedRowKeys(keys),
@@ -253,7 +253,7 @@ export default function VehicleStatusPage() {
         </Flex>
       </Card>
 
-      {/* bảng */}
+      {/* Bảng */}
       <Card>
         <Table
           rowKey="id"
@@ -265,7 +265,7 @@ export default function VehicleStatusPage() {
         />
       </Card>
 
-      {/* modal thêm sửa */}
+      {/* Modal thêm sửa */}
       <VehicleStatusModal
         openAdd={isAddModal}
         setOpenAdd={setIsAddModal}

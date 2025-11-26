@@ -1,3 +1,4 @@
+//src/pages/adminPages/tripManage/schedulePage.tsx
 import {
   Table,
   Input,
@@ -51,7 +52,7 @@ export default function SchedulePage() {
 
   const [searchText, setSearchText] = useState("");
 
-  // 🔍 Lọc dữ liệu
+  // Lọc dữ liệu theo từ khóa tìm kiếm
   const filteredData = schedules.filter((s) => {
     if (!searchText) return true;
     return (
@@ -65,7 +66,7 @@ export default function SchedulePage() {
     );
   });
 
-  // 🧱 Cột hiển thị
+  // Cấu hình các cột hiển thị trong bảng
   const columns: ColumnsType<any> = [
     {
       title: "Tuyến",
@@ -118,6 +119,7 @@ export default function SchedulePage() {
       width: 130,
       render: (_, record) => (
         <Space>
+          {/* Sửa lịch trình */}
           <Tooltip title="Sửa lịch trình">
             <Button
               shape="circle"
@@ -130,11 +132,12 @@ export default function SchedulePage() {
               onClick={() => {
                 setIsEdit(true);
                 setEditingSchedule(record);
-                setIsModalOpen(true); // chỉ mở modal thôi
+                setIsModalOpen(true);
               }}
             />
           </Tooltip>
 
+          {/* Xóa lịch trình */}
           <Tooltip title="Xóa lịch trình">
             <Popconfirm
               title="Xác nhận xóa"
@@ -160,8 +163,6 @@ export default function SchedulePage() {
   return (
     <div style={{ padding: 24, background: "#f4f6f9", minHeight: "100vh" }}>
       {contextHolder}
-
-      {/* Breadcrumb */}
       <Breadcrumb style={{ marginBottom: 16 }}>
         <Breadcrumb.Item>
           <HomeOutlined /> Dashboard
@@ -171,13 +172,14 @@ export default function SchedulePage() {
         </Breadcrumb.Item>
       </Breadcrumb>
 
+      {/* Tiêu đề trang */}
       <Flex justify="space-between" align="center" style={{ marginBottom: 20 }}>
         <Title level={3} style={{ fontWeight: 700, margin: 0 }}>
           Quản lý lịch trình
         </Title>
       </Flex>
 
-      {/* Bộ lọc & nút */}
+      {/* Khu vực bộ lọc và nút chức năng */}
       <Card
         style={{
           marginBottom: 20,
@@ -187,7 +189,7 @@ export default function SchedulePage() {
       >
         <Flex justify="space-between" align="center" wrap="wrap" gap={16}>
           <Input
-            placeholder="🔍 Tìm tuyến, xe..."
+            placeholder="Tìm tuyến, xe..."
             prefix={<SearchOutlined />}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
@@ -195,6 +197,7 @@ export default function SchedulePage() {
           />
 
           <Flex gap={8}>
+            {/* Sinh chuyến tự động từ lịch trình */}
             <Button
               icon={<ThunderboltOutlined />}
               onClick={handleGenerateTrips}
@@ -208,6 +211,7 @@ export default function SchedulePage() {
               Sinh chuyến
             </Button>
 
+            {/* Thêm lịch trình mới */}
             <Button
               icon={<PlusOutlined />}
               type="primary"
@@ -232,7 +236,7 @@ export default function SchedulePage() {
         </Flex>
       </Card>
 
-      {/* Bảng dữ liệu */}
+      {/* Bảng hiển thị danh sách lịch trình */}
       <Card
         style={{
           borderRadius: 12,
@@ -248,7 +252,7 @@ export default function SchedulePage() {
         />
       </Card>
 
-      {/* Modal thêm/sửa */}
+      {/* Modal thêm và sửa lịch trình */}
       <ScheduleModal
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}

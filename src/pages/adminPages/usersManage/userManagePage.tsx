@@ -48,7 +48,7 @@ export default function UserManagePage() {
   const [searchText, setSearchText] = useState("");
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
-  // lọc dữ liệu
+  // Lọc dữ liệu
   const filteredData = users.filter((u) => {
     if (!searchText) return true;
     const text = searchText.toLowerCase();
@@ -58,7 +58,7 @@ export default function UserManagePage() {
     );
   });
 
-  // cột bảng
+  // Cột bảng
   const columns: ColumnsType<any> = [
     {
       title: "Mã KH",
@@ -118,7 +118,7 @@ export default function UserManagePage() {
     },
   ];
 
-  // checkbox chọn nhiều
+  // Checkbox chọn nhiều
   const rowSelection = {
     selectedRowKeys,
     onChange: (keys: React.Key[]) => setSelectedRowKeys(keys),
@@ -212,7 +212,7 @@ export default function UserManagePage() {
         />
       </Card>
 
-      {/* mode thêm/sửa */}
+      {/* Mode thêm/sửa */}
       <UserModal
         openAdd={isAddModal}
         setOpenAdd={setIsAddModal}

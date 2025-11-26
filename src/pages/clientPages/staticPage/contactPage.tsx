@@ -1,3 +1,4 @@
+//src/pages/clientPages/staticPage/contactPage.tsx
 import {
   PhoneOutlined,
   MailOutlined,
@@ -7,6 +8,7 @@ import {
 import "./contactPage.scss";
 
 export default function ContactPage() {
+  // Danh sách các văn phòng hỗ trợ
   const offices = [
     {
       title: "Văn phòng bến Mỹ Đình",
@@ -27,11 +29,12 @@ export default function ContactPage() {
 
   return (
     <div className="contact-page">
-      {/* Phần 1: Liên hệ chính */}
+      {/* Khu vực thông tin liên hệ chính */}
       <section className="contact-main">
         <div className="contact-info">
           <h2>Liên hệ với chúng tôi</h2>
 
+          {/* Thông tin hotline */}
           <div className="info-item">
             <PhoneOutlined className="icon phone" />
             <div>
@@ -40,6 +43,7 @@ export default function ContactPage() {
             </div>
           </div>
 
+          {/* Thông tin email */}
           <div className="info-item">
             <MailOutlined className="icon email" />
             <div>
@@ -48,6 +52,7 @@ export default function ContactPage() {
             </div>
           </div>
 
+          {/* Thông tin địa chỉ và link Google Maps */}
           <div className="info-item">
             <EnvironmentOutlined className="icon address" />
             <div>
@@ -64,7 +69,7 @@ export default function ContactPage() {
           </div>
         </div>
 
-        {/* Google map */}
+        {/* Google Maps nhúng */}
         <div className="contact-map">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3719.598632119693!2d105.76716231501755!3d19.806184986154665!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3136fcb9cf9f1f2d%3A0x9b89e969c96f1!2zMyBOZ3V54buFbiBDaMOtIFRoYW5oLCBQaMO6bmcgSMOgbSBS4bq_bmcsIFRoYW5oIEjDoCwgVmnhu4d0IE5hbQ!5e0!3m2!1sen!2s!4v1695064908321!5m2!1sen!2s"
@@ -76,9 +81,10 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Phần 2: Hệ thống phòng vé */}
+      {/* Danh sách hệ thống văn phòng */}
       <section className="office-system">
         <h3>Hệ thống phòng vé</h3>
+
         <div className="office-list">
           {offices.map((office, idx) => (
             <div className="office-item" key={idx}>

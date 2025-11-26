@@ -1,18 +1,14 @@
+// src/utils/time.ts
 import dayjs from "dayjs";
 
-/**
- * Định dạng lại thời lượng (VD: "04:00:00" -> "4h", "03:30:00" -> "3h30")
- */
+// Định dạng thời lượng "HH:mm" thành dạng rút gọn
 export function formatDuration(totalTime?: string) {
   if (!totalTime) return "";
   const [h, m] = totalTime.split(":").map(Number);
-  if (m === 0) return `${h}h`;
-  return `${h}h${m}`;
+  return m === 0 ? `${h}h` : `${h}h${m}`;
 }
 
-/**
- * Tính giờ kết thúc từ giờ bắt đầu + totalTime
- */
+// Tính giờ kết thúc từ giờ bắt đầu + tổng thời gian
 export function calcEndTime(startTime: string, totalTime?: string) {
   if (!startTime || !totalTime) return "";
   const [h, m] = totalTime.split(":").map(Number);
@@ -22,9 +18,7 @@ export function calcEndTime(startTime: string, totalTime?: string) {
     .format("HH:mm");
 }
 
-/**
- * Chuyển "HH:mm:ss" -> "HH:mm"
- */
+// Đổi "HH:mm:ss" → "HH:mm"
 export function formatStartTime(startTime?: string) {
   if (!startTime) return "";
   return dayjs(startTime, "HH:mm:ss").format("HH:mm");

@@ -1,3 +1,4 @@
+//src/pages/adminPages/reportManage/cancellationRatePage.tsx
 import {
   Card,
   Typography,
@@ -43,6 +44,7 @@ const { RangePicker } = DatePicker;
 const COLORS = ["#ff4d4f", "#52c41a"];
 
 export default function CancellationRatePage() {
+  // Lấy dữ liệu và trạng thái từ hook
   const {
     data,
     loading,
@@ -54,6 +56,7 @@ export default function CancellationRatePage() {
     setPreset,
   } = useCancellationRate();
 
+  // Chuẩn bị dữ liệu
   const chartData = data
     ? [
         { name: "Bị hủy", value: data.cancelledBookings },
@@ -80,7 +83,7 @@ export default function CancellationRatePage() {
           size="middle"
           style={{ width: "100%", justifyContent: "space-between" }}
         >
-          {/* Bộ chọn thời gian */}
+          {/* Chọn khoảng thời gian */}
           <Space>
             <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <CalendarOutlined style={{ color: "#4d940e" }} />
@@ -93,7 +96,7 @@ export default function CancellationRatePage() {
             />
           </Space>
 
-          {/* Nhóm theo */}
+          {/* Chọn nhóm hiển thị */}
           <Space>
             <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <BarChartOutlined style={{ color: "#722ed1" }} />
@@ -111,7 +114,7 @@ export default function CancellationRatePage() {
             />
           </Space>
 
-          {/* Preset buttons */}
+          {/* Bộ preset thời gian */}
           <Space>
             <Button onClick={() => setPreset("7d")} icon={<CalendarOutlined />}>
               7 ngày
@@ -139,7 +142,7 @@ export default function CancellationRatePage() {
             </Button>
           </Space>
 
-          {/* Action buttons */}
+          {/* Nút tải lại */}
           <Space>
             <Button onClick={fetchData} icon={<ReloadOutlined />}>
               Tải lại
@@ -148,10 +151,11 @@ export default function CancellationRatePage() {
         </Space>
       </Card>
 
-      {/* KPIs */}
+      {/* Thống kê nhanh */}
       <Row gutter={16} style={{ marginBottom: 16 }}>
         <Col xs={24} sm={12} md={8}>
           <Card>
+            {/* Tổng booking */}
             <div
               style={{
                 display: "flex",
@@ -171,6 +175,7 @@ export default function CancellationRatePage() {
 
         <Col xs={24} sm={12} md={8}>
           <Card>
+            {/* Số lượng hủy */}
             <div
               style={{
                 display: "flex",
@@ -190,6 +195,7 @@ export default function CancellationRatePage() {
 
         <Col xs={24} sm={12} md={8}>
           <Card>
+            {/* Tỷ lệ hủy */}
             <div
               style={{
                 display: "flex",
@@ -221,6 +227,7 @@ export default function CancellationRatePage() {
 
       <Spin spinning={loading}>
         <Row gutter={16}>
+          {/* Biểu đồ tròn */}
           <Col span={12}>
             <Card title="Phân bố Hủy / Không hủy">
               <ResponsiveContainer width="100%" height={320}>
@@ -249,6 +256,7 @@ export default function CancellationRatePage() {
             </Card>
           </Col>
 
+          {/* Biểu đồ xu hướng */}
           <Col span={12}>
             <Card title="Xu hướng hủy theo thời gian">
               <ResponsiveContainer width="100%" height={320}>
@@ -283,6 +291,7 @@ export default function CancellationRatePage() {
           </Col>
         </Row>
 
+        {/* Bảng chi tiết */}
         <Card title="Chi tiết số liệu" style={{ marginTop: 20 }}>
           <Table
             dataSource={data?.history || []}

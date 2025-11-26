@@ -1,3 +1,4 @@
+//src/containers/ModalsCollect/VehicleModal/DriverScheduleModal.tsx
 import { useEffect, useState } from "react";
 import { Modal, Form, Input, Select, Button } from "antd";
 import type {
@@ -33,13 +34,13 @@ export default function DriverScheduleModal({
   formEdit,
   handleAdd,
   handleEdit,
-  editingSchedule,
   drivers,
   trips,
   schedules,
 }: Props) {
   const [selectedTripId, setSelectedTripId] = useState<number | null>(null);
 
+  // Reset form
   useEffect(() => {
     if (!openAdd) {
       formAdd.resetFields();
@@ -47,13 +48,11 @@ export default function DriverScheduleModal({
     }
   }, [openAdd]);
 
-  // 🔹 Lọc tài xế rảnh cho chuyến đã chọn
+  // Danh sách tài xế rảnh phù hợp với chuyến được chọn
   const availableDrivers = (() => {
     if (!selectedTripId) return drivers;
 
-    const trip = trips.find((t) => t.id === selectedTripId) as
-      | CoachTrip
-      | undefined;
+    const trip = trips.find((t) => t.id === selectedTripId);
     if (!trip) return drivers;
 
     const start = dayjs(
@@ -76,14 +75,15 @@ export default function DriverScheduleModal({
           "hour"
         );
 
-        // check trùng giờ
+        // Kiểm tra trùng giờ
         return existingStart.isBefore(end) && existingEnd.isAfter(start);
       });
+
       return !conflict;
     });
   })();
 
-  // 🔹 Lọc chuyến xe chưa có tài xế nào được phân công
+  // Chuyến chưa có tài xế nào được phân công
   const unassignedTrips = trips.filter(
     (trip) => !schedules.some((s) => s.coachTripId === trip.id)
   );
@@ -119,6 +119,7 @@ export default function DriverScheduleModal({
       ]}
     >
       <Form form={openEdit ? formEdit : formAdd} layout="vertical">
+        {/* Chọn chuyến xe */}
         <Form.Item
           name="coachTripId"
           label="Chuyến xe"
@@ -127,7 +128,7 @@ export default function DriverScheduleModal({
           <Select
             placeholder="Chọn chuyến xe (chỉ hiển thị chuyến chưa phân công tài xế)"
             onChange={(val) => setSelectedTripId(val)}
-            disabled={openEdit} // không cho đổi chuyến khi đang sửa
+            disabled={openEdit}
           >
             {unassignedTrips.map((t) => (
               <Option key={t.id} value={t.id}>
@@ -142,6 +143,7 @@ export default function DriverScheduleModal({
           </Select>
         </Form.Item>
 
+        {/* Chọn tài xế */}
         <Form.Item
           name="userId"
           label="Tài xế"
@@ -164,6 +166,7 @@ export default function DriverScheduleModal({
           </Select>
         </Form.Item>
 
+        {/* Ghi chú */}
         <Form.Item name="note" label="Ghi chú">
           <Input.TextArea rows={2} placeholder="Nhập ghi chú (nếu có)" />
         </Form.Item>

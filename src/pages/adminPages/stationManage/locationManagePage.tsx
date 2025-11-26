@@ -38,6 +38,7 @@ const { Option } = Select;
 
 export default function LocationManage() {
   const lm = useLocationManage();
+  // Lưu danh sách
   const [selectedProvinceKeys, setSelectedProvinceKeys] = useState<React.Key[]>(
     []
   );
@@ -45,7 +46,7 @@ export default function LocationManage() {
     []
   );
 
-  // cột
+  // Cột bảng tỉnh và địa điểm
   const provinceColumns: ColumnsType<Province & { index: number }> = [
     {
       title: "Tên tỉnh",
@@ -66,7 +67,7 @@ export default function LocationManage() {
       width: 120,
       render: (_, record) => (
         <Space>
-          <Tooltip title="Sửa">
+          <Tooltip title="Sửa tỉnh">
             <Button
               shape="circle"
               icon={<EditOutlined />}
@@ -78,9 +79,10 @@ export default function LocationManage() {
               }}
             />
           </Tooltip>
+
           <Popconfirm
             title="Xác nhận xoá"
-            description={`Bạn có chắc chắn muốn xoá tỉnh "${record.nameProvince}" không?`}
+            description={`Bạn có chắc muốn xoá tỉnh "${record.nameProvince}" không?`}
             okText="Xoá"
             cancelText="Hủy"
             okButtonProps={{ danger: true }}
@@ -97,7 +99,6 @@ export default function LocationManage() {
       ),
     },
   ];
-
   const locationColumns: ColumnsType<Location & { index: number }> = [
     {
       title: "Tên địa điểm",
@@ -141,7 +142,7 @@ export default function LocationManage() {
       width: 120,
       render: (_, record) => (
         <Space>
-          <Tooltip title="Sửa">
+          <Tooltip title="Sửa địa điểm">
             <Button
               shape="circle"
               icon={<EditOutlined />}
@@ -159,7 +160,7 @@ export default function LocationManage() {
           </Tooltip>
           <Popconfirm
             title="Xác nhận xoá"
-            description={`Bạn có chắc chắn muốn xoá địa điểm "${record.nameLocations}" không?`}
+            description={`Bạn có chắc muốn xoá địa điểm "${record.nameLocations}" không?`}
             okText="Xoá"
             cancelText="Hủy"
             okButtonProps={{ danger: true }}
@@ -177,11 +178,12 @@ export default function LocationManage() {
     },
   ];
 
+  // Chọn nhiều ở bảng tỉnh
   const provinceSelection = {
     selectedRowKeys: selectedProvinceKeys,
     onChange: (keys: React.Key[]) => setSelectedProvinceKeys(keys),
   };
-
+  // Chọn nhiều ở bảng địa điểm
   const locationSelection = {
     selectedRowKeys: selectedLocationKeys,
     onChange: (keys: React.Key[]) => setSelectedLocationKeys(keys),
@@ -208,6 +210,8 @@ export default function LocationManage() {
         }}
       >
         {lm.contextHolder}
+
+        {/* Điều hướng trang */}
         <Breadcrumb style={{ marginBottom: 16 }}>
           <Breadcrumb.Item>
             <HomeOutlined /> Dashboard
@@ -216,11 +220,11 @@ export default function LocationManage() {
             <EnvironmentOutlined /> Quản lý Tỉnh / Địa điểm
           </Breadcrumb.Item>
         </Breadcrumb>
-
+        {/* Tiêu đề trang */}
         <Title level={3} style={{ marginBottom: 20, fontWeight: 700 }}>
           Quản lý Tỉnh / Địa điểm
         </Title>
-
+        {/* Tabs chứa Tỉnh và Địa điểm */}
         <Tabs defaultActiveKey="provinces">
           {/* Tab tỉnh */}
           <Tabs.TabPane tab="Tỉnh / Thành phố" key="provinces">
@@ -232,14 +236,16 @@ export default function LocationManage() {
               }}
             >
               <Flex justify="space-between" align="center" wrap="wrap" gap={16}>
+                {/* Tìm kiếm tỉnh */}
                 <Input
-                  placeholder="🔍 Tìm tỉnh..."
+                  placeholder="Tìm tỉnh..."
                   prefix={<SearchOutlined />}
                   value={lm.searchProvince}
                   onChange={(e) => lm.setSearchProvince(e.target.value)}
                   style={{ width: 260, borderRadius: 8 }}
                 />
 
+                {/* Xoá hàng loạt hoặc thêm mới */}
                 {selectedProvinceKeys.length > 0 ? (
                   <Popconfirm
                     title="Xác nhận xoá"
@@ -287,6 +293,8 @@ export default function LocationManage() {
                 )}
               </Flex>
             </Card>
+
+            {/* Bảng tỉnh */}
             <Card style={{ borderRadius: 10 }}>
               <Table
                 rowKey="id"
@@ -299,7 +307,7 @@ export default function LocationManage() {
             </Card>
           </Tabs.TabPane>
 
-          {/* Tab địa điểm*/}
+          {/* Tab địa điểm */}
           <Tabs.TabPane tab="Địa điểm" key="locations">
             <Card
               style={{
@@ -309,9 +317,10 @@ export default function LocationManage() {
               }}
             >
               <Flex justify="space-between" align="center" wrap="wrap" gap={16}>
+                {/* Bộ lọc địa điểm */}
                 <Flex gap={16} wrap="wrap">
                   <Input
-                    placeholder="🔍 Tìm địa điểm..."
+                    placeholder="Tìm địa điểm..."
                     prefix={<SearchOutlined />}
                     value={lm.searchLocation}
                     onChange={(e) => lm.setSearchLocation(e.target.value)}
@@ -344,6 +353,7 @@ export default function LocationManage() {
                   </Select>
                 </Flex>
 
+                {/* Xoá hàng loạt hoặc thêm mới */}
                 {selectedLocationKeys.length > 0 ? (
                   <Popconfirm
                     title="Xác nhận xoá"
@@ -392,6 +402,7 @@ export default function LocationManage() {
               </Flex>
             </Card>
 
+            {/* Bảng địa điểm */}
             <Card style={{ borderRadius: 10 }}>
               <Table
                 rowKey="id"
@@ -405,7 +416,7 @@ export default function LocationManage() {
           </Tabs.TabPane>
         </Tabs>
 
-        {/* modal */}
+        {/* Modal tỉnh */}
         <ProvinceModal
           openAdd={lm.isAddProvince}
           setOpenAdd={lm.setIsAddProvince}
@@ -418,6 +429,7 @@ export default function LocationManage() {
           editingProvince={lm.editingProvince}
         />
 
+        {/* Modal địa điểm */}
         <LocationModal
           openAdd={lm.isAddLocation}
           setOpenAdd={lm.setIsAddLocation}

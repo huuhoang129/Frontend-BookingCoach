@@ -1,3 +1,4 @@
+//src/containers/ModalsCollect/AuthModals.tsx
 import { Modal, Form, Input, Button, Typography, Space } from "antd";
 import {
   LockOutlined,
@@ -46,11 +47,14 @@ export default function AuthModals({
   handlers,
 }: AuthModalsProps) {
   const [form] = Form.useForm();
+
+  // Loading trạng thái từng hành động
   const [loadingLogin, setLoadingLogin] = useState(false);
   const [loadingRegister, setLoadingRegister] = useState(false);
   const [loadingForgot, setLoadingForgot] = useState(false);
   const [loadingReset, setLoadingReset] = useState(false);
 
+  // Xử lý đăng nhập
   const handleLoginSubmit = (values: any) => {
     setLoadingLogin(true);
     setTimeout(() => {
@@ -59,6 +63,7 @@ export default function AuthModals({
     }, 3000);
   };
 
+  // Xử lý đăng ký
   const handleRegisterSubmit = (values: any) => {
     setLoadingRegister(true);
     setTimeout(() => {
@@ -67,6 +72,7 @@ export default function AuthModals({
     }, 3000);
   };
 
+  // Xử lý quên mật khẩu
   const handleForgotSubmit = (values: any) => {
     setLoadingForgot(true);
     setTimeout(() => {
@@ -75,6 +81,7 @@ export default function AuthModals({
     }, 3000);
   };
 
+  // Đặt lại mật khẩu
   const handleResetSubmit = (values: any) => {
     setLoadingReset(true);
     setTimeout(() => {
@@ -83,6 +90,7 @@ export default function AuthModals({
     }, 3000);
   };
 
+  // Style chung
   const modalStyle: React.CSSProperties = {
     position: "relative",
     borderRadius: 12,
@@ -91,7 +99,7 @@ export default function AuthModals({
 
   return (
     <>
-      {/* Đăng nhập */}
+      {/* Modal đăng nhập */}
       <Modal
         open={openLogin}
         footer={null}
@@ -101,6 +109,7 @@ export default function AuthModals({
       >
         <div style={modalStyle}>
           <LoadingOverlay spinning={loadingLogin} text="Đang đăng nhập..." />
+
           <Title level={3} className="auth-title">
             Đăng nhập
           </Title>
@@ -125,6 +134,7 @@ export default function AuthModals({
               />
             </Form.Item>
 
+            {/* Mở modal quên mật khẩu */}
             <div className="auth-forgot">
               <a
                 href="#"
@@ -147,6 +157,7 @@ export default function AuthModals({
               Đăng nhập
             </Button>
 
+            {/* Chuyển sang đăng ký */}
             <div className="auth-switch">
               <Text>Chưa có tài khoản? </Text>
               <a
@@ -164,7 +175,7 @@ export default function AuthModals({
         </div>
       </Modal>
 
-      {/* Đăng ký */}
+      {/* Modal đăng ký */}
       <Modal
         open={openRegister}
         footer={null}
@@ -177,6 +188,7 @@ export default function AuthModals({
             spinning={loadingRegister}
             text="Đang tạo tài khoản..."
           />
+
           <Title level={3} className="auth-title">
             Tạo tài khoản mới
           </Title>
@@ -189,6 +201,7 @@ export default function AuthModals({
             >
               <Input prefix={<MailOutlined />} placeholder="Nhập email" />
             </Form.Item>
+
             <Form.Item
               name="password"
               label="Mật khẩu"
@@ -199,6 +212,7 @@ export default function AuthModals({
                 placeholder="Nhập mật khẩu"
               />
             </Form.Item>
+
             <Space size="small" style={{ display: "flex" }}>
               <Form.Item
                 name="firstName"
@@ -208,6 +222,7 @@ export default function AuthModals({
               >
                 <Input prefix={<UserOutlined />} placeholder="Tên" />
               </Form.Item>
+
               <Form.Item
                 name="lastName"
                 label="Họ"
@@ -217,6 +232,8 @@ export default function AuthModals({
                 <Input prefix={<UserOutlined />} placeholder="Họ" />
               </Form.Item>
             </Space>
+
+            {/* Số điện thoại */}
             <Form.Item
               name="phoneNumber"
               label="Số điện thoại"
@@ -239,6 +256,7 @@ export default function AuthModals({
               Đăng ký
             </Button>
 
+            {/* Chuyển sang đăng nhập */}
             <div className="auth-switch">
               <Text>Đã có tài khoản? </Text>
               <a
@@ -256,7 +274,7 @@ export default function AuthModals({
         </div>
       </Modal>
 
-      {/* Quên mật khẩu */}
+      {/* Modal quên mật khẩu */}
       <Modal
         open={openForgotPassword}
         footer={null}
@@ -269,6 +287,7 @@ export default function AuthModals({
             spinning={loadingForgot}
             text="Đang gửi mã xác thực..."
           />
+
           <Title level={4} className="auth-title">
             Khôi phục mật khẩu
           </Title>
@@ -281,6 +300,7 @@ export default function AuthModals({
             >
               <Input prefix={<MailOutlined />} placeholder="Nhập email" />
             </Form.Item>
+
             <Button
               type="primary"
               htmlType="submit"
@@ -293,7 +313,7 @@ export default function AuthModals({
         </div>
       </Modal>
 
-      {/* OTP */}
+      {/* Modal nhập OTP */}
       <Modal
         open={openVerifyOtp}
         footer={null}
@@ -305,6 +325,7 @@ export default function AuthModals({
           <Title level={4} className="auth-title">
             Xác thực OTP
           </Title>
+
           <Form layout="vertical" onFinish={handlers.handleVerifyOtp}>
             <Form.Item
               name="otp"
@@ -316,6 +337,7 @@ export default function AuthModals({
                 placeholder="Nhập mã gồm 6 chữ số"
               />
             </Form.Item>
+
             <Button type="primary" htmlType="submit" block>
               Xác nhận
             </Button>
@@ -323,7 +345,7 @@ export default function AuthModals({
         </div>
       </Modal>
 
-      {/* Reset mật khẩu */}
+      {/* Modal đặt lại mật khẩu */}
       <Modal
         open={openResetPassword}
         footer={null}
@@ -336,9 +358,11 @@ export default function AuthModals({
             spinning={loadingReset}
             text="Đang đặt lại mật khẩu..."
           />
+
           <Title level={4} className="auth-title">
             Đặt lại mật khẩu
           </Title>
+
           <Form layout="vertical" onFinish={handleResetSubmit}>
             <Form.Item
               name="newPassword"
@@ -347,6 +371,7 @@ export default function AuthModals({
             >
               <Input.Password placeholder="Nhập mật khẩu mới" />
             </Form.Item>
+
             <Form.Item
               name="confirmPassword"
               label="Xác nhận mật khẩu"
@@ -354,6 +379,7 @@ export default function AuthModals({
             >
               <Input.Password placeholder="Nhập lại mật khẩu" />
             </Form.Item>
+
             <Button
               type="primary"
               htmlType="submit"

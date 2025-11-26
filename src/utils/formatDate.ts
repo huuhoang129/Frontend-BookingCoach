@@ -1,4 +1,6 @@
 // utils/formatDate.ts
+
+// Định dạng ngày
 export function formatDate(
   dateString?: string | Date,
   withTime: boolean = false
@@ -6,7 +8,7 @@ export function formatDate(
   if (!dateString) return "";
 
   const d = new Date(dateString);
-  if (isNaN(d.getTime())) return "";
+  if (isNaN(d.getTime())) return ""; // ngày không hợp lệ
 
   return withTime
     ? d.toLocaleString("vi-VN", {

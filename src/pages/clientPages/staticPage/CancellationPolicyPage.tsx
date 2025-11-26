@@ -1,5 +1,9 @@
+//src/pages/clientPages/staticPage/CancellationPolicyPage.tsx
 import StaticPage from "../../../components/staticPage/StaticPage";
 
 export default function AboutPage() {
-  return <StaticPage pageKey="payment_policy" title="Chính sách thanh toán" />;
+  // Hiển thị trang chính sách hoàn hủy
+  return (
+    <StaticPage pageKey="cancellation_policy" title="Chính sách hoàn hủy" />
+  );
 }

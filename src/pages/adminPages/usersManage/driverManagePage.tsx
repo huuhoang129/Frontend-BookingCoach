@@ -1,3 +1,4 @@
+//src/pages/adminPages/usersManage/driverManagePage.tsx
 import {
   Table,
   Input,
@@ -54,7 +55,7 @@ export default function DriverManagePage() {
   const [searchText, setSearchText] = useState("");
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
-  // lọc dữ liệu (role = Driver)
+  // Lọc dữ liệu (role = Driver)
   const filteredDrivers = drivers.filter((d) => {
     if (d.role !== "Driver") return false;
     if (!searchText) return true;
@@ -66,7 +67,7 @@ export default function DriverManagePage() {
     );
   });
 
-  // cấu hình bảng
+  // Cấu hình bảng
   const columns: ColumnsType<any> = [
     { title: "Mã tài xế", dataIndex: "userCode", key: "userCode", width: 120 },
     {
@@ -141,7 +142,7 @@ export default function DriverManagePage() {
     },
   ];
 
-  // checkbox
+  // Checkbox
   const rowSelection = {
     selectedRowKeys,
     onChange: (keys: React.Key[]) => setSelectedRowKeys(keys),

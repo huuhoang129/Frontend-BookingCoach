@@ -1,7 +1,6 @@
 import {
   Table,
   Input,
-  Button,
   Card,
   Flex,
   Typography,
@@ -37,7 +36,7 @@ export default function PaymentPage() {
     setSelectedPayment,
   } = usePayments();
 
-  // 🟢 Local state (như VehiclePage)
+  // State bộ lọc
   const [searchText, setSearchText] = useState("");
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
@@ -45,24 +44,27 @@ export default function PaymentPage() {
     null
   );
 
-  // Map sang tiếng Việt cho phương thức và trạng thái
+  // Map phương thức
   const methodLabel: Record<string, string> = {
     CASH: "Tiền mặt",
     BANKING: "Chuyển khoản",
     VNPAY: "VNPay",
   };
 
+  // Map trạng thái
   const statusLabel: Record<string, string> = {
     PENDING: "Đang xử lý",
     SUCCESS: "Thành công",
     FAILED: "Thất bại",
   };
 
-  // Lọc dữ liệu
+  // Lọc và sắp xếp danh sách
   const filteredPayments = useMemo(() => {
     return filteredData
       .filter((p: Payment) => {
         const keyword = searchText.toLowerCase().trim();
+
+        // Tìm theo id, mã đặt vé, phương thức
         const matchKeyword =
           !keyword ||
           String(p.id).includes(keyword) ||
@@ -74,6 +76,7 @@ export default function PaymentPage() {
         const matchMethod = !selectedMethod || p.method === selectedMethod;
         const matchStatus = !selectedStatus || p.status === selectedStatus;
 
+        // Lọc theo khoảng tiền
         let matchPrice = true;
         if (selectedPriceRange) {
           const [min, max] = selectedPriceRange.split("-").map(Number);
@@ -92,14 +95,14 @@ export default function PaymentPage() {
     selectedPriceRange,
   ]);
 
-  // Cấu hình bảng
+  // Cấu hình cột bảng
   const columns: ColumnsType<Payment> = [
     {
       title: "Mã đặt vé",
       key: "bookingCode",
       dataIndex: "booking",
       width: 160,
-      render: (b) => b?.bookingCode || "—", // 🟢 bỏ CSS ở đây, hiển thị text bình thường
+      render: (b) => b?.bookingCode || "—",
     },
     {
       title: "Phương thức",
@@ -137,14 +140,26 @@ export default function PaymentPage() {
       key: "actions",
       render: (_, r) => (
         <Tooltip title="Xem chi tiết">
-          <Button
-            shape="circle"
-            icon={<EyeOutlined />}
+          <button
+            style={{
+              border: "1px solid #d9d9d9",
+              borderRadius: "50%",
+              width: 32,
+              height: 32,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "#fff",
+              cursor: "pointer",
+            }}
             onClick={() => {
+              // Mở modal và lưu thanh toán được chọn
               setSelectedPayment(r);
               setIsModalOpen(true);
             }}
-          />
+          >
+            <EyeOutlined />
+          </button>
         </Tooltip>
       ),
     },
@@ -152,11 +167,11 @@ export default function PaymentPage() {
 
   return (
     <div style={{ padding: 24, background: "#f4f6f9", minHeight: "100vh" }}>
-      {/* Breadcrumb */}
+      {/* Điều hướng breadcrumb */}
       <Breadcrumb style={{ marginBottom: 16 }}>
         <Breadcrumb.Item>
           <HomeOutlined />
-          <span>Dashboard</span>
+          <span>Trang chủ</span>
         </Breadcrumb.Item>
         <Breadcrumb.Item>
           <DollarOutlined />
@@ -168,20 +183,20 @@ export default function PaymentPage() {
         Quản lý thanh toán
       </Title>
 
-      {/* Bộ lọc */}
+      {/* Khu vực bộ lọc thanh toán */}
       <Card style={{ marginBottom: 20 }}>
         <Flex justify="space-between" align="center" wrap="wrap" gap={16}>
           <Flex gap={16} wrap="wrap">
-            {/* Input tìm kiếm */}
+            {/* Ô tìm kiếm theo nhiều tiêu chí */}
             <Input
-              placeholder="🔍 Tìm theo mã đặt vé, mã thanh toán, phương thức..."
+              placeholder="Tìm theo mã đặt vé, mã thanh toán, phương thức..."
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               style={{ width: 320 }}
             />
 
-            {/* Lọc phương thức */}
+            {/* Lọc theo phương thức thanh toán */}
             <Select
               allowClear
               placeholder="Phương thức"
@@ -194,7 +209,7 @@ export default function PaymentPage() {
               <Option value="VNPAY">VNPay</Option>
             </Select>
 
-            {/* Lọc khoảng tiền */}
+            {/* Lọc theo khoảng tiền (nghìn đồng) */}
             <Select
               allowClear
               placeholder="Khoảng tiền (nghìn)"
@@ -208,7 +223,7 @@ export default function PaymentPage() {
               <Option value="600-1000">600k – 1.000k</Option>
             </Select>
 
-            {/* Lọc trạng thái */}
+            {/* Lọc theo trạng thái thanh toán */}
             <Select
               allowClear
               placeholder="Trạng thái"
@@ -224,7 +239,7 @@ export default function PaymentPage() {
         </Flex>
       </Card>
 
-      {/* Bảng dữ liệu */}
+      {/* Bảng danh sách thanh toán */}
       <Card>
         <Table
           rowKey="id"
@@ -235,7 +250,7 @@ export default function PaymentPage() {
         />
       </Card>
 
-      {/* Modal chi tiết */}
+      {/* Modal hiển thị chi tiết thanh toán */}
       <Modal
         title={`Chi tiết thanh toán #${selectedPayment?.id}`}
         open={isModalOpen}
@@ -247,7 +262,7 @@ export default function PaymentPage() {
           <div style={{ lineHeight: 1.8 }}>
             <Card
               size="small"
-              title="💳 Thông tin thanh toán"
+              title="Thông tin thanh toán"
               style={{ marginBottom: 16 }}
             >
               <p>
@@ -276,7 +291,7 @@ export default function PaymentPage() {
 
             <Card
               size="small"
-              title="📄 Giao dịch"
+              title="Thông tin giao dịch"
               style={{ marginBottom: 16 }}
             >
               <p>
@@ -290,7 +305,7 @@ export default function PaymentPage() {
               </p>
             </Card>
 
-            <Card size="small" title="📌 Trạng thái">
+            <Card size="small" title="Trạng thái thanh toán">
               <Tag
                 color={
                   selectedPayment.status === "SUCCESS"

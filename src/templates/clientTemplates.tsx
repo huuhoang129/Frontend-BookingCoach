@@ -1,3 +1,4 @@
+//src/templates/clientTemplates.tsx
 import { Outlet } from "react-router-dom";
 import TopBar from "../components/layout/Topbar";
 import Header from "../components/layout/Header";
@@ -10,12 +11,16 @@ interface HomeTemplateProps {
 
 export const HomeTemplate: React.FC<HomeTemplateProps> = ({ Component }) => {
   return (
+    // Template giao diện
     <div className="home-template">
       <TopBar />
       <Header />
+
+      {/* Nội dung chính */}
       <div className="home-content">
         {Component ? <Component /> : <Outlet />}
       </div>
+
       <Footer />
     </div>
   );

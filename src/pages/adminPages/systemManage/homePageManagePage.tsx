@@ -1,3 +1,4 @@
+//src/pages/adminPages/systemManage/homePageManagePage.tsx
 import { useEffect, useState } from "react";
 import {
   Tabs,
@@ -31,12 +32,14 @@ export default function HomepageManage() {
   const { mode, setMode, savedContent, handleSave } = useStaticPages();
   const [activeKey, setActiveKey] = useState<TabKey>("about");
 
+  // Chuyển tab sẽ nạp nội dung cũ vào form
   useEffect(() => {
     if (savedContent[activeKey]) {
       form.setFieldsValue(savedContent[activeKey]);
     }
   }, [activeKey, savedContent, form]);
 
+  // Hiển thị nội dung
   const renderTabContent = (key: TabKey) => {
     return mode[key] === "edit" ? (
       <Form
@@ -53,7 +56,7 @@ export default function HomepageManage() {
 
         <Form.Item style={{ marginTop: 20 }}>
           <Space size="middle">
-            <Tooltip title="Lưu thay đổi">
+            <Tooltip title="Lưu nội dung">
               <Button
                 type="primary"
                 icon={<SaveOutlined />}
@@ -88,6 +91,7 @@ export default function HomepageManage() {
           }}
         >
           <h2 className="preview-title">{savedContent[key].title}</h2>
+
           <Tooltip title="Chỉnh sửa nội dung">
             <Button
               type="dashed"
@@ -113,23 +117,23 @@ export default function HomepageManage() {
       className="panel-homepage-admin"
       style={{ padding: 24, background: "#f4f6f9", minHeight: "100vh" }}
     >
-      {/* Breadcrumb */}
+      {/* Điều hướng breadcrumb */}
       <Breadcrumb style={{ marginBottom: 16 }}>
-        <Breadcrumb.Item href="">
+        <Breadcrumb.Item>
           <HomeOutlined />
           <span>Dashboard</span>
         </Breadcrumb.Item>
         <Breadcrumb.Item>
           <FileTextOutlined />
-          <span>Static Pages</span>
+          <span>Trang tĩnh</span>
         </Breadcrumb.Item>
         <Breadcrumb.Item>
           <EditOutlined />
-          <span>Quản lý Nội dung Trang tĩnh</span>
+          <span>Quản lý nội dung</span>
         </Breadcrumb.Item>
       </Breadcrumb>
 
-      {/* Title */}
+      {/* Tiêu đề */}
       <Title
         level={3}
         style={{
@@ -141,7 +145,7 @@ export default function HomepageManage() {
         Quản lý Nội dung Trang Tĩnh
       </Title>
 
-      {/* Tabs Zone */}
+      {/* Vùng tab chỉnh sửa */}
       <Card
         style={{
           borderRadius: 12,
@@ -157,30 +161,28 @@ export default function HomepageManage() {
           <TabPane tab="Giới thiệu" key="about">
             {renderTabContent("about")}
           </TabPane>
-
           <TabPane tab="Điều khoản" key="terms">
             {renderTabContent("terms")}
           </TabPane>
-
           <TabPane tab="Chính sách" key="policies">
             <Tabs
               defaultActiveKey="privacy_policy"
               type="line"
               onChange={(key) => setActiveKey(key as TabKey)}
             >
-              <TabPane tab="Chính Sách: Bảo Mật" key="privacy_policy">
+              <TabPane tab="Chính sách bảo mật" key="privacy_policy">
                 {renderTabContent("privacy_policy")}
               </TabPane>
-              <TabPane tab="Chính Sách: Hoàn Tiền" key="refund_policy">
+              <TabPane tab="Chính sách hoàn tiền" key="refund_policy">
                 {renderTabContent("refund_policy")}
               </TabPane>
-              <TabPane tab="Chính Sách: Thanh Toán" key="payment_policy">
+              <TabPane tab="Chính sách thanh toán" key="payment_policy">
                 {renderTabContent("payment_policy")}
               </TabPane>
-              <TabPane tab="Chính Sách: Hoàn Huỷ" key="cancellation_policy">
+              <TabPane tab="Chính sách hủy" key="cancellation_policy">
                 {renderTabContent("cancellation_policy")}
               </TabPane>
-              <TabPane tab="Chính Sách: Vận Chuyển" key="shipping_policy">
+              <TabPane tab="Chính sách vận chuyển" key="shipping_policy">
                 {renderTabContent("shipping_policy")}
               </TabPane>
             </Tabs>

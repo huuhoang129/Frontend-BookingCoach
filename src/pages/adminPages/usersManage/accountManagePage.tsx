@@ -39,7 +39,7 @@ export default function AccountManagePage() {
     contextHolder,
   } = useAccounts();
 
-  // state lọc và tìm kiếm
+  // State lọc và tìm kiếm
   const [searchText, setSearchText] = useState("");
   const [roleFilter, setRoleFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
@@ -68,7 +68,7 @@ export default function AccountManagePage() {
     Driver: "Tài xế",
   };
 
-  // tình toán dữ liêu đã lọc
+  // Tính toán dữ liêu đã lọc
   const filteredData = useMemo(() => {
     const q = searchText.trim().toLowerCase();
     return accounts.filter((acc) => {
@@ -79,7 +79,7 @@ export default function AccountManagePage() {
     });
   }, [accounts, searchText, roleFilter, statusFilter]);
 
-  // cột bảng
+  // Cột bảng
   const columns: ColumnsType<any> = useMemo(
     () => [
       {
@@ -184,7 +184,7 @@ export default function AccountManagePage() {
     [handleLock, handleUnlock]
   );
 
-  // làm mới
+  // Làm mới
   const [refreshing, setRefreshing] = useState(false);
   const handleRefresh = async () => {
     setRefreshing(true);

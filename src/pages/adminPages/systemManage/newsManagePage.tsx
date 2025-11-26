@@ -1,3 +1,4 @@
+//src/pages/adminPages/systemManage/newsManagePage.tsx
 import { useState } from "react";
 import {
   Table,
@@ -44,17 +45,20 @@ export default function NewsManagePage() {
     handleGetById,
   } = useNews();
 
+  // Trạng thái mở modal và phân trang
   const [openCreate, setOpenCreate] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchText, setSearchText] = useState("");
 
+  // Tìm kiếm tiêu đề
+  const [searchText, setSearchText] = useState("");
   const pageSize = 6;
 
-  // Bộ lọc + tìm kiếm
+  // Lọc danh sách tin
   const filteredNews = newsList.filter((n) => {
     const status = n.status?.toLowerCase();
     const type = n.newsType;
+
     const titleMatch = n.title
       ?.toLowerCase()
       .includes(searchText.toLowerCase());
@@ -66,7 +70,7 @@ export default function NewsManagePage() {
     );
   });
 
-  // Cột bảng
+  // Cấu hình cột bảng tin tức
   const columns: ColumnsType<any> = [
     {
       title: "Ảnh",
@@ -100,14 +104,15 @@ export default function NewsManagePage() {
       title: "Tác giả",
       dataIndex: "author",
       key: "author",
+      width: 180,
       render: (author) =>
         author ? `${author.firstName} ${author.lastName}` : "—",
-      width: 180,
     },
     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
+      width: 130,
       render: (status) => (
         <Tag
           color={
@@ -121,12 +126,12 @@ export default function NewsManagePage() {
           {status}
         </Tag>
       ),
-      width: 130,
     },
     {
       title: "Loại tin",
       dataIndex: "newsType",
       key: "newsType",
+      width: 150,
       render: (t) => (
         <Tag color="blue">
           {t === "News"
@@ -140,7 +145,6 @@ export default function NewsManagePage() {
             : "Khác"}
         </Tag>
       ),
-      width: 150,
     },
     {
       title: "Hành động",
@@ -148,7 +152,7 @@ export default function NewsManagePage() {
       width: 140,
       render: (_, record) => (
         <Space>
-          <Tooltip title="Sửa">
+          <Tooltip title="Sửa tin">
             <Button
               shape="circle"
               icon={<EditOutlined />}
@@ -165,7 +169,7 @@ export default function NewsManagePage() {
             okButtonProps={{ danger: true }}
             onConfirm={() => handleDelete(record.id)}
           >
-            <Tooltip title="Xoá">
+            <Tooltip title="Xoá tin">
               <Button
                 shape="circle"
                 icon={<DeleteOutlined />}
@@ -188,19 +192,19 @@ export default function NewsManagePage() {
         overflowY: "auto",
       }}
     >
-      {/* Breadcrumb */}
+      {/* Điều hướng breadcrumb */}
       <Breadcrumb style={{ marginBottom: 16 }}>
-        <Breadcrumb.Item href="">
+        <Breadcrumb.Item>
           <HomeOutlined />
           <span>Dashboard</span>
         </Breadcrumb.Item>
         <Breadcrumb.Item>
           <ReadOutlined />
-          <span>News Management</span>
+          <span>Quản lý tin tức</span>
         </Breadcrumb.Item>
       </Breadcrumb>
 
-      {/* Title */}
+      {/* Tiêu đề trang */}
       <Title
         level={3}
         style={{
@@ -212,7 +216,7 @@ export default function NewsManagePage() {
         Quản lý Tin tức
       </Title>
 
-      {/* Toolbar */}
+      {/* Bộ công cụ lọc và tìm kiếm */}
       <Card
         style={{
           marginBottom: 20,
@@ -220,10 +224,10 @@ export default function NewsManagePage() {
           boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
         }}
       >
-        <Flex justify="space-between" align="center" gap={16} wrap="wrap">
+        <Flex justify="space-between" align="center" wrap="wrap" gap={16}>
           <Flex gap={16} wrap="wrap">
             <Input
-              placeholder="🔍 Tìm theo tiêu đề..."
+              placeholder="Tìm theo tiêu đề..."
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -272,7 +276,7 @@ export default function NewsManagePage() {
         </Flex>
       </Card>
 
-      {/* Table */}
+      {/* Bảng tin tức */}
       <Card
         style={{
           borderRadius: 12,
@@ -294,7 +298,7 @@ export default function NewsManagePage() {
         />
       </Card>
 
-      {/* Modals giữ nguyên */}
+      {/* Modal tạo và sửa tin */}
       <NewsModals
         openCreate={openCreate}
         setOpenCreate={setOpenCreate}

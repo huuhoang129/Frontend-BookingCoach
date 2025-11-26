@@ -1,3 +1,4 @@
+//src/pages/adminPages/reportManage/ticketSalesPage.tsx
 import { useState } from "react";
 import {
   Card,
@@ -28,7 +29,6 @@ import {
 } from "recharts";
 import {
   ReloadOutlined,
-  FileExcelOutlined,
   CalendarOutlined,
   RiseOutlined,
   FallOutlined,
@@ -45,6 +45,7 @@ const { Title } = Typography;
 const { RangePicker } = DatePicker;
 
 export default function TicketSalesPage() {
+  // Lấy dữ liệu và trạng thái từ hook phân tích vé bán
   const {
     data,
     loading,
@@ -55,7 +56,6 @@ export default function TicketSalesPage() {
     avgTickets,
     maxItem,
     tableRows,
-    handleExportCSV,
     setPreset,
     groupBy,
     setGroupBy,
@@ -63,10 +63,12 @@ export default function TicketSalesPage() {
     setChartMA,
   } = useTicketSales();
 
+  // Chọn loại biểu đồ
   const [chartType, setChartType] = useState<"bar" | "line">("bar");
 
   return (
     <div style={{ padding: 24, background: "#f5f7fa", minHeight: "100vh" }}>
+      {/* Tiêu đề trang */}
       <Title level={3} style={{ marginBottom: 16 }}>
         🎟️ Báo cáo vé bán ra
       </Title>
@@ -81,7 +83,7 @@ export default function TicketSalesPage() {
           size="middle"
           style={{ width: "100%", justifyContent: "space-between" }}
         >
-          {/* Chọn thời gian */}
+          {/* Bộ chọn khoảng thời gian */}
           <Space>
             <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <CalendarOutlined style={{ color: "#4d940e" }} />
@@ -96,7 +98,7 @@ export default function TicketSalesPage() {
             />
           </Space>
 
-          {/* Nhóm theo */}
+          {/* Bộ chọn nhóm hiển thị (ngày/tháng/năm) */}
           <Space>
             <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <BarChartOutlined style={{ color: "#722ed1" }} />
@@ -114,7 +116,7 @@ export default function TicketSalesPage() {
             />
           </Space>
 
-          {/* Preset buttons */}
+          {/* Bộ presets thời gian */}
           <Space>
             <Button onClick={() => setPreset("7d")} icon={<CalendarOutlined />}>
               7 ngày
@@ -138,14 +140,17 @@ export default function TicketSalesPage() {
             </Button>
           </Space>
 
-          {/* Action buttons */}
+          {/* Hành động: đổi chart + bật MA7 + reload */}
           <Space>
+            {/* Chọn kiểu biểu đồ */}
             <Switch
               checkedChildren={<ColumnHeightOutlined />}
               unCheckedChildren={<LineChartOutlined />}
               checked={chartType === "bar"}
               onChange={(checked) => setChartType(checked ? "bar" : "line")}
             />
+
+            {/* Bật/tắt MA7 khi xem theo ngày */}
             {groupBy === "day" && (
               <Button
                 type={chartMA ? "primary" : "default"}
@@ -159,6 +164,8 @@ export default function TicketSalesPage() {
                 {chartMA ? "Tắt MA7" : "Bật MA7"}
               </Button>
             )}
+
+            {/* Tải lại dữ liệu */}
             <Button onClick={fetchData} icon={<ReloadOutlined />}>
               Tải lại
             </Button>
@@ -166,8 +173,9 @@ export default function TicketSalesPage() {
         </Space>
       </Card>
 
-      {/* KPIs */}
+      {/* Các chỉ số tổng quan */}
       <Row gutter={16} style={{ marginBottom: 16 }}>
+        {/* Tổng vé bán */}
         <Col xs={24} sm={12} md={6}>
           <Card>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -180,6 +188,7 @@ export default function TicketSalesPage() {
           </Card>
         </Col>
 
+        {/* Số kỳ dữ liệu */}
         <Col xs={24} sm={12} md={6}>
           <Card>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -198,6 +207,7 @@ export default function TicketSalesPage() {
           </Card>
         </Col>
 
+        {/* Trung bình vé theo kỳ */}
         <Col xs={24} sm={12} md={6}>
           <Card>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -212,6 +222,7 @@ export default function TicketSalesPage() {
           </Card>
         </Col>
 
+        {/* Kỳ có vé cao nhất */}
         <Col xs={24} sm={12} md={6}>
           <Card>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -220,6 +231,8 @@ export default function TicketSalesPage() {
                 {groupBy === "day" ? "Ngày cao nhất" : "Kỳ cao nhất"}
               </span>
             </div>
+
+            {/* Nếu có dữ liệu đỉnh */}
             {maxItem ? (
               <div
                 style={{
@@ -242,16 +255,18 @@ export default function TicketSalesPage() {
         </Col>
       </Row>
 
-      {/* Chart */}
+      {/* Vùng biểu đồ */}
       <Card style={{ marginBottom: 20 }}>
         {loading ? (
           <Spin />
         ) : data.length === 0 ? (
           <Empty description="Không có dữ liệu" />
         ) : chartType === "bar" ? (
+          // Biểu đồ cột
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={data} barSize={40}>
               <defs>
+                {/* Gradient đổ màu cho cột */}
                 <linearGradient
                   id="ticketsGradient"
                   x1="0"
@@ -268,12 +283,15 @@ export default function TicketSalesPage() {
               <XAxis dataKey="date" />
               <YAxis />
               <Tooltip formatter={(val: number) => [`${val} vé`, "Số vé"]} />
+
+              {/* Đường trung bình */}
               <ReferenceLine
                 y={avgTickets}
                 stroke="#999"
                 strokeDasharray="4 4"
                 label="Trung bình"
               />
+
               <Bar
                 dataKey="ticketsSold"
                 fill="url(#ticketsGradient)"
@@ -282,13 +300,17 @@ export default function TicketSalesPage() {
             </BarChart>
           </ResponsiveContainer>
         ) : (
+          // Biểu đồ đường
           <ResponsiveContainer width="100%" height={320}>
             <LineChart data={data}>
               <defs>
+                {/* Gradient cho đường chính */}
                 <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#4d940e" stopOpacity={0.9} />
                   <stop offset="100%" stopColor="#4d940e" stopOpacity={0.1} />
                 </linearGradient>
+
+                {/* Gradient cho MA7 */}
                 <linearGradient id="maGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#1890ff" stopOpacity={0.8} />
                   <stop offset="100%" stopColor="#1890ff" stopOpacity={0.2} />
@@ -299,6 +321,8 @@ export default function TicketSalesPage() {
               <XAxis dataKey="date" />
               <YAxis />
               <Tooltip formatter={(val: number) => [`${val} vé`, "Số vé"]} />
+
+              {/* Đường trung bình */}
               <ReferenceLine
                 y={avgTickets}
                 stroke="#999"
@@ -316,7 +340,7 @@ export default function TicketSalesPage() {
                 activeDot={{ r: 5 }}
               />
 
-              {/* Đường MA7 nếu có */}
+              {/* Đường MA7 nếu bật */}
               {chartMA && (
                 <Line
                   type="monotone"
@@ -331,7 +355,7 @@ export default function TicketSalesPage() {
         )}
       </Card>
 
-      {/* Table */}
+      {/* Bảng dữ liệu chi tiết */}
       <Card>
         <Table<RowView>
           rowKey="key"

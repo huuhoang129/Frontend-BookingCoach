@@ -1,3 +1,4 @@
+//src/pages/clientPages/AuthManage/BookingHistoryPage.tsx
 import { useEffect, useState } from "react";
 import { Table, Tag } from "antd";
 import { EnvironmentOutlined } from "@ant-design/icons";
@@ -14,29 +15,26 @@ export default function TripHistoryPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    console.log("👤 [TripHistoryPage] currentUser:", currentUser);
-    console.log("💾 [TripHistoryPage] localStorage:", { ...localStorage });
-
+    // Kiểm tra user đang đăng nhập
     if (!currentUser?.id) {
       setBookings([]);
       return;
     }
 
+    // Lấy danh sách lịch sử đặt vé theo người dùng
     const fetchData = async () => {
       try {
         setLoading(true);
-        console.log(`📡 Fetching bookings for userId=${currentUser.id}`);
+
         const res = await axios.get(
           `http://localhost:8080/api/v1/bookings?userId=${currentUser.id}`
         );
+
         if (res.data.errCode === 0) {
-          console.log("API bookings:", res.data.data);
           setBookings(res.data.data || []);
-        } else {
-          console.warn("⚠️ API trả về errCode khác 0:", res.data);
         }
       } catch (e) {
-        console.error("❌ Lỗi lấy dữ liệu lịch sử đặt vé:", e);
+        console.error("Lỗi lấy dữ liệu lịch sử đặt vé:", e);
       } finally {
         setLoading(false);
       }
@@ -45,6 +43,7 @@ export default function TripHistoryPage() {
     fetchData();
   }, [currentUser]);
 
+  // Cấu hình các cột của bảng
   const columns = [
     {
       title: "Mã vé",
@@ -96,7 +95,6 @@ export default function TripHistoryPage() {
           .join(", ");
       },
     },
-
     {
       title: "Giá vé",
       dataIndex: "totalAmount",
@@ -116,19 +114,23 @@ export default function TripHistoryPage() {
         const payment = Array.isArray(record.payment)
           ? record.payment[0]
           : record.payment;
+
         const status = payment?.status;
+
         const color =
           status === "SUCCESS"
             ? "green"
             : status === "PENDING"
             ? "orange"
             : "red";
+
         const text =
           status === "SUCCESS"
             ? "ĐÃ THANH TOÁN"
             : status === "PENDING"
             ? "ĐANG CHỜ XÁC NHẬN"
             : "THẤT BẠI";
+
         return <Tag color={color}>{text}</Tag>;
       },
     },
@@ -136,13 +138,17 @@ export default function TripHistoryPage() {
 
   return (
     <div className="profile-container">
+      {/* Thanh sidebar tài khoản */}
       <ProfileSidebar
         activeTab="history"
         onChangeTab={(tab) => navigate(`/profile/${tab}`)}
       />
+
       <div className="main-content">
         <div className="trip-history">
           <h3>Lịch sử chuyến đi</h3>
+
+          {/* Bảng lịch sử đặt vé */}
           <Table
             loading={loading}
             columns={columns}

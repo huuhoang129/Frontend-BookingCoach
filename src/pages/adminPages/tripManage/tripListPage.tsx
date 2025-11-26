@@ -1,3 +1,4 @@
+//src/pages/adminPages/tripManage/tripListPage.tsx
 import {
   Table,
   Input,
@@ -63,9 +64,11 @@ export default function TripPage() {
   >(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
+  // Lọc danh sách chuyến xe
   const filteredData = trips
     .filter((t) => {
       let match = true;
+
       if (
         searchText &&
         !(
@@ -77,24 +80,28 @@ export default function TripPage() {
             .includes(searchText.toLowerCase()) ||
           t.vehicle?.name.toLowerCase().includes(searchText.toLowerCase())
         )
-      )
+      ) {
         match = false;
+      }
+
       if (filterVehicle && t.vehicle?.id !== filterVehicle) match = false;
+
       if (filterStatus && t.status !== filterStatus) match = false;
+
       if (filterDateRange && filterDateRange.length === 2) {
         const start = dayjs(t.startDate);
         const from = filterDateRange[0].startOf("day");
         const to = filterDateRange[1].endOf("day");
         if (!start.isBetween(from, to, "day", "[]")) match = false;
       }
+
       return match;
     })
-    // Sắp xếp từ mới nhất → cũ nhất
     .sort(
       (a, b) => dayjs(b.startDate).valueOf() - dayjs(a.startDate).valueOf()
     );
 
-  //  Cột bảng
+  // Cấu hình các cột của bảng
   const columns: ColumnsType<any> = [
     {
       title: "Tuyến",
@@ -105,7 +112,7 @@ export default function TripPage() {
             {r.route?.toLocation?.nameLocations}
           </span>
 
-          {/* Chưa phân công tài xế */}
+          {/* Cảnh báo chưa phân công tài xế */}
           {!r.hasDriver && (
             <Tooltip title="Chưa phân công tài xế">
               <ExclamationCircleOutlined
@@ -114,7 +121,7 @@ export default function TripPage() {
             </Tooltip>
           )}
 
-          {/* Đã có tài xế */}
+          {/* Hiển thị tài xế đã phân công */}
           {r.hasDriver && (
             <Tooltip title={`Tài xế: ${r.driverName}`}>
               <CheckCircleOutlined style={{ color: "#52c41a", fontSize: 14 }} />
@@ -123,7 +130,6 @@ export default function TripPage() {
         </Flex>
       ),
     },
-
     {
       title: "Xe",
       render: (_, r) =>
@@ -136,7 +142,6 @@ export default function TripPage() {
     },
     { title: "Giờ đi", dataIndex: "startTime" },
     { title: "Thời gian", dataIndex: "totalTime" },
-
     {
       title: "Trạng thái",
       align: "center",
@@ -162,7 +167,6 @@ export default function TripPage() {
         return <Tag color={color}>{label}</Tag>;
       },
     },
-
     {
       title: (
         <>
@@ -182,6 +186,7 @@ export default function TripPage() {
       key: "actions",
       render: (_, record) => (
         <Space>
+          {/* Sửa chuyến xe */}
           <Tooltip title="Sửa">
             <Button
               shape="circle"
@@ -207,6 +212,7 @@ export default function TripPage() {
             />
           </Tooltip>
 
+          {/* Xóa chuyến xe */}
           <Popconfirm
             title="Xác nhận xoá"
             description={`Bạn có chắc muốn xoá chuyến từ "${record.route?.fromLocation?.nameLocations}" không?`}
@@ -229,16 +235,16 @@ export default function TripPage() {
     },
   ];
 
+  // Checkbox
   const rowSelection = {
     selectedRowKeys,
     onChange: (keys: React.Key[]) => setSelectedRowKeys(keys),
   };
 
-  // =================== RENDER ===================
+  // Giao diện trang quản lý chuyến xe
   return (
     <div style={{ padding: 24, background: "#f4f6f9", minHeight: "100vh" }}>
       {contextHolder}
-
       <Breadcrumb style={{ marginBottom: 16 }}>
         <Breadcrumb.Item>
           <HomeOutlined /> Dashboard
@@ -248,17 +254,19 @@ export default function TripPage() {
         </Breadcrumb.Item>
       </Breadcrumb>
 
+      {/* Tiêu đề trang */}
       <Flex justify="space-between" align="center" style={{ marginBottom: 20 }}>
         <Title level={3} style={{ fontWeight: 700, margin: 0 }}>
           Quản lý chuyến xe
         </Title>
       </Flex>
 
+      {/* Bộ lọc và nút thao tác */}
       <Card style={{ marginBottom: 20 }}>
         <Flex justify="space-between" align="center" wrap="wrap" gap={16}>
           <Flex gap={16} wrap="wrap">
             <Input
-              placeholder="🔍 Tìm tuyến, xe..."
+              placeholder="Tìm tuyến, xe..."
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -299,6 +307,7 @@ export default function TripPage() {
 
           <Flex gap={12} align="center">
             {selectedRowKeys.length > 0 ? (
+              // Xoá nhiều chuyến đã chọn
               <Popconfirm
                 title="Xác nhận xoá"
                 description="Bạn có chắc muốn xoá các chuyến đã chọn không?"
@@ -324,6 +333,7 @@ export default function TripPage() {
                 </Button>
               </Popconfirm>
             ) : (
+              // Thêm chuyến mới
               <Button
                 icon={<PlusOutlined />}
                 style={{
@@ -349,6 +359,7 @@ export default function TripPage() {
         </Flex>
       </Card>
 
+      {/* Bảng danh sách chuyến xe */}
       <Card>
         <Table
           rowKey="id"
@@ -360,6 +371,7 @@ export default function TripPage() {
         />
       </Card>
 
+      {/* Modal thêm/sửa chuyến xe */}
       <TripModal
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}

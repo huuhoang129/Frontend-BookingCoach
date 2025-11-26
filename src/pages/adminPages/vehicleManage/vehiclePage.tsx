@@ -50,12 +50,12 @@ export default function VehiclePage() {
     contextHolder,
   } = useVehicles();
 
-  // state
+  // State
   const [searchText, setSearchText] = useState("");
   const [filterType, setFilterType] = useState<string | null>(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
-  // lọc dữ liệu
+  // Lọc dữ liệu
   const filteredData = vehicles.filter((v) => {
     let match = true;
     if (
@@ -84,7 +84,7 @@ export default function VehiclePage() {
     LIMOUSINE: "🚐",
   };
 
-  // cấu hình bảng
+  // Cấu hình bảng
   const columns: ColumnsType<Vehicle> = [
     {
       title: "Tên xe",
@@ -164,7 +164,7 @@ export default function VehiclePage() {
     },
   ];
 
-  // checkbox
+  // Checkbox
   const rowSelection = {
     selectedRowKeys,
     onChange: (keys: React.Key[]) => setSelectedRowKeys(keys),
@@ -264,7 +264,7 @@ export default function VehiclePage() {
         </Flex>
       </Card>
 
-      {/* bảng */}
+      {/* Bảng */}
       <Card>
         <Table
           rowKey="id"

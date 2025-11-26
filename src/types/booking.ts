@@ -53,7 +53,7 @@ export interface Trip {
   startDate: string;
   startTime: string;
   totalTime?: string;
-  status: "OPEN" | "FULL" | "CANCELLED";
+  status: "OPEN" | "FULL" | "CANCELLED" | string;
   route: Route;
   vehicle: Vehicle;
   price?: TripPrice;

@@ -49,14 +49,17 @@ export default function BannerManagePage() {
     contextHolder,
   } = useBanners();
 
+  // Trạng thái tìm kiếm, chọn nhiều và hiển thị chi tiết
   const [searchText, setSearchText] = useState("");
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [isViewOpen, setIsViewOpen] = useState(false);
 
+  // Lọc danh sách banner
   const filteredData = banners.filter((b) =>
     b.title?.toLowerCase().includes(searchText.toLowerCase())
   );
 
+  // Cấu hình cột bảng banner
   const columns: ColumnsType<any> = [
     {
       title: "Ảnh banner",
@@ -141,6 +144,7 @@ export default function BannerManagePage() {
     },
   ];
 
+  // Checkbox
   const rowSelection = {
     selectedRowKeys,
     onChange: (keys: React.Key[]) => setSelectedRowKeys(keys),
@@ -150,6 +154,7 @@ export default function BannerManagePage() {
     <div style={{ padding: 24, background: "#f4f6f9", minHeight: "100vh" }}>
       {contextHolder}
 
+      {/* Điều hướng breadcrumb */}
       <Breadcrumb style={{ marginBottom: 16 }}>
         <Breadcrumb.Item>
           <HomeOutlined /> Dashboard
@@ -159,17 +164,19 @@ export default function BannerManagePage() {
         </Breadcrumb.Item>
       </Breadcrumb>
 
+      {/* Tiêu đề trang */}
       <Flex justify="space-between" align="center" style={{ marginBottom: 20 }}>
         <Title level={3} style={{ fontWeight: 700, margin: 0 }}>
           Quản lý Banner
         </Title>
       </Flex>
 
+      {/* Bộ lọc và thao tác thêm/xoá */}
       <Card style={{ marginBottom: 20 }}>
         <Flex justify="space-between" align="center" wrap="wrap" gap={16}>
           <Flex gap={16} wrap="wrap">
             <Input
-              placeholder="🔍 Tìm theo tiêu đề..."
+              placeholder="Tìm theo tiêu đề..."
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -180,7 +187,7 @@ export default function BannerManagePage() {
           <Flex gap={12} align="center">
             {selectedRowKeys.length > 0 ? (
               <Popconfirm
-                title="Xác nhận xoá banner đã chọn?"
+                title="Xác nhận xoá các banner đã chọn?"
                 okText="Xoá"
                 cancelText="Hủy"
                 okButtonProps={{ danger: true }}
@@ -216,6 +223,7 @@ export default function BannerManagePage() {
         </Flex>
       </Card>
 
+      {/* Bảng danh sách banner */}
       <Card style={{ borderRadius: 12 }}>
         <Table
           rowKey="id"
@@ -227,7 +235,7 @@ export default function BannerManagePage() {
         />
       </Card>
 
-      {/* modal thêm sửa*/}
+      {/* Modal thêm/sửa banner */}
       <BannerModal
         openAdd={isAddModal}
         setOpenAdd={setIsAddModal}
@@ -240,7 +248,7 @@ export default function BannerManagePage() {
         editingBanner={bannerData}
       />
 
-      {/* Modal xem chi tiết */}
+      {/* Modal xem chi tiết banner */}
       <Modal
         title="Chi tiết Banner"
         open={isViewOpen}

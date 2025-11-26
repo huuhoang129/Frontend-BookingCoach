@@ -1,3 +1,4 @@
+//src/pages/adminPages/vehicleManage/driverSchedulePage.tsx
 import {
   Table,
   Input,
@@ -51,13 +52,15 @@ export default function DriverSchedulePage() {
   const [searchText, setSearchText] = useState("");
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
-  // Filter
+  // Bộ lọc tìm kiếm danh sách lịch làm việc
   const filteredData = schedules.filter((s) => {
     if (!searchText) return true;
     const lower = searchText.toLowerCase();
+
     const driverName =
       s.driver?.fullName ||
       `${s.driver?.firstName || ""} ${s.driver?.lastName || ""}`;
+
     return (
       driverName.toLowerCase().includes(lower) ||
       s.trip?.route?.nameRoute?.toLowerCase().includes(lower) ||
@@ -65,6 +68,7 @@ export default function DriverSchedulePage() {
     );
   });
 
+  // Cấu hình cột của bảng danh sách
   const columns: ColumnsType<any> = [
     {
       title: "Tài xế",
@@ -127,6 +131,7 @@ export default function DriverSchedulePage() {
       width: 120,
       render: (_, r) => (
         <Space>
+          {/* Mở modal sửa lịch làm việc */}
           <Tooltip title="Sửa">
             <Button
               shape="circle"
@@ -143,6 +148,8 @@ export default function DriverSchedulePage() {
               }}
             />
           </Tooltip>
+
+          {/* Xác nhận xoá lịch */}
           <Popconfirm
             title="Xác nhận xoá"
             description="Bạn có chắc muốn xoá lịch này không?"
@@ -160,7 +167,7 @@ export default function DriverSchedulePage() {
     },
   ];
 
-  // Checkbox chọn nhiều
+  // Checkbox chọn nhiều dòng
   const rowSelection = {
     selectedRowKeys,
     onChange: (keys: React.Key[]) => setSelectedRowKeys(keys),
@@ -170,7 +177,7 @@ export default function DriverSchedulePage() {
     <div style={{ padding: 24, background: "#f4f6f9", minHeight: "100vh" }}>
       {contextHolder}
 
-      {/* breadcrumb */}
+      {/* Thanh điều hướng vị trí trang */}
       <Breadcrumb style={{ marginBottom: 16 }}>
         <Breadcrumb.Item>
           <HomeOutlined /> Dashboard
@@ -180,16 +187,18 @@ export default function DriverSchedulePage() {
         </Breadcrumb.Item>
       </Breadcrumb>
 
+      {/* Tiêu đề trang */}
       <Flex justify="space-between" align="center" style={{ marginBottom: 20 }}>
         <Title level={3} style={{ fontWeight: 700, margin: 0 }}>
           Quản lý lịch làm việc tài xế
         </Title>
       </Flex>
 
+      {/* Khu vực tìm kiếm và hành động */}
       <Card style={{ marginBottom: 20 }}>
         <Flex justify="space-between" align="center" wrap="wrap" gap={16}>
           <Input
-            placeholder="🔍 Tìm theo tài xế, tuyến, biển số..."
+            placeholder="Tìm theo tài xế, tuyến, biển số..."
             prefix={<SearchOutlined />}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
@@ -198,6 +207,7 @@ export default function DriverSchedulePage() {
 
           <Flex gap={12} align="center">
             {selectedRowKeys.length > 0 ? (
+              // Xoá nhiều lịch cùng lúc
               <Popconfirm
                 title="Xác nhận xoá"
                 description="Bạn có chắc muốn xoá các lịch đã chọn không?"
@@ -223,6 +233,7 @@ export default function DriverSchedulePage() {
                 </Button>
               </Popconfirm>
             ) : (
+              // Mở modal thêm lịch
               <Button
                 icon={<PlusOutlined />}
                 style={{
@@ -244,6 +255,7 @@ export default function DriverSchedulePage() {
         </Flex>
       </Card>
 
+      {/* Bảng danh sách lịch làm việc */}
       <Card>
         <Table
           rowKey="id"
@@ -255,6 +267,7 @@ export default function DriverSchedulePage() {
         />
       </Card>
 
+      {/* Modal thêm / sửa lịch tài xế */}
       <DriverScheduleModal
         openAdd={isAddModal}
         setOpenAdd={setIsAddModal}

@@ -31,13 +31,11 @@ const { Title } = Typography;
 const { Option } = Select;
 
 export default function RoutePage() {
-  // hooks
+  // Hooks
   const rm = useRouteManage();
-
-  // state checkbox
+  // State checkbox
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-
-  //  cột bảng
+  //  Cột bảng
   const columns: ColumnsType<Route & { index: number }> = [
     {
       title: "Điểm đi",
@@ -164,8 +162,7 @@ export default function RoutePage() {
       ),
     },
   ];
-
-  // checkbox
+  // Checkbox
   const rowSelection = {
     selectedRowKeys,
     onChange: (keys: React.Key[]) => setSelectedRowKeys(keys),
@@ -280,7 +277,7 @@ export default function RoutePage() {
         />
       </Card>
 
-      {/* modal thêm sửa*/}
+      {/* Modal thêm sửa*/}
       <RouteModal
         openAdd={rm.isAddModal}
         setOpenAdd={rm.setIsAddModal}

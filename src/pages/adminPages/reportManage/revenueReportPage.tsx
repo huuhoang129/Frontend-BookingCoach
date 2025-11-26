@@ -1,3 +1,4 @@
+//src/pages/adminPages/reportManage/revenueReportPage.tsx
 import {
   Card,
   Table,
@@ -26,7 +27,7 @@ import {
 } from "recharts";
 import {
   ReloadOutlined,
-  FileExcelOutlined,
+  // FileExcelOutlined,
   CalendarOutlined,
   BarChartOutlined,
   AreaChartOutlined,
@@ -39,10 +40,12 @@ import { useRevenueReport } from "../../../hooks/reportHooks/useRevenueReport";
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
 
+// Format tiền tệ
 const fmtMoney = (v: number) =>
   new Intl.NumberFormat("vi-VN").format(Math.round(v)) + " đ";
 
 export default function RevenueReportPage() {
+  // Lấy dữ liệu, bộ lọc và thông tin KPI từ hook
   const {
     loading,
     groupBy,
@@ -62,23 +65,29 @@ export default function RevenueReportPage() {
     setPreset,
   } = useRevenueReport();
 
-  const handleExportCSV = () => {
-    const headers = ["label", "totalRevenue"];
-    const rows = data.map((d) => [d.label, d.totalRevenue]);
-    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    const suffix =
-      groupBy === "day" ? "ngay" : groupBy === "month" ? "thang" : "nam";
-    a.download = `revenue_${suffix}_${range[0].format(
-      "YYYYMMDD"
-    )}_${range[1].format("YYYYMMDD")}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  // Xuất báo cáo dạng CSV
+  // const handleExportCSV = () => {
+  //   const headers = ["label", "totalRevenue"];
+  //   const rows = data.map((d) => [d.label, d.totalRevenue]);
+  //   const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
 
+  //   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  //   const url = URL.createObjectURL(blob);
+
+  //   const a = document.createElement("a");
+  //   a.href = url;
+
+  //   const suffix =
+  //     groupBy === "day" ? "ngay" : groupBy === "month" ? "thang" : "nam";
+  //   a.download = `revenue_${suffix}_${range[0].format(
+  //     "YYYYMMDD"
+  //   )}_${range[1].format("YYYYMMDD")}.csv`;
+
+  //   a.click();
+  //   URL.revokeObjectURL(url);
+  // };
+
+  // Cấu hình cột bảng dữ liệu
   const columns = [
     {
       title: groupBy === "day" ? "Ngày" : groupBy === "month" ? "Tháng" : "Năm",
@@ -126,12 +135,13 @@ export default function RevenueReportPage() {
 
   return (
     <div style={{ padding: 24, background: "#f5f7fa", minHeight: "100vh" }}>
+      {/* Tiêu đề trang */}
       <Title level={3} style={{ marginBottom: 16 }}>
         <BarChartOutlined style={{ color: "#4d940e", marginRight: 8 }} />
         Báo cáo doanh thu
       </Title>
 
-      {/* Bộ lọc */}
+      {/* Bộ lọc báo cáo */}
       <Card
         style={{
           marginBottom: 16,
@@ -145,7 +155,7 @@ export default function RevenueReportPage() {
           size="middle"
           style={{ width: "100%", justifyContent: "space-between" }}
         >
-          {/* Bộ chọn thời gian */}
+          {/* Chọn khoảng thời gian */}
           <Space>
             <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <CalendarOutlined style={{ color: "#4d940e" }} />
@@ -160,7 +170,7 @@ export default function RevenueReportPage() {
             />
           </Space>
 
-          {/* Nhóm theo */}
+          {/* Chọn phương thức nhóm dữ liệu */}
           <Space>
             <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <BarChartOutlined style={{ color: "#722ed1" }} />
@@ -178,7 +188,7 @@ export default function RevenueReportPage() {
             />
           </Space>
 
-          {/* Preset buttons */}
+          {/* Các preset thời gian nhanh */}
           <Space>
             <Button onClick={() => setPreset("7d")} icon={<CalendarOutlined />}>
               7 ngày
@@ -206,11 +216,13 @@ export default function RevenueReportPage() {
             </Button>
           </Space>
 
-          {/* Action buttons */}
+          {/* Các hành động thêm */}
           <Space>
             <Button onClick={fetchData} icon={<ReloadOutlined />}>
               Tải lại
             </Button>
+
+            {/* Nút bật/tắt đường MA7 */}
             {groupBy === "day" && (
               <Button
                 type={chartMA ? "primary" : "default"}
@@ -228,7 +240,7 @@ export default function RevenueReportPage() {
         </Space>
       </Card>
 
-      {/* KPIs */}
+      {/* KPIs tổng quan */}
       <Row gutter={16} style={{ marginBottom: 16 }}>
         {/* Tổng doanh thu */}
         <Col xs={24} sm={12} md={6}>
@@ -250,7 +262,7 @@ export default function RevenueReportPage() {
           </Card>
         </Col>
 
-        {/* Số ngày / tháng / năm */}
+        {/* Số kỳ thống kê */}
         <Col xs={24} sm={12} md={6}>
           <Card>
             <div
@@ -276,7 +288,7 @@ export default function RevenueReportPage() {
           </Card>
         </Col>
 
-        {/* Doanh thu TB */}
+        {/* Doanh thu trung bình */}
         <Col xs={24} sm={12} md={6}>
           <Card>
             <div
@@ -303,7 +315,7 @@ export default function RevenueReportPage() {
           </Card>
         </Col>
 
-        {/* Ngày/Tháng cao nhất */}
+        {/* Kỳ có doanh thu cao nhất */}
         <Col xs={24} sm={12} md={6}>
           <Card>
             <div
@@ -317,6 +329,8 @@ export default function RevenueReportPage() {
               <RiseOutlined style={{ color: "#fa8c16" }} />
               <span style={{ fontWeight: 500 }}>Ngày/Tháng cao nhất</span>
             </div>
+
+            {/* Hiển thị giá trị cao nhất */}
             {maxItem ? (
               <div
                 style={{
@@ -341,7 +355,7 @@ export default function RevenueReportPage() {
         </Col>
       </Row>
 
-      {/* Chart */}
+      {/* Biểu đồ doanh thu */}
       <Card style={{ marginBottom: 16 }}>
         {loading ? (
           <Spin />
@@ -353,6 +367,7 @@ export default function RevenueReportPage() {
               data={dataWithMA}
               margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
             >
+              {/* Hiệu ứng gradient cho cột và đường */}
               <defs>
                 <linearGradient
                   id="revenueGradient"
@@ -364,6 +379,7 @@ export default function RevenueReportPage() {
                   <stop offset="0%" stopColor="#4d940e" stopOpacity={0.9} />
                   <stop offset="100%" stopColor="#4d940e" stopOpacity={0.2} />
                 </linearGradient>
+
                 <linearGradient id="maGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#52c41a" stopOpacity={0.9} />
                   <stop offset="100%" stopColor="#52c41a" stopOpacity={0.2} />
@@ -373,6 +389,8 @@ export default function RevenueReportPage() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="label" />
               <YAxis />
+
+              {/* Tooltip custom giá trị */}
               <Tooltip
                 formatter={(value: number, name: string) =>
                   name.toLowerCase().includes("ma")
@@ -380,7 +398,10 @@ export default function RevenueReportPage() {
                     : [fmtMoney(Number(value)), "Doanh thu"]
                 }
               />
+
               <Legend />
+
+              {/* Đường trung bình */}
               <ReferenceLine
                 y={avgPerPeriod}
                 stroke="#bfbfbf"
@@ -393,7 +414,7 @@ export default function RevenueReportPage() {
                 }}
               />
 
-              {/* Cột doanh thu chính */}
+              {/* Cột doanh thu */}
               <Bar
                 dataKey="totalRevenue"
                 name="Doanh thu"
@@ -402,7 +423,7 @@ export default function RevenueReportPage() {
                 barSize={40}
               />
 
-              {/* Nếu có MA7 thì thêm đường biểu diễn xu hướng */}
+              {/* Đường MA7 nếu bật */}
               {chartMA && groupBy === "day" && (
                 <Line
                   type="monotone"
@@ -418,7 +439,7 @@ export default function RevenueReportPage() {
         )}
       </Card>
 
-      {/* Table phân tích */}
+      {/* Bảng phân tích */}
       <Card>
         <Table
           rowKey="key"

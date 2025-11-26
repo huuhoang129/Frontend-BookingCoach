@@ -1,3 +1,4 @@
+//src/containers/ModalsCollect/NewsModals.tsx
 import { CustomModal } from "../../components/ui/Modal/Modal";
 import { FormInput } from "../../components/ui/Form/FormInput";
 import { FormSelect } from "../../components/ui/Form/FormSelect";

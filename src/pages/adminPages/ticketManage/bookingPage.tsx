@@ -41,7 +41,7 @@ export default function BookingPage() {
     handleStatusChange,
   } = useBookingManage();
 
-  // 🟢 local state (giống VehiclePage)
+  // State bộ lọc
   const [searchText, setSearchText] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -50,11 +50,12 @@ export default function BookingPage() {
     null
   );
 
-  // 🔎 Lọc dữ liệu
+  // Lọc danh sách đặt vé theo bộ lọc
   const filteredBookings = useMemo(() => {
     return filteredData
       .filter((b: Booking) => {
         const matchStatus = !selectedStatus || b.status === selectedStatus;
+
         const matchDate =
           !selectedDate ||
           (b.trip &&
@@ -69,13 +70,13 @@ export default function BookingPage() {
               c.fullName.toLowerCase().includes(keyword)
             ));
 
-        // 🛣️ Lọc theo tuyến
+        // Lọc theo tuyến
         const routeName = b.trip
           ? `${b.trip.route?.fromLocation?.nameLocations} → ${b.trip.route?.toLocation?.nameLocations}`
           : "";
         const matchRoute = !selectedRoute || routeName === selectedRoute;
 
-        // 💰 Lọc theo khoảng tiền
+        // Lọc theo khoảng tiền
         let matchPrice = true;
         if (selectedPriceRange) {
           const [min, max] = selectedPriceRange.split("-").map(Number);
@@ -97,7 +98,7 @@ export default function BookingPage() {
     selectedPriceRange,
   ]);
 
-  // Lấy danh sách tuyến duy nhất
+  // Lấy danh sách tuyến không trùng lặp
   const uniqueRoutes = Array.from(
     new Set(
       filteredData
@@ -111,7 +112,7 @@ export default function BookingPage() {
     )
   );
 
-  // 🧱 Cấu hình bảng
+  // Cấu hình cột bảng
   const columns: ColumnsType<Booking> = [
     { title: "Mã đặt vé", dataIndex: "bookingCode", key: "bookingCode" },
     {
@@ -176,6 +177,7 @@ export default function BookingPage() {
               shape="circle"
               icon={<EyeOutlined />}
               onClick={() => {
+                // Mở modal chi tiết đặt vé
                 setSelectedBooking(r);
                 setIsModalOpen(true);
               }}
@@ -199,11 +201,11 @@ export default function BookingPage() {
       <Breadcrumb style={{ marginBottom: 16 }}>
         <Breadcrumb.Item>
           <HomeOutlined />
-          <span>Dashboard</span>
+          <span>Trang chủ</span>
         </Breadcrumb.Item>
         <Breadcrumb.Item>
           <FileTextOutlined />
-          <span>Bookings</span>
+          <span>Đặt vé</span>
         </Breadcrumb.Item>
       </Breadcrumb>
 
@@ -211,12 +213,12 @@ export default function BookingPage() {
         Quản lý đặt vé
       </Title>
 
-      {/* Bộ lọc */}
+      {/* Khu vực bộ lọc danh sách đặt vé */}
       <Card style={{ marginBottom: 20 }}>
         <Flex justify="space-between" align="center" wrap="wrap" gap={16}>
           <Flex gap={16} wrap="wrap">
             <Input
-              placeholder="🔍 Tìm theo mã hoặc tên khách hàng..."
+              placeholder="Tìm theo mã hoặc tên khách hàng..."
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -276,6 +278,7 @@ export default function BookingPage() {
         </Flex>
       </Card>
 
+      {/* Bảng danh sách đặt vé */}
       <Card>
         <Table
           rowKey="id"
@@ -286,6 +289,7 @@ export default function BookingPage() {
         />
       </Card>
 
+      {/* Modal chi tiết đặt vé */}
       <BookingModal
         open={isModalOpen}
         booking={selectedBooking}

@@ -1,9 +1,6 @@
 // src/utils/file.ts
-/**
- * Chuyển File sang base64
- * @param file - Đối tượng File từ input
- * @returns Promise<string> (base64)
- */
+
+// Đọc file và trả về chuỗi base64
 export const toBase64 = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();

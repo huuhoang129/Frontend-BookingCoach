@@ -1,14 +1,10 @@
+//src/components/Seat/FortyFiveSeats.tsx
 import { useState, useRef } from "react";
 import "../styles/Seats/FortyFiveSeats.scss";
-
-// Notification custom
 import { AppNotification } from "../../components/Notification/AppNotification";
-
-// icons
 import SeatAvailable from "../../assets/icon/seat-1.svg";
 import SeatSelected from "../../assets/icon/seat-2.svg";
 import SeatSold from "../../assets/icon/seat-3.svg";
-
 import type { Seat, Trip } from "../../types/booking";
 import { formatDuration, formatStartTime, calcEndTime } from "../../utils/time";
 import { getSeatNumber } from "../../utils/seat";
@@ -27,37 +23,25 @@ export default function FortyFiveSeats({
   onClose,
 }: FortyFiveSeatsProps) {
   const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
-
-  // ============================
-  // 🔔 Notification
-  // ============================
   const { notifySuccess, notifyInfo, contextHolder } = AppNotification();
 
-  // ============================
-  // 🔥 FIX DOUBLE NOTIFICATION
-  // ============================
+  // Ngăn hiện thông báo trùng khi click nhanh
   const notifyLock = useRef(false);
-
   const safeNotify = (callback: () => void) => {
     if (notifyLock.current) return;
     notifyLock.current = true;
-
     callback();
 
-    // khóa 100ms — strict mode render double cũng không bị notify 2 lần
     setTimeout(() => {
       notifyLock.current = false;
     }, 100);
   };
-  // ============================
 
-  // Toggle chọn ghế
+  // Chọn hoặc huỷ chọn ghế
   const toggleSeat = (seat: Seat) => {
     if (seat.status === "SOLD" || seat.status === "HOLD") return;
-
     setSelectedSeats((prev) => {
       const exists = prev.some((s) => s.id === seat.id);
-
       if (exists) {
         safeNotify(() =>
           notifyInfo(
@@ -65,24 +49,24 @@ export default function FortyFiveSeats({
             `Đã bỏ chọn ghế ${getSeatNumber(seat.name)}`
           )
         );
+
         return prev.filter((s) => s.id !== seat.id);
-      } else {
-        safeNotify(() =>
-          notifySuccess("Chọn ghế", `Đã chọn ghế ${getSeatNumber(seat.name)}`)
-        );
-        return [...prev, seat];
       }
+      safeNotify(() =>
+        notifySuccess("Chọn ghế", `Đã chọn ghế ${getSeatNumber(seat.name)}`)
+      );
+
+      return [...prev, seat];
     });
   };
 
-  // Icon ghế
+  // Lấy icon theo trạng thái ghế
   const getIcon = (seat: Seat) => {
     if (selectedSeats.some((s) => s.id === seat.id)) return SeatSelected;
     if (seat.status === "SOLD" || seat.status === "HOLD") return SeatSold;
     return SeatAvailable;
   };
 
-  // Class CSS ghế
   const getSeatClass = (seat: Seat) => {
     if (selectedSeats.some((s) => s.id === seat.id))
       return "fortyfive-seat-selected";
@@ -90,18 +74,17 @@ export default function FortyFiveSeats({
       return "fortyfive-seat-sold";
     return "fortyfive-seat-available";
   };
-
-  // 💰 Giá vé
+  // Tính giá vé
   const unitPrice = trip?.price?.priceTrip ? Number(trip.price.priceTrip) : 0;
   const total = selectedSeats.length * unitPrice;
 
-  // Render thân xe (40 ghế đầu)
+  // Render 40 ghế đầu
   const renderBody = () => {
     const rows = Array.from({ length: 10 }, (_, i) => [
-      seats[i * 2],
-      seats[i * 2 + 1],
-      seats[i * 2 + 20],
-      seats[i * 2 + 21],
+      seats[i * 2], // trái 1
+      seats[i * 2 + 1], // trái 2
+      seats[i * 2 + 20], // phải 1
+      seats[i * 2 + 21], // phải 2
     ]);
 
     return (
@@ -113,6 +96,7 @@ export default function FortyFiveSeats({
                 index === 2 ? (
                   <>
                     <td className="aisle" key={`aisle-${idx}`}></td>
+                    {/* Ghế bên phải */}
                     {seat && (
                       <td
                         key={seat.id}
@@ -125,6 +109,7 @@ export default function FortyFiveSeats({
                     )}
                   </>
                 ) : seat ? (
+                  // Ghế bên trái
                   <td
                     key={seat.id}
                     className={`fortyfive-seat ${getSeatClass(seat)}`}
@@ -144,9 +129,10 @@ export default function FortyFiveSeats({
     );
   };
 
-  // Render hàng cuối (41–45)
+  // Render 5 ghế cuối
   const renderBack = () => {
     const backSeats = seats.slice(40, 45);
+
     return (
       <table className="fortyfive-seat-table back-row">
         <tbody>
@@ -169,11 +155,8 @@ export default function FortyFiveSeats({
 
   return (
     <div className="fortyfive-seat-layout">
-      {/* 🔔 MUST HAVE — Notification holder */}
       {contextHolder}
-
       <div className="fortyfive-seat-container">
-        {/* Header */}
         <div className="fortyfive-seat-header">
           <div className="fortyfive-seat-title">
             <h2>{trip?.vehicle?.name || "Xe Hương Dương"}</h2>
@@ -198,26 +181,32 @@ export default function FortyFiveSeats({
             </span>
           </div>
 
-          {/* 💸 Box giá ghế */}
+          {/* Hiển thị giá*/}
           {selectedSeats.length > 0 && (
             <div className="fortyfive-seat-price-box">
               <h4>Giá ghế:</h4>
+
               <div className="price-row">
                 <span>Ghế:</span>
                 <span>
                   {selectedSeats.map((s) => getSeatNumber(s.name)).join(", ")}
                 </span>
               </div>
+
               <hr className="divider" />
+
               <div className="price-row">
                 <span>Đơn giá:</span>
                 <span>{unitPrice.toLocaleString("vi-VN")} đ</span>
               </div>
+
               <div className="price-row">
                 <span>Tổng tiền:</span>
                 <span>{total.toLocaleString("vi-VN")} đ</span>
               </div>
+
               <hr className="divider" />
+
               <div className="price-row total">
                 <span>Thanh toán:</span>
                 <span>{total.toLocaleString("vi-VN")} đ</span>
@@ -236,13 +225,13 @@ export default function FortyFiveSeats({
           </div>
         </div>
 
-        {/* Body */}
+        {/* Vùng ghế */}
         <div className="fortyfive-seat-wrapper">
           <h2 className="fortyfive-seat-title">
             {trip?.vehicle?.name || "Hương Dương"}
           </h2>
 
-          {/* legend */}
+          {/* Chú thích trạng thái ghế */}
           <div className="fortyfive-seat-legend">
             <div className="legend-item">
               <img src={SeatAvailable} alt="available" /> Ghế trống
@@ -260,7 +249,6 @@ export default function FortyFiveSeats({
         </div>
       </div>
 
-      {/* Button */}
       <button
         className="fortyfive-seat-btn"
         disabled={!trip || selectedSeats.length === 0}

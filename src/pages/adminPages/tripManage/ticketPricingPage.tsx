@@ -50,13 +50,13 @@ export default function TripPricePage() {
     contextHolder,
   } = useTripPrices();
 
-  // state filter, search
+  // State filter, search
   const [searchText, setSearchText] = useState("");
   const [filterSeatType, setFilterSeatType] = useState<string | null>(null);
   const [filterTypeTrip, setFilterTypeTrip] = useState<string | null>(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]); // state chọn nhiều dòng
 
-  // lọc dữ liệu hiển thị
+  // Lọc dữ liệu hiển thị
   const filteredData = tripPrices.filter((p) => {
     let match = true;
 
@@ -79,7 +79,7 @@ export default function TripPricePage() {
     return match;
   });
 
-  // label và màu hiển thị
+  // Label và màu hiển thị
   const seatTypeColors: Record<string, string> = {
     NORMAL: "blue",
     SLEEPER: "orange",
@@ -188,7 +188,7 @@ export default function TripPricePage() {
     },
   ];
 
-  // checkbox chọn dòng
+  // Checkbox chọn dòng
   const rowSelection = {
     selectedRowKeys,
     onChange: (newSelectedKeys: React.Key[]) => {
@@ -311,7 +311,7 @@ export default function TripPricePage() {
         />
       </Card>
 
-      {/* modal thêmsửa */}
+      {/* Modal thêm sửa */}
       <TripPriceModal
         openAdd={isAddModal}
         setOpenAdd={setIsAddModal}

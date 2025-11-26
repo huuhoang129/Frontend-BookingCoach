@@ -1,3 +1,4 @@
+//src/routes/AdminRoute.tsx
 import AdminTemplate from "../templates/adminTemplates";
 import ProtectedRoute from "./ProtectedRoute";
 

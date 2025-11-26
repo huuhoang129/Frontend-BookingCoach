@@ -1,3 +1,4 @@
+//src/pages/driverPages/driverDashboardPage.tsx
 import { useEffect, useState } from "react";
 import {
   Card,
@@ -30,7 +31,7 @@ interface DriverSchedule {
     id: number;
     startDate: string;
     startTime: string;
-    totalTime: string; // có totalTime thay cho endTime
+    totalTime: string;
     route?: {
       fromLocation?: { nameLocations: string };
       toLocation?: { nameLocations: string };
@@ -44,9 +45,11 @@ export default function DriverDashboardPage() {
   const { currentUser } = useAuth();
   const [schedules, setSchedules] = useState<DriverSchedule[]>([]);
   const [loading, setLoading] = useState(true);
+
   const now = dayjs();
   const today = now.format("YYYY-MM-DD");
 
+  // Lấy danh sách chuyến của tài xế
   const fetchDriverSchedules = async () => {
     try {
       setLoading(true);
@@ -60,7 +63,7 @@ export default function DriverDashboardPage() {
         setSchedules(res.data.data || []);
       }
     } catch (err) {
-      console.error("❌ Fetch driver schedules error:", err);
+      console.error("Lỗi lấy danh sách chuyến của tài xế:", err);
     } finally {
       setLoading(false);
     }
@@ -70,18 +73,18 @@ export default function DriverDashboardPage() {
     fetchDriverSchedules();
   }, [currentUser]);
 
-  // ========================= NHÓM THEO NGÀY =========================
+  // Nhóm chuyến xe theo ngày
   const groupedTrips: Record<string, DriverSchedule[]> = {};
-
   schedules.forEach((s) => {
     const tripDate = s.trip?.startDate;
     if (!tripDate) return;
+
     const dateKey = dayjs(tripDate).format("YYYY-MM-DD");
     if (!groupedTrips[dateKey]) groupedTrips[dateKey] = [];
     groupedTrips[dateKey].push(s);
   });
 
-  // Tách nhóm ngày
+  // Tách ngày
   const futureDates: string[] = [];
   const todayDates: string[] = [];
   const pastDates: string[] = [];
@@ -92,12 +95,13 @@ export default function DriverDashboardPage() {
     else pastDates.push(date);
   });
 
-  // Thứ tự hiển thị
+  // Sắp xếp thứ tự hiển thị
   futureDates.sort((a, b) => dayjs(a).valueOf() - dayjs(b).valueOf());
   pastDates.sort((a, b) => dayjs(b).valueOf() - dayjs(a).valueOf());
+
   const sortedDates = [...futureDates, ...todayDates, ...pastDates];
 
-  // Thống kê hôm nay
+  // Thống kê nhanh hôm nay
   const todayTrips = groupedTrips[today] || [];
   const assignedVehicle =
     todayTrips.length > 0 ? todayTrips[0].trip?.vehicle?.licensePlate : "—";
@@ -111,7 +115,7 @@ export default function DriverDashboardPage() {
       ? "Sẵn sàng"
       : "Chờ khởi hành";
 
-  // ========================= JSX =========================
+  // Giao diện
   return (
     <div className="driver-dashboard">
       {loading ? (
@@ -120,7 +124,7 @@ export default function DriverDashboardPage() {
         </div>
       ) : (
         <>
-          {/* ===== Thống kê nhanh ===== */}
+          {/* Thống kê nhanh */}
           <Row gutter={[16, 16]}>
             <Col xs={24} sm={12} md={8}>
               <Card>
@@ -131,6 +135,7 @@ export default function DriverDashboardPage() {
                 />
               </Card>
             </Col>
+
             <Col xs={24} sm={12} md={8}>
               <Card>
                 <Statistic
@@ -140,6 +145,7 @@ export default function DriverDashboardPage() {
                 />
               </Card>
             </Col>
+
             <Col xs={24} sm={12} md={8}>
               <Card>
                 <Statistic
@@ -161,7 +167,7 @@ export default function DriverDashboardPage() {
             </Col>
           </Row>
 
-          {/* ===== Danh sách chuyến xe chia theo ngày ===== */}
+          {/* Danh sách chuyến theo ngày */}
           <div style={{ marginTop: 24 }}>
             {sortedDates.length === 0 ? (
               <Card>
@@ -170,34 +176,29 @@ export default function DriverDashboardPage() {
                 </p>
               </Card>
             ) : (
-              <Collapse
-                bordered={false}
-                defaultActiveKey={todayDates}
-                accordion={false}
-              >
+              <Collapse bordered={false} defaultActiveKey={todayDates}>
                 {sortedDates.map((date) => {
                   const trips = groupedTrips[date];
                   const dateObj = dayjs(date);
-                  const isToday = date === today;
-                  const isFuture = dateObj.isAfter(today);
-                  const isPast = dateObj.isBefore(today);
 
-                  const label = isToday
-                    ? "🟢 Chuyến xe hôm nay"
-                    : isFuture
-                    ? `🕒 Chuyến xe ngày ${dateObj.format("DD/MM/YYYY")}`
-                    : `📅 Chuyến xe ngày ${dateObj.format("DD/MM/YYYY")}`;
+                  const label =
+                    date === today
+                      ? "Chuyến xe hôm nay"
+                      : dateObj.isAfter(today)
+                      ? `Chuyến ngày ${dateObj.format("DD/MM/YYYY")}`
+                      : `Chuyến ngày ${dateObj.format("DD/MM/YYYY")}`;
 
                   return (
                     <Panel
                       key={date}
                       header={label}
                       style={{
-                        backgroundColor: isToday
-                          ? "#f6ffed"
-                          : isFuture
-                          ? "#fffbe6"
-                          : "#fafafa",
+                        backgroundColor:
+                          date === today
+                            ? "#f6ffed"
+                            : dateObj.isAfter(today)
+                            ? "#fffbe6"
+                            : "#fafafa",
                         borderRadius: 8,
                       }}
                     >
@@ -211,20 +212,22 @@ export default function DriverDashboardPage() {
                             s.trip?.route?.toLocation?.nameLocations || "?"
                           }`;
 
-                          // Tính start & end time dựa vào totalTime
+                          // Tính thời gian kết thúc theo totalTime
                           const startDateTime = dayjs(
                             `${s.trip?.startDate} ${s.trip?.startTime}`
                           );
                           const [h, m, sec] = s.trip?.totalTime
                             ?.split(":")
                             .map(Number) || [0, 0, 0];
+
                           const endDateTime = startDateTime
                             .add(h, "hour")
                             .add(m, "minute")
                             .add(sec, "second");
 
-                          // Tính trạng thái thực tế
+                          // Xác định trạng thái
                           let status = s.trip?.status || "Chờ khởi hành";
+
                           if (endDateTime.isBefore(now))
                             status = "Đã hoàn thành";
                           else if (
@@ -245,14 +248,15 @@ export default function DriverDashboardPage() {
                                 description={
                                   <>
                                     <div>
-                                      🕒 Giờ khởi hành:{" "}
+                                      Giờ khởi hành:{" "}
                                       {s.trip?.startTime || "--:--"}
                                     </div>
                                     <div>
-                                      ⏱️ Giờ đến: {endDateTime.format("HH:mm")}
+                                      Giờ dự kiến đến:{" "}
+                                      {endDateTime.format("HH:mm")}
                                     </div>
                                     <div>
-                                      🚐 Xe:{" "}
+                                      Xe:{" "}
                                       {s.trip?.vehicle?.licensePlate ||
                                         s.trip?.vehicle?.name ||
                                         "—"}

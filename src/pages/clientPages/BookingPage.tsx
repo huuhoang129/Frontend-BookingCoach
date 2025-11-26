@@ -1,76 +1,29 @@
 // src/pages/BookingPage/BookingPage.tsx
-import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
-import FormInputSearchCoach from "../../components/ui/Form/FormInputSearchCoach";
-import { searchTrips } from "../../services/routeListServices/tripListServices.ts";
-import "./BookingPage.scss";
-import SeatBookingModal from "../../containers/ModalsCollect/SeatBookingModal";
-import { formatDuration, formatStartTime, calcEndTime } from "../../utils/time";
-import { capitalizeFirst } from "../../utils/string";
 import {
   LeftOutlined,
   RightOutlined,
   ClockCircleOutlined,
 } from "@ant-design/icons";
+
+import FormInputSearchCoach from "../../components/ui/Form/FormInputSearchCoach";
+import SeatBookingModal from "../../containers/ModalsCollect/SeatBookingModal";
+import { formatDuration, formatStartTime, calcEndTime } from "../../utils/time";
 import DefaultBusImg from "../../assets/logo/default-bus.jpg";
+import "./BookingPage.scss";
+
+import {
+  useBookingPage,
+  VEHICLE_TYPE_MAP,
+  getUnitPrice,
+} from "../../hooks/ClientHooks/useBookingClient.ts";
+import type { Trip, Seat } from "../../hooks/ClientHooks/useBookingClient.ts";
 
 dayjs.locale("vi");
 
-/* ---------------- Types ---------------- */
-interface Seat {
-  id: number;
-  name: string;
-  floor: number;
-  status?: "HOLD" | "SOLD" | "CANCELLED";
-}
-
-interface Province {
-  id: number;
-  nameProvince: string;
-}
-interface Location {
-  id: number;
-  nameLocations: string;
-  province?: Province;
-}
-interface Vehicle {
-  id: number;
-  name: string;
-  type: string;
-  seatCount: number;
-  licensePlate: string;
-}
-interface Route {
-  id: number;
-  fromLocation: Location;
-  toLocation: Location;
-}
-
-interface TripPrice {
-  id: number;
-  coachRouteId: number;
-  seatType: "SEAT" | "SLEEPER" | "DOUBLESLEEPER" | "LIMOUSINE";
-  priceTrip: number | string;
-  typeTrip: "NORMAL" | "HOLIDAY";
-}
-
-interface Trip {
-  id: number;
-  startDate: string;
-  startTime: string;
-  totalTime?: string;
-  status: string;
-  route: Route;
-  vehicle: Vehicle;
-  price?: TripPrice;
-  totalSeats: number;
-  availableSeats: number;
-  seats: Seat[];
-}
-
-/* ---------------- DualRangeSlider ---------------- */
+// Bộ chọn khoảng giá trị
 interface DualRangeSliderProps {
   min: number;
   max: number;
@@ -93,18 +46,27 @@ function DualRangeSlider({
   const [minVal, setMinVal] = useState(defaultMin);
   const [maxVal, setMaxVal] = useState(defaultMax);
 
+  // Tính phần trăm thanh trượt
   const getPercent = (value: number) =>
     Math.round(((value - min) / (max - min)) * 100);
 
   const left = getPercent(minVal);
   const width = getPercent(maxVal) - getPercent(minVal);
 
+  // Gửi giá trị mới ra ngoài mỗi khi thay đổi
   useEffect(() => {
     onChange?.(minVal, maxVal);
   }, [minVal, maxVal]);
 
+  // Đồng bộ khi reset filter bên ngoài
+  useEffect(() => {
+    setMinVal(defaultMin);
+    setMaxVal(defaultMax);
+  }, [defaultMin, defaultMax]);
+
   return (
     <div className="mobi-multi-range">
+      {/* Tay trái */}
       <input
         type="range"
         min={min}
@@ -116,6 +78,8 @@ function DualRangeSlider({
         }
         className="thumb thumb--left"
       />
+
+      {/* Tay phải */}
       <input
         type="range"
         min={min}
@@ -128,12 +92,14 @@ function DualRangeSlider({
         className="thumb thumb--right"
       />
 
+      {/* Vùng hiển thị */}
       <div className="slider">
         <div className="slider__track"></div>
         <div
           className="slider__range"
           style={{ left: `${left}%`, width: `${width}%` }}
         ></div>
+
         <div className="slider__left-value">
           {formatLabel ? formatLabel(minVal) : minVal}
         </div>
@@ -145,87 +111,31 @@ function DualRangeSlider({
   );
 }
 
-/* ---------------- Helpers ---------------- */
-const VEHICLE_TYPE_MAP: Record<string, string> = {
-  NORMAL: "Xe Khách Ngồi 45 chỗ",
-  SLEEPER: "Xe Giường Nằm 36 chỗ",
-  DOUBLESLEEPER: "Xe Giường Nằm VIP 22 chỗ",
-  LIMOUSINE: "Xe Limousine 9 chỗ",
-};
-
-const getUnitPrice = (trip?: Trip) => {
-  if (!trip?.price?.priceTrip && trip?.price?.priceTrip !== 0) return 0;
-  const p = trip.price.priceTrip as any;
-  const n = typeof p === "string" ? Number(p) : (p as number);
-  return Number.isFinite(n) ? n : 0;
-};
-
-/* ---------------- BookingPage ---------------- */
 export default function BookingPage() {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-
-  const fromLocationId = searchParams.get("fromLocationId");
-  const toLocationId = searchParams.get("toLocationId");
-
-  const today = dayjs().format("YYYY-MM-DD");
-  const tripDateStart = searchParams.get("tripDateStart") || today;
-
-  const [trips, setTrips] = useState<Trip[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [vehicleType, setVehicleType] = useState<string | null>(null);
-  const [timeRange, setTimeRange] = useState<[number, number]>([0, 1439]);
-  const [seatRange, setSeatRange] = useState<[number, number]>([0, 60]);
-  const [openModal, setOpenModal] = useState(false);
-  const [selectedVehicleType, setSelectedVehicleType] = useState<string>("");
-  const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
-  const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
-  const [activeDay, setActiveDay] = useState(tripDateStart);
-  const [startIndex, setStartIndex] = useState(0);
-
-  const days = Array.from({ length: 6 }, (_, i) => {
-    const d = dayjs(tripDateStart).add(i, "day");
-    const thu = capitalizeFirst(d.format("dddd"));
-    return {
-      label: `${thu}, ${d.format("DD/MM/YYYY")}`,
-      value: d.format("YYYY-MM-DD"),
-    };
-  });
-
-  const handleConfirmBooking = (trip: Trip, seats: Seat[]) => {
-    localStorage.setItem("bookingData", JSON.stringify({ trip, seats }));
-    navigate("/checkout");
-    setOpenModal(false);
-  };
-
-  useEffect(() => {
-    const fetchTrips = async () => {
-      try {
-        if (!fromLocationId || !toLocationId) return;
-
-        const res = await searchTrips({
-          fromLocationId,
-          toLocationId,
-          startDate: tripDateStart,
-          endDate: dayjs(tripDateStart).add(5, "day").format("YYYY-MM-DD"),
-        });
-
-        if (res && res.data && Array.isArray(res.data.data)) {
-          setTrips(res.data.data);
-        } else {
-          setTrips([]);
-        }
-      } catch (err) {
-        console.error("❌ Lỗi fetch trips:", err);
-        setTrips([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    setLoading(true);
-    fetchTrips();
-  }, [fromLocationId, toLocationId, tripDateStart]);
+  // Lấy hook
+  const {
+    loading,
+    days,
+    startIndex,
+    setStartIndex,
+    activeDay,
+    handleSelectDay,
+    vehicleType,
+    setVehicleType,
+    timeRange,
+    setTimeRange,
+    seatRange,
+    setSeatRange,
+    resetFilters,
+    filteredTrips,
+    openModal,
+    setOpenModal,
+    selectedVehicleType,
+    selectedSeats,
+    selectedTrip,
+    openSeatModal,
+    handleConfirmBooking,
+  } = useBookingPage();
 
   if (loading) {
     return <p className="booking-loading">Đang tải chuyến xe...</p>;
@@ -233,7 +143,7 @@ export default function BookingPage() {
 
   return (
     <div className="booking-page">
-      {/* Banner */}
+      {/* Banner và tìm kiếm*/}
       <div className="banner-booking-wrapper">
         <div className="bus-search_bgSearch__nV7TX"></div>
         <div className="search-box-coach">
@@ -242,24 +152,17 @@ export default function BookingPage() {
       </div>
 
       <div className="booking-wrapper">
-        {/* Bộ lọc bên trái */}
+        {/* Bộ lọc*/}
         <div className="filter-panel">
           <div className="filter-inner">
             <div className="filter-header">
-              <h3>BỘ LỌC</h3>
-              <button
-                className="reset-btn"
-                onClick={() => {
-                  setVehicleType(null);
-                  setTimeRange([0, 1439]);
-                  setSeatRange([0, 60]);
-                }}
-              >
+              <h3>Bộ lọc</h3>
+              <button className="reset-btn" onClick={resetFilters}>
                 Đặt lại bộ lọc
               </button>
             </div>
 
-            {/* Loại xe */}
+            {/* Lọc theo loại xe */}
             <div className="filter-section">
               <h4>Loại xe</h4>
               <div className="filter-options">
@@ -280,7 +183,7 @@ export default function BookingPage() {
               </div>
             </div>
 
-            {/* Giờ chạy */}
+            {/* Lọc theo giờ chạy */}
             <div className="filter-section">
               <h4>Giờ chạy</h4>
               <DualRangeSlider
@@ -288,7 +191,6 @@ export default function BookingPage() {
                 max={1439}
                 defaultMin={timeRange[0]}
                 defaultMax={timeRange[1]}
-                step={1}
                 formatLabel={(val) =>
                   dayjs().startOf("day").add(val, "minute").format("HH:mm")
                 }
@@ -296,7 +198,7 @@ export default function BookingPage() {
               />
             </div>
 
-            {/* Lượng ghế trống */}
+            {/* Lọc theo số ghế trống */}
             <div className="filter-section">
               <h4>Lượng ghế trống</h4>
               <DualRangeSlider
@@ -310,9 +212,9 @@ export default function BookingPage() {
           </div>
         </div>
 
-        {/* Danh sách chuyến bên phải */}
+        {/* Danh sách chuyến xe */}
         <div className="trip-list">
-          {/* Chọn thứ */}
+          {/* Chọn ngày trong tuần */}
           <section className="trip-section weekday-section">
             <button
               className={`arrow left ${startIndex === 0 ? "hidden" : ""}`}
@@ -329,16 +231,7 @@ export default function BookingPage() {
                   className={`weekday ${
                     activeDay === day.value ? "active" : ""
                   }`}
-                  onClick={() => {
-                    setActiveDay(day.value);
-                    const newParams = new URLSearchParams(searchParams);
-                    newParams.set("tripDateStart", day.value);
-                    window.history.replaceState(
-                      {},
-                      "",
-                      `${window.location.pathname}?${newParams.toString()}`
-                    );
-                  }}
+                  onClick={() => handleSelectDay(day.value)}
                 >
                   {day.label}
                 </button>
@@ -358,52 +251,25 @@ export default function BookingPage() {
             </button>
           </section>
 
-          {/* Danh sách chuyến */}
+          {/* Card chuyến xe*/}
           <section className="trip-section trip-list-section">
             <div className="booking-list">
-              {(() => {
-                const filteredTrips = trips.filter((trip) => {
-                  if (dayjs(trip.startDate).format("YYYY-MM-DD") !== activeDay)
-                    return false;
-                  if (vehicleType && trip.vehicle?.type !== vehicleType)
-                    return false;
-
-                  const startMinutes =
-                    dayjs(trip.startTime, "HH:mm:ss").hour() * 60 +
-                    dayjs(trip.startTime, "HH:mm:ss").minute();
-                  if (
-                    startMinutes < timeRange[0] ||
-                    startMinutes > timeRange[1]
-                  )
-                    return false;
-
-                  const availableSeats = Number(trip.availableSeats) || 0;
-                  if (
-                    availableSeats < seatRange[0] ||
-                    availableSeats > seatRange[1]
-                  )
-                    return false;
-
-                  return true;
-                });
-
-                if (filteredTrips.length === 0) {
-                  return (
-                    <p className="booking-empty">Hiện tại chưa có lịch chạy</p>
-                  );
-                }
-
-                return filteredTrips.map((trip) => {
+              {filteredTrips.length === 0 ? (
+                <p className="booking-empty">Hiện tại chưa có lịch chạy</p>
+              ) : (
+                filteredTrips.map((trip: Trip) => {
                   const totalSeats = Number(trip.totalSeats) || 0;
                   const availableSeats = Number(trip.availableSeats) || 0;
                   const unitPrice = getUnitPrice(trip);
 
                   return (
                     <div key={trip.id} className="booking-card">
+                      {/* Hình minh họa xe */}
                       <div className="trip-image">
                         <img src={DefaultBusImg} alt="bus" />
                       </div>
 
+                      {/* Thông tin chuyến */}
                       <div className="trip-details">
                         <div className="trip-name">
                           <h3>Hương Dương</h3>
@@ -411,6 +277,7 @@ export default function BookingPage() {
                             {trip.vehicle?.type &&
                               VEHICLE_TYPE_MAP[trip.vehicle?.type]}
                           </span>
+
                           <p className="trip-start">
                             <ClockCircleOutlined
                               style={{ marginRight: 6, color: "#13663b" }}
@@ -419,15 +286,18 @@ export default function BookingPage() {
                           </p>
                         </div>
 
+                        {/* Thời gian chạy */}
                         <div className="trip-time">
                           <div className="time-left">
                             <p>{formatStartTime(trip.startTime)}</p>
                           </div>
+
                           <div className="time-middle">
                             <span className="time-duration">
                               {formatDuration(trip.totalTime)}
                             </span>
                           </div>
+
                           <div className="time-right">
                             <p>
                               {calcEndTime(trip.startTime, trip.totalTime) ||
@@ -436,12 +306,14 @@ export default function BookingPage() {
                           </div>
                         </div>
 
+                        {/* Số ghế còn trống */}
                         <div className="trip-seats">
                           <p>
                             Còn{" "}
                             <span className="available">{availableSeats}</span>/
                             {totalSeats} chỗ
                           </p>
+
                           <div className="seats-bar">
                             <div
                               className="seats-fill"
@@ -454,41 +326,39 @@ export default function BookingPage() {
                           </div>
                         </div>
 
+                        {/* Giá */}
                         <div className="trip-price">
                           {unitPrice.toLocaleString("vi-VN")} đ
                         </div>
                       </div>
 
+                      {/* Nút đặt ghế */}
                       <div className="trip-action">
                         <button
                           className="booking-btn"
-                          onClick={() => {
-                            setSelectedVehicleType(trip.vehicle?.type || "");
-                            setSelectedSeats(trip.seats || []);
-                            setSelectedTrip(trip);
-                            setOpenModal(true);
-                          }}
+                          onClick={() => openSeatModal(trip)}
                         >
                           Đặt xe
                         </button>
                       </div>
-
-                      <SeatBookingModal
-                        open={openModal}
-                        onClose={() => setOpenModal(false)}
-                        onConfirm={handleConfirmBooking}
-                        vehicleType={selectedVehicleType}
-                        seats={selectedSeats}
-                        trip={selectedTrip as any}
-                      />
                     </div>
                   );
-                });
-              })()}
+                })
+              )}
             </div>
           </section>
         </div>
       </div>
+
+      {/* Modal đặt ghế */}
+      <SeatBookingModal
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        onConfirm={handleConfirmBooking}
+        vehicleType={selectedVehicleType}
+        seats={selectedSeats as Seat[]}
+        trip={selectedTrip as Trip | null}
+      />
     </div>
   );
 }
