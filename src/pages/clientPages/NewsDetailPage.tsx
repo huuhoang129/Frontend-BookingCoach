@@ -1,18 +1,21 @@
 // src/pages/clientPages/NewsDetailPage.tsx
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { Spin } from "antd";
 import "./NewsDetailPage.scss";
-
+import dayjs from "dayjs";
 import { useNewsDetail } from "../../hooks/ClientHooks/useNewsDetailClient.ts";
 import { formatDate } from "../../utils/formatDate";
 
 export default function NewsDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { news, loading } = useNewsDetail(id);
-
   const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+  const tomorrow = dayjs().add(1, "day").format("YYYY-MM-DD");
 
+  const buildBookingUrl = (fromId: number, toId: number) => {
+    return `/booking?fromLocationId=${fromId}&toLocationId=${toId}&tripDateStart=${tomorrow}&roundTrip=one`;
+  };
   if (loading)
     return (
       <div className="loading-wrapper">
@@ -64,22 +67,28 @@ export default function NewsDetailPage() {
           <h2 className="routes-box__title">Lộ Trình Xe</h2>
           <ul className="routes-box__list">
             <li>
-              <a href="#">TP Thanh Hóa - Hà Nội</a>
+              <Link to={buildBookingUrl(1, 4)}>BX Nước Ngầm → BX Bãi Cháy</Link>
             </li>
             <li>
-              <a href="#">Hà Nội - TP Thanh Hóa</a>
+              <Link to={buildBookingUrl(1, 6)}>
+                BX Nước Ngầm → BX Niệm Nghĩa
+              </Link>
             </li>
             <li>
-              <a href="#">Triệu Sơn - Hà Nội</a>
+              <Link to={buildBookingUrl(1, 8)}>BX Nước Ngầm → BX Nam Định</Link>
             </li>
             <li>
-              <a href="#">Hà Nội - Triệu Sơn</a>
+              <Link to={buildBookingUrl(1, 10)}>
+                BX Nước Ngầm → BX Thái Bình
+              </Link>
             </li>
             <li>
-              <a href="#">Sầm Sơn - BX Nước Ngầm</a>
+              <Link to={buildBookingUrl(14, 1)}>
+                BX Thanh Hóa → BX Nước Ngầm
+              </Link>
             </li>
             <li>
-              <a href="#">BX Nước Ngầm - Sầm Sơn</a>
+              <Link to={buildBookingUrl(14, 2)}>BX Thanh Hóa → Sư Phạm HN</Link>
             </li>
           </ul>
         </div>

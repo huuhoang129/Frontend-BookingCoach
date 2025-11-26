@@ -302,7 +302,10 @@ export default function CheckoutPage() {
 
                   <button
                     className="btn next-btn"
-                    onClick={() => setStep(3)}
+                    onClick={() => {
+                      setStep(3);
+                      downloadInvoice(booking.id);
+                    }}
                     style={{ marginTop: "16px" }}
                   >
                     Tôi đã thanh toán

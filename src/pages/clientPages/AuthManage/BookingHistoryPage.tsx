@@ -7,12 +7,14 @@ import axios from "axios";
 import ProfileSidebar from "../../../components/Sider/ProfileSidebar";
 import { useAuth } from "../../../hooks/AuthHooks/useAuth";
 import "./InformationClientPage.scss";
+import BookingDetailView from "./BookingDetailView";
 
 export default function TripHistoryPage() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<any | null>(null);
 
   useEffect(() => {
     // Kiểm tra user đang đăng nhập
@@ -66,17 +68,6 @@ export default function TripHistoryPage() {
       },
     },
     {
-      title: "Loại xe",
-      key: "type",
-      render: (_: any, record: any) => record.trip?.vehicle?.type || "—",
-    },
-    {
-      title: "Biển số xe",
-      key: "licensePlate",
-      render: (_: any, record: any) =>
-        record.trip?.vehicle?.licensePlate || "—",
-    },
-    {
       title: "Ngày đi",
       key: "startDate",
       render: (_: any, record: any) => {
@@ -85,30 +76,18 @@ export default function TripHistoryPage() {
       },
     },
     {
-      title: "Ghế (Tầng)",
+      title: "Ghế đã đặt",
       key: "seatInfo",
       render: (_: any, record: any) => {
         const seats = record.seats || [];
         if (seats.length === 0) return "—";
         return seats
-          .map((s: any) => `${s.seat?.name} (${s.seat?.floor || 1})`)
+          .map((s: any) => `${s.seat?.name} (Tầng ${s.seat?.floor || 1})`)
           .join(", ");
       },
     },
     {
-      title: "Giá vé",
-      dataIndex: "totalAmount",
-      key: "totalAmount",
-      render: (p: number) =>
-        p
-          ? Number(p).toLocaleString("vi-VN", {
-              style: "currency",
-              currency: "VND",
-            })
-          : "--",
-    },
-    {
-      title: "Trạng thái thanh toán",
+      title: "Thanh toán",
       key: "paymentStatus",
       render: (_: any, record: any) => {
         const payment = Array.isArray(record.payment)
@@ -128,13 +107,30 @@ export default function TripHistoryPage() {
           status === "SUCCESS"
             ? "ĐÃ THANH TOÁN"
             : status === "PENDING"
-            ? "ĐANG CHỜ XÁC NHẬN"
+            ? "ĐANG CHỜ"
             : "THẤT BẠI";
 
         return <Tag color={color}>{text}</Tag>;
       },
     },
   ];
+  if (selectedBooking) {
+    return (
+      <div className="profile-container">
+        <ProfileSidebar
+          activeTab="history"
+          onChangeTab={(tab) => navigate(`/profile/${tab}`)}
+        />
+
+        <div className="main-content">
+          <BookingDetailView
+            booking={selectedBooking}
+            onBack={() => setSelectedBooking(null)}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="profile-container">
@@ -155,6 +151,9 @@ export default function TripHistoryPage() {
             dataSource={bookings}
             rowKey="id"
             pagination={{ pageSize: 5 }}
+            onRow={(record) => ({
+              onClick: () => setSelectedBooking(record),
+            })}
           />
         </div>
       </div>

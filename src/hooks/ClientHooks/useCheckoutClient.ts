@@ -56,11 +56,30 @@ export function useCheckout() {
   }, [currentUser]);
 
   // Điều hướng về từ VNPAY
+  // useEffect(() => {
+  //   if (location.state?.step === 3) {
+  //     setStep(3);
+
+  //     if (booking?.id) {
+  //       downloadInvoice(booking.id);
+  //     }
+  //   }
+  // }, [location.state, booking]);
   useEffect(() => {
-    if (location.state?.step === 3) {
+    const params = new URLSearchParams(location.search);
+    const responseCode = params.get("vnp_ResponseCode");
+
+    // Nếu thanh toán thành công
+    if (responseCode === "00") {
       setStep(3);
+
+      if (booking?.id) {
+        setTimeout(() => {
+          downloadInvoice(booking.id); // 👈 Tự động tải PDF
+        }, 800);
+      }
     }
-  }, [location.state]);
+  }, [location.search, booking]);
 
   // FORM CHANGE
   const handleChange = (
@@ -156,8 +175,10 @@ export function useCheckout() {
           amount: total,
         });
 
-        if (res.data.errCode === 0) setStep(3);
-        else alert(res.data.errMessage);
+        if (res.data.errCode === 0) {
+          setStep(3);
+          downloadInvoice(booking.id);
+        } else alert(res.data.errMessage);
 
         return;
       }

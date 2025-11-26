@@ -1,6 +1,8 @@
 //src/components/staticPage/StaticPage.tsx
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
+import { Link } from "react-router-dom";
+import dayjs from "dayjs";
 import { Spin } from "antd";
 import { getStaticPage } from "../../services/systemServices/staticPageServices.ts";
 import { formatDate } from "../../utils/formatDate";
@@ -32,14 +34,21 @@ const backendKeyMap: Record<string, string> = {
 };
 
 // Danh sách lộ trình hiển thị cố định
-const dummyRoutes = [
-  "TP Thanh Hóa - Hà Nội",
-  "Hà Nội - TP Thanh Hóa",
-  "Triệu Sơn - Hà Nội",
-  "Hà Nội - Triệu Sơn",
-  "Sầm Sơn - BX Nước Ngầm",
-  "BX Nước Ngầm - Sầm Sơn",
+const routeLinks = [
+  { label: "TP Thanh Hóa → Hà Nội", from: 14, to: 1 },
+  { label: "Hà Nội → TP Thanh Hóa", from: 1, to: 14 },
+
+  { label: "Triệu Sơn → Hà Nội", from: 2, to: 1 },
+  { label: "Hà Nội → Triệu Sơn", from: 1, to: 2 },
+
+  { label: "Sầm Sơn → BX Nước Ngầm", from: 3, to: 1 },
+  { label: "BX Nước Ngầm → Sầm Sơn", from: 1, to: 3 },
 ];
+
+const tomorrow = dayjs().add(1, "day").format("YYYY-MM-DD");
+const buildBookingUrl = (fromId: number, toId: number) => {
+  return `/booking?fromLocationId=${fromId}&toLocationId=${toId}&tripDateStart=${tomorrow}&roundTrip=one`;
+};
 
 export default function StaticPage({ pageKey, title }: StaticPageProps) {
   // Lưu danh sách block nội dung
@@ -124,9 +133,11 @@ export default function StaticPage({ pageKey, title }: StaticPageProps) {
           <h2 className="routes-box__title">Lộ Trình Xe</h2>
 
           <ul className="routes-box__list">
-            {dummyRoutes.map((route, idx) => (
+            {routeLinks.map((route, idx) => (
               <li key={idx}>
-                <a href="#">{route}</a>
+                <Link to={buildBookingUrl(route.from, route.to)}>
+                  {route.label}
+                </Link>
               </li>
             ))}
           </ul>
