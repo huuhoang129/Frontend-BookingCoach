@@ -456,9 +456,11 @@ export const AdminTemplate: React.FC<AdminTemplateProps> = ({ Component }) => {
             <Menu.Item key="/admin/booking-tickets">
               <Link to="/admin/booking-tickets">Quản lý đặt vé</Link>
             </Menu.Item>
-
             <Menu.Item key="/admin/ticket-status">
               <Link to="/admin/ticket-status">Quản lý thanh toán</Link>
+            </Menu.Item>
+            <Menu.Item key="/admin/cancellation-ticket">
+              <Link to="/admin/cancellation-ticket">Quản lý hoàn hủy</Link>
             </Menu.Item>
           </SubMenu>
 

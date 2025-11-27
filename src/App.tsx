@@ -39,11 +39,13 @@ import TicketListPage from "./pages/adminPages/tripManage/tripListPage";
 import SchedulePage from "./pages/adminPages/tripManage/schedulePage";
 import BookingPageAdmin from "./pages/adminPages/ticketManage/bookingPage";
 import PaymentPage from "./pages/adminPages/ticketManage/paymentPage";
+import CancellationPage from "./pages/adminPages/ticketManage/cancellationPage";
 
 import RevenueReportPage from "./pages/adminPages/reportManage/revenueReportPage";
 import TicketSalesPage from "./pages/adminPages/reportManage/ticketSalesPage";
 import CancellationRatePage from "./pages/adminPages/reportManage/cancellationRatePage";
 import InformationClientPage from "./pages/clientPages/AuthManage/InformationClientPage";
+import BookingCancellationPage from "./pages/clientPages/AuthManage/BookingCancellationClient";
 import BookingHistoryPage from "./pages/clientPages/AuthManage/BookingHistoryPage";
 import TestPage from "./pages/clientPages/testClient";
 
@@ -78,6 +80,10 @@ export default function App() {
         <Route path="/checkout-failed" element={<CheckoutFailedPage />} />
         <Route path="/test" element={<TestPage />} />
         <Route path="/profile/info" element={<InformationClientPage />} />
+        <Route
+          path="/profile/cancellation"
+          element={<BookingCancellationPage />}
+        />
         <Route path="/profile/history" element={<BookingHistoryPage />} />
       </Route>
 
@@ -116,6 +122,13 @@ export default function App() {
         path="/admin/ticket-status"
         element={
           <AdminRoute allowedRoles={["Admin"]} Component={PaymentPage} />
+        }
+      />
+
+      <Route
+        path="/admin/cancellation-ticket"
+        element={
+          <AdminRoute allowedRoles={["Admin"]} Component={CancellationPage} />
         }
       />
 

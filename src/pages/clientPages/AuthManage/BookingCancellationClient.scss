@@ -1,0 +1,49 @@
+.cancellation-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+}
+.cancellation-card {
+  width: 100%;
+  max-width: 650px;
+  background: #fff;
+  padding: 30px 32px;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+.title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.desc {
+  color: #777;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+.cancellation-form {
+  .ant-form-item {
+    margin-bottom: 18px;
+  }
+}
+
+/* Radio */
+.refund-method {
+  display: flex;
+  gap: 30px;
+}
+
+/* Button */
+.submit-btn {
+  margin-top: 10px;
+  background: #4d940e;
+  border-radius: 20px;
+  padding: 0 36px;
+  height: 42px;
+  font-weight: 500;
+
+  &:hover {
+    background: #3c7e0b !important;
+  }
+}

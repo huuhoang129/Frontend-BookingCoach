@@ -20,13 +20,14 @@ requestAPI.interceptors.request.use((config) => {
 // Token hết hạn tự động out
 requestAPI.interceptors.response.use(
   (response) => response,
-
   (error) => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
-    window.location.href = "/";
-
+    if (error.response) {
+      if (error.response.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/";
+      }
+    }
     return Promise.reject(error);
   }
 );

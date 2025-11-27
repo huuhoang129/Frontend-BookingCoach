@@ -13,11 +13,7 @@ export function useBookingManage() {
   // Danh sách booking
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(false);
-
-  // Từ khóa tìm kiếm
   const [searchText, setSearchText] = useState("");
-
-  // Modal và booking đang chọn
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
@@ -46,7 +42,7 @@ export function useBookingManage() {
     try {
       const res = await deleteBooking(id);
       if (res.data.errCode === 0) {
-        message.success("Xóa booking thành công");
+        message.success("Xóa booking thành công", res.data.errMessage);
         fetchBookings();
       } else {
         message.error(res.data.errMessage);
@@ -62,7 +58,7 @@ export function useBookingManage() {
       const res = await updateBooking({ id, status });
 
       if (res.data.errCode === 0) {
-        message.success("Cập nhật trạng thái thành công");
+        message.success("Cập nhật trạng thái thành công", res.data.errMessage);
         fetchBookings();
       } else {
         message.error(res.data.errMessage);

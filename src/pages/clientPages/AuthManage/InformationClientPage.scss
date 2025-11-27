@@ -1,3 +1,4 @@
+//src/pages/clientPages/AuthManage/InformationClientPage.scss
 .profile-container {
   display: flex;
   background: #fafafa;
@@ -5,13 +6,11 @@
   font-family: "Lexend", sans-serif;
 }
 
-/* MAIN CONTENT */
 .main-content {
   flex: 1;
   padding: 60px 80px;
   background: #fff;
 
-  /* PHẦN HEADER NGƯỜI DÙNG (ảnh + chữ trái) */
   .user-header {
     display: flex;
     align-items: center;
